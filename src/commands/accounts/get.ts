@@ -4,18 +4,27 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class accountsGet extends Command {
     static description = ` Retrieve a representation of the specified Account.`
 
     static flags = {
         next: Flags.boolean({ hidden: true }),
+        json: Flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: Flags.help({ char: "h" }),
     }
 
     async run() {
         const out = new Output(this)
-        const { flags } = await this.parse(accountsGet)
+        const { flags } = await (async () => {
+            try {
+                return await this.parse(accountsGet)
+            } catch (error) {
+                const err = new Errors.ParseError(error)
+                this.error(err.message, { exit: err.code })
+            }
+        })()
         const fcApi = new FreeClimbApi(``, true, this)
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
@@ -25,7 +34,12 @@ export class accountsGet extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("accounts", "get")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

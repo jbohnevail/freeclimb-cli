@@ -4,6 +4,7 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class conferencesList extends Command {
     static description = ` Retrieve a list of Conferences associated with the specified account, sorted by creation date, newest to oldest.`
@@ -33,12 +34,20 @@ export class conferencesList extends Command {
             required: false,
         }),
         next: Flags.boolean({ char: "n", description: "Displays the next page of output." }),
+        json: Flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: Flags.help({ char: "h" }),
     }
 
     async run() {
         const out = new Output(this)
-        const { flags } = await this.parse(conferencesList)
+        const { flags } = await (async () => {
+            try {
+                return await this.parse(conferencesList)
+            } catch (error) {
+                const err = new Errors.ParseError(error)
+                this.error(err.message, { exit: err.code })
+            }
+        })()
         const fcApi = new FreeClimbApi(`Conferences`, true, this)
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
@@ -48,14 +57,24 @@ export class conferencesList extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("conferences", "list")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }
         }
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("conferences", "list")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

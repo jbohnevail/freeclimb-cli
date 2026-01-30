@@ -4,6 +4,7 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class accountsManage extends Command {
     static description = `This command allows you to manage an account.`
@@ -20,12 +21,20 @@ export class accountsManage extends Command {
             required: false,
         }),
         next: Flags.boolean({ hidden: true }),
+        json: Flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: Flags.help({ char: "h" }),
     }
 
     async run() {
         const out = new Output(this)
-        const { flags } = await this.parse(accountsManage)
+        const { flags } = await (async () => {
+            try {
+                return await this.parse(accountsManage)
+            } catch (error) {
+                const err = new Errors.ParseError(error)
+                this.error(err.message, { exit: err.code })
+            }
+        })()
         const fcApi = new FreeClimbApi(``, true, this)
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
@@ -35,7 +44,12 @@ export class accountsManage extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("accounts", "manage")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

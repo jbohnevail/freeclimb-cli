@@ -4,6 +4,7 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 import { sleep, calculateSinceTimestamp } from "../../tail"
 
 let lastTime: number
@@ -35,12 +36,22 @@ export class logsList extends Command {
             dependsOn: ["tail"],
         }),
         next: Flags.boolean({ char: "n", description: "Displays the next page of output." }),
+        json: Flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: Flags.help({ char: "h" }),
     }
 
+    static args = []
+
     async run() {
         const out = new Output(this)
-        const { flags } = await this.parse(logsList)
+        const { flags } = await (async () => {
+            try {
+                return await this.parse(logsList)
+            } catch (error) {
+                const err = new Errors.ParseError(error)
+                this.error(err.message, { exit: err.code })
+            }
+        })()
         const fcApi = new FreeClimbApi(`Logs`, true, this)
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {

@@ -4,6 +4,7 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class availableNumbersList extends Command {
     static description = ` Search for phone numbers that are available for purchase. To purchase an available phone number, the number should be submitted via POST to the /IncomingPhoneNumbers endpoint.`
@@ -44,12 +45,20 @@ export class availableNumbersList extends Command {
             required: false,
         }),
         next: Flags.boolean({ char: "n", description: "Displays the next page of output." }),
+        json: Flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: Flags.help({ char: "h" }),
     }
 
     async run() {
         const out = new Output(this)
-        const { flags } = await this.parse(availableNumbersList)
+        const { flags } = await (async () => {
+            try {
+                return await this.parse(availableNumbersList)
+            } catch (error) {
+                const err = new Errors.ParseError(error)
+                this.error(err.message, { exit: err.code })
+            }
+        })()
         const fcApi = new FreeClimbApi(`AvailablePhoneNumbers`, false, this)
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
@@ -59,14 +68,24 @@ export class availableNumbersList extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("available-numbers", "list")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }
         }
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("available-numbers", "list")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }
