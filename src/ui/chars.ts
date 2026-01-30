@@ -65,14 +65,14 @@ export function getBoxChars(): BoxChars {
 export const icons = {
     // Success/pass
     success: (): string => {
-        const icon = "\u2713"
+        const icon = "\u2714"
         if (!supportsColor()) return icon
         return chalk.hex(BrandColors.lime)(icon)
     },
 
     // Error/fail
     error: (): string => {
-        const icon = "\u2717"
+        const icon = "\u2718"
         if (!supportsColor()) return icon
         return chalk.red(icon)
     },
@@ -107,14 +107,14 @@ export const icons = {
 
     // Pending/loading
     pending: (): string => {
-        const icon = "\u25cb"
+        const icon = "\u231b"
         if (!supportsColor()) return icon
         return chalk.hex(BrandColors.orange)(icon)
     },
 
     // Arrow right
     arrow: (): string => {
-        const icon = "\u2192"
+        const icon = "\u203a"
         if (!supportsColor()) return icon
         return chalk.hex(BrandColors.orange)(icon)
     },
