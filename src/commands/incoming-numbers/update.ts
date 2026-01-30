@@ -4,6 +4,7 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class incomingNumbersUpdate extends Command {
     static description = ` Update the properties of the specified incoming phone number.`
@@ -20,6 +21,7 @@ export class incomingNumbersUpdate extends Command {
             required: false,
         }),
         next: flags.boolean({ hidden: true }),
+        json: flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: flags.help({ char: "h" }),
     }
 
@@ -50,7 +52,12 @@ export class incomingNumbersUpdate extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("incoming-numbers", "update")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

@@ -4,6 +4,7 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 import { sleep, calculateSinceTimestamp } from "../../tail"
 
 let lastTime: number
@@ -35,6 +36,7 @@ export class logsList extends Command {
             dependsOn: ["tail"],
         }),
         next: flags.boolean({ char: "n", description: "Displays the next page of output." }),
+        json: flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: flags.help({ char: "h" }),
     }
 

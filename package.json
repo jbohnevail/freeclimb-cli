@@ -19,14 +19,18 @@
     "chalk": "^2.4.2",
     "cli-ux": "^5.6.3",
     "dotenv": "^10.0.0",
+    "inquirer": "^8.2.6",
     "keytar": "^7.7.0",
     "lodash": "^4.17.15",
+    "ora": "^5.4.1",
+    "strip-ansi": "^6.0.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
     "@oclif/test": "^1",
     "@types/chai": "^4",
+    "@types/inquirer": "^8.2.10",
     "@types/mocha": "^9",
     "@types/node": "^16",
     "@typescript-eslint/eslint-plugin": "^5.3.0",
@@ -115,6 +119,9 @@
       },
       "accounts": {
         "description": " You get a FreeClimb Account at signup. This includes an account ID and an API key. These two properties enable you to connect and communicate with FreeClimb."
+      },
+      "mcp": {
+        "description": "MCP (Model Context Protocol) server for AI agent integration. Allows Claude, Copilot, and other AI assistants to interact with FreeClimb."
       }
     }
   },

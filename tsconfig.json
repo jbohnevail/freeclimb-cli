@@ -8,7 +8,8 @@
     "strict": true,
     "composite": true,
     "target": "es2017",
-    "noEmit": false
+    "noEmit": false,
+    "esModuleInterop": true
   },
   "include": ["src/**/*"]
 }

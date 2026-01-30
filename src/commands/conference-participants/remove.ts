@@ -4,12 +4,14 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class conferenceParticipantsRemove extends Command {
     static description = ` Remove the specified Participant from the Conference.`
 
     static flags = {
         next: flags.boolean({ hidden: true }),
+        json: flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: flags.help({ char: "h" }),
     }
 
@@ -49,7 +51,12 @@ export class conferenceParticipantsRemove extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("conference-participants", "remove")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

@@ -1,55 +1,267 @@
-const errorMessage = new Map()
+import chalk from "chalk"
 
-errorMessage.set(0, "Either a service was inaccessible or was configured wrong. This error can occurs if login credentials are not valid. Re-run the login command. If error persists, something went wrong on FreeClimb's end. Plese try Our engineers are hard at work resolving this problem.")
-errorMessage.set(1, "Check for typos or misspelling.")
-errorMessage.set(3, "Make sure that all necessary flags and arguments have been formatted and/or spelled correctly.")
-errorMessage.set(5, "Check formatting of PQL request. For more details on formatting visit: https://docs.freeclimb.com/reference/logs#filter-logs.")
-errorMessage.set(6, "Update your profile to ensure you have the correct information on file: https://freeclimb.com/dashboard/portal/account/profile.")
-errorMessage.set(9, "Check formatting of flags and arguements. Note: Numbers should be in e.164 format: +12223334444")
-errorMessage.set(10, "Use a different number that is SMS enabled.")
-errorMessage.set(11, "You currently do not have access to international numbers. To gain access to international numbers, contact support@freeclimb.com")
-errorMessage.set(15, "The system was unable to create a calling number. This is an internal error. Please try again. \nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(16, "The system was unable to create a call. This is an internal error. Please try again. \nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(17, "The system failed to update the call. This is an internal error. Please try again. \nIf the error persists, please contact support@freeclimb.com")
-errorMessage.set(18, "The system was unable to update a participant in the conference. This is an internal error. Please try again. \nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(19, "The system was unable to hang up a participant from the call. This is an internal error. Please try again. \nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(20, "The system failed to delete a participant from the conference. This is an internal error \nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(24, "Wait and retry your request.")
-errorMessage.set(27, "If you have upgraded your account, please remove any functionality associated with trial accounts, such as verified numbers.")
-errorMessage.set(29, "Check that the outbound number you are using is verified in the dashboard.")
-errorMessage.set(30, "Contact support@freeclimb.com for assistance.")
-errorMessage.set(31, "If the error persists, contact support@freeclimb.com for more information.")
-errorMessage.set(43, "Your account type is not recognized by our system. This is an internal error. \nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(44, "Your account status is not recognized by our system. This is an internal error. \n If the error persists, please contact support@freeclimb.com.")
-errorMessage.set(46, "Check for any typos. Check if your account owns the number.")
-errorMessage.set(47, "To gain access to international numbers, please contact support@freeclimb.com")
-errorMessage.set(49, "Please contact support@freeclimb.com.")
-errorMessage.set(50, "Saved login credentials could be incorrect. Try command freeclimb login to reset credentials.")
-errorMessage.set(51, "Login with new account credentials. /nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(55, "The server will be back sortly.")
-errorMessage.set(56, "Wait until the call is no longer in a conference.")
-errorMessage.set(59, "The system was unable to create a Queue. This is an internal error.")
-errorMessage.set(61, "An attempt was made to reuse a resource ID. This is an internal error. If the problem persists, contact support@freeclimb.com")
-errorMessage.set(62, "The system was unable to create a Conference. This is an internal error. If the problem persists, contact support@freeclimb.com")
-errorMessage.set(66, "Check for any typos with the conferenceId or callId associated with the conference.")
-errorMessage.set(67, "The system was unable to add member a member to the queue. This is an internal error. \n If the error persists, please contact support@freeclimb.com.")
-errorMessage.set(68, "Check recordingId is correct. /nIf the error persists, please contact support@freeclimb.com.")
-errorMessage.set(69, "Ensure the file URL is returning a non-empty response body.")
-errorMessage.set(76, "To resolve choose one of the following and retry command. /nDelete an exsisting number /nor /nupgrade to full account")
-errorMessage.set(77, "The resource you attempted to retrieve or modify has been deleted and can no longer be accessed.")
+const { red, yellow, cyan, dim, bold } = chalk
 
-
-export function errorWithSuggestions(errorM: any) {
-    const suggestion = errorMessage.get(errorM.code) || "Refer to URL"
-    return returnFormat(errorM.code, errorM.message, errorM.url, suggestion)
+interface ErrorSuggestion {
+    message: string
+    tryCommands?: string[]
+    docUrl?: string
 }
 
-export function returnFormat(code: number, message: string, url: string, suggestion: string) {
-    return `
-    Code : ${code}
-    Message : ${message}
-    Suggestion : ${suggestion}
-    For further information on this error visit :
-    ${url}
-    `
+const errorSuggestions = new Map<number, ErrorSuggestion>()
+
+// Authentication errors
+errorSuggestions.set(0, {
+    message: "Service inaccessible or credentials invalid",
+    tryCommands: ["freeclimb login", "freeclimb diagnose"],
+    docUrl: "https://docs.freeclimb.com/docs/authentication",
+})
+
+errorSuggestions.set(50, {
+    message: "Login credentials may be incorrect",
+    tryCommands: ["freeclimb login", "freeclimb diagnose"],
+    docUrl: "https://docs.freeclimb.com/docs/authentication",
+})
+
+errorSuggestions.set(51, {
+    message: "Account credentials expired or invalid",
+    tryCommands: ["freeclimb login"],
+    docUrl: "https://docs.freeclimb.com/docs/authentication",
+})
+
+// Input validation errors
+errorSuggestions.set(1, {
+    message: "Check for typos or misspelling in your command",
+    tryCommands: ["freeclimb --help"],
+})
+
+errorSuggestions.set(3, {
+    message: "Check that all flags and arguments are formatted correctly",
+    tryCommands: ["freeclimb [command] --help"],
+})
+
+errorSuggestions.set(5, {
+    message: "PQL query syntax error",
+    docUrl: "https://docs.freeclimb.com/reference/logs#filter-logs",
+})
+
+errorSuggestions.set(9, {
+    message: "Phone numbers must be in E.164 format",
+    tryCommands: ["Example: +12223334444"],
+})
+
+// Number-related errors
+errorSuggestions.set(10, {
+    message: "This number is not SMS-enabled",
+    tryCommands: ["freeclimb incoming-numbers:list", "freeclimb available-numbers:list --smsEnabled true"],
+})
+
+errorSuggestions.set(11, {
+    message: "International numbers require account upgrade",
+    docUrl: "https://support.freeclimb.com",
+})
+
+errorSuggestions.set(29, {
+    message: "Outbound number not verified",
+    tryCommands: ["freeclimb incoming-numbers:list"],
+    docUrl: "https://freeclimb.com/dashboard",
+})
+
+errorSuggestions.set(46, {
+    message: "Number not found or not owned by your account",
+    tryCommands: ["freeclimb incoming-numbers:list"],
+})
+
+errorSuggestions.set(47, {
+    message: "International access requires account upgrade",
+    docUrl: "https://support.freeclimb.com",
+})
+
+errorSuggestions.set(76, {
+    message: "Number limit reached for trial account",
+    tryCommands: ["freeclimb incoming-numbers:list"],
+    docUrl: "https://freeclimb.com/pricing",
+})
+
+// Call/Conference errors
+errorSuggestions.set(15, {
+    message: "Failed to create calling number (internal error)",
+    tryCommands: ["Retry the command"],
+    docUrl: "https://support.freeclimb.com",
+})
+
+errorSuggestions.set(16, {
+    message: "Failed to create call (internal error)",
+    tryCommands: ["freeclimb diagnose", "Retry the command"],
+})
+
+errorSuggestions.set(17, {
+    message: "Failed to update call (internal error)",
+    tryCommands: ["freeclimb calls:get <callId>", "Retry the command"],
+})
+
+errorSuggestions.set(56, {
+    message: "Call is currently in a conference",
+    tryCommands: ["freeclimb conferences:list", "Wait for conference to end"],
+})
+
+errorSuggestions.set(66, {
+    message: "Conference or call ID not found",
+    tryCommands: ["freeclimb conferences:list", "freeclimb calls:list"],
+})
+
+// Queue errors
+errorSuggestions.set(59, {
+    message: "Failed to create queue (internal error)",
+    tryCommands: ["freeclimb call-queues:list", "Retry the command"],
+})
+
+errorSuggestions.set(67, {
+    message: "Failed to add member to queue (internal error)",
+    tryCommands: ["freeclimb queue-members:list <queueId>"],
+})
+
+// Recording errors
+errorSuggestions.set(68, {
+    message: "Recording not found",
+    tryCommands: ["freeclimb recordings:list"],
+})
+
+errorSuggestions.set(69, {
+    message: "Recording file URL returned empty response",
+    tryCommands: ["freeclimb recordings:get <recordingId>"],
+})
+
+// Account errors
+errorSuggestions.set(6, {
+    message: "Account profile incomplete",
+    docUrl: "https://freeclimb.com/dashboard/portal/account/profile",
+})
+
+errorSuggestions.set(27, {
+    message: "Trial account features conflict with upgraded account",
+    docUrl: "https://freeclimb.com/dashboard",
+})
+
+errorSuggestions.set(43, {
+    message: "Account type not recognized (internal error)",
+    docUrl: "https://support.freeclimb.com",
+})
+
+errorSuggestions.set(44, {
+    message: "Account status not recognized (internal error)",
+    docUrl: "https://support.freeclimb.com",
+})
+
+// Rate limiting
+errorSuggestions.set(24, {
+    message: "Rate limit exceeded",
+    tryCommands: ["Wait a moment and retry"],
+})
+
+// Server errors
+errorSuggestions.set(55, {
+    message: "Server temporarily unavailable",
+    tryCommands: ["freeclimb diagnose", "Retry in a few minutes"],
+})
+
+// Resource errors
+errorSuggestions.set(61, {
+    message: "Resource ID conflict (internal error)",
+    docUrl: "https://support.freeclimb.com",
+})
+
+errorSuggestions.set(62, {
+    message: "Failed to create conference (internal error)",
+    tryCommands: ["freeclimb conferences:list"],
+})
+
+errorSuggestions.set(77, {
+    message: "Resource has been deleted",
+    tryCommands: ["Resource no longer available"],
+})
+
+// Generic
+errorSuggestions.set(18, {
+    message: "Failed to update conference participant (internal error)",
+    tryCommands: ["freeclimb conference-participants:list <conferenceId>"],
+})
+
+errorSuggestions.set(19, {
+    message: "Failed to hang up participant (internal error)",
+})
+
+errorSuggestions.set(20, {
+    message: "Failed to remove participant from conference (internal error)",
+    tryCommands: ["freeclimb conference-participants:list <conferenceId>"],
+})
+
+errorSuggestions.set(30, {
+    message: "Contact support for assistance",
+    docUrl: "https://support.freeclimb.com",
+})
+
+errorSuggestions.set(31, {
+    message: "Unexpected error occurred",
+    docUrl: "https://support.freeclimb.com",
+})
+
+errorSuggestions.set(49, {
+    message: "Contact support for assistance",
+    docUrl: "https://support.freeclimb.com",
+})
+
+export function errorWithSuggestions(errorM: any): string {
+    const errorInfo = errorSuggestions.get(errorM.code)
+    const suggestion = errorInfo?.message || "Refer to documentation"
+    const tryCommands = errorInfo?.tryCommands || []
+    const docUrl = errorInfo?.docUrl || errorM.url
+
+    return formatEnhancedError(errorM.code, errorM.message, suggestion, tryCommands, docUrl)
+}
+
+export function returnFormat(
+    code: number,
+    message: string,
+    url: string,
+    suggestion: string
+): string {
+    return formatEnhancedError(code, message, suggestion, [], url)
+}
+
+function formatEnhancedError(
+    code: number,
+    message: string,
+    suggestion: string,
+    tryCommands: string[],
+    docUrl?: string
+): string {
+    const lines: string[] = []
+
+    lines.push("")
+    lines.push(red(`Error: ${message}`))
+    lines.push("")
+    lines.push(`${bold("Code:")} ${code}`)
+    lines.push(`${bold("Suggestion:")} ${suggestion}`)
+
+    if (tryCommands.length > 0) {
+        lines.push("")
+        lines.push(yellow("Try:"))
+        tryCommands.forEach((cmd, i) => {
+            if (cmd.startsWith("freeclimb")) {
+                lines.push(`  ${i + 1}. ${cyan(cmd)}`)
+            } else {
+                lines.push(`  ${i + 1}. ${cmd}`)
+            }
+        })
+    }
+
+    if (docUrl) {
+        lines.push("")
+        lines.push(dim(`Need help? ${docUrl}`))
+    }
+
+    lines.push("")
+
+    return lines.join("\n")
 }

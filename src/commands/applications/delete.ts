@@ -4,12 +4,14 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class applicationsDelete extends Command {
     static description = ` Delete the specified application. If this application's ID is assigned to any Incoming phone number, that relationship will be cleared.`
 
     static flags = {
         next: flags.boolean({ hidden: true }),
+        json: flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: flags.help({ char: "h" }),
     }
 
@@ -40,7 +42,12 @@ export class applicationsDelete extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("applications", "delete")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

@@ -4,12 +4,14 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class callsUpdate extends Command {
     static description = ` Call hang up may take time. A 202 status code is returned if the hangup request was successfully queued by FreeClimb. Otherwise, an error code is returned. If successfully queued, the asynchronous callback for the result will occur after some time through the statusCallbackUrl.`
 
     static flags = {
         next: flags.boolean({ hidden: true }),
+        json: flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: flags.help({ char: "h" }),
     }
 
@@ -46,7 +48,12 @@ export class callsUpdate extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("calls", "update")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

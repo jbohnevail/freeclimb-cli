@@ -118,6 +118,7 @@ import chalk from "chalk"
 import { Output } from '../../output'
 import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
+import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 ${
     tail
         ? `import { sleep, calculateSinceTimestamp } from "../../tail"\n\nlet lastTime: number\nlet tailMax: number\n`
@@ -144,12 +145,12 @@ export class ${command.className} extends Command {
         })()
         const fcApi = new FreeClimbApi(\`${command.endpoint}\`, ${command.usesAuthentication}, this)
         const normalResponse = (response: FreeClimbResponse) => {
-            ${getAxiosResponse(command.topic)}
+            ${getAxiosResponse(command.topic, command.name)}
         }${tail ? getTailResponse() : ""}${
         command.pagination
             ? `
         const nextResponse = (response: FreeClimbResponse) => {${getAxiosResponseNextFlag(
-            command.topic
+            command.topic, command.name
         )}
             if(out.next === null) {
                 out.out("== You are on the last page of output. ==")
@@ -234,6 +235,9 @@ function getAdditionalFlags(topicName, tail, pagination) {
     } else {
         data += "\n\t\tnext: flags.boolean({hidden: true})," // so that the command can still parse, but users will not see this flag
     }
+
+    // Add --json flag for machine-readable output (agent-friendly)
+    data += `\n\t\tjson: flags.boolean({description: 'Output as JSON (for scripting/agents)', default: false}),`
 
     data += "\n\t\thelp: flags.help({char: 'h'}),\n\t"
 
@@ -398,16 +402,58 @@ function getAxiosParams(bodyParams, queryParams) {
 }
 
 // Return response of Axios request
-function getAxiosResponse(topicName) {
-    return topicName === "logs"
-        ? `if (response.status === 204) { out.out( chalk.green("Received a success code from FreeClimb. There is no further output.") ) } else if (response.data) { out.out(flags.maxItem?JSON.stringify(response.data.logs.splice(0, flags.maxItem), null, 2): JSON.stringify(response.data, null, 2)) } else { throw new Errors.UndefinedResponseError() }`
-        : `if (response.status === 204) { out.out( chalk.green("Received a success code from FreeClimb. There is no further output.") ) } else if (response.data) { out.out(JSON.stringify(response.data, null, 2)) } else { throw new Errors.UndefinedResponseError() }`
+function getAxiosResponse(topicName, commandName) {
+    const formatterCall = `getFormatterForTopic("${topicName}", "${commandName}")`
+
+    if (topicName === "logs") {
+        return `if (response.status === 204) {
+            out.out( chalk.green("Received a success code from FreeClimb. There is no further output.") )
+        } else if (response.data) {
+            const outputData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
+            if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(outputData), null, 2))
+            } else {
+                const formatter = ${formatterCall}
+                out.out(formatter ? formatter(outputData) : JSON.stringify(outputData, null, 2))
+            }
+        } else { throw new Errors.UndefinedResponseError() }`
+    }
+
+    return `if (response.status === 204) {
+        out.out( chalk.green("Received a success code from FreeClimb. There is no further output.") )
+    } else if (response.data) {
+        if (flags.json) {
+            out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+        } else {
+            const formatter = ${formatterCall}
+            out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+        }
+    } else { throw new Errors.UndefinedResponseError() }`
 }
 
-function getAxiosResponseNextFlag(topicName) {
-    return topicName === "logs"
-        ? `if (response.data) { out.out(flags.maxItem?JSON.stringify(response.data.logs.splice(0, flags.maxItem), null, 2): JSON.stringify(response.data, null, 2)) } else { throw new Errors.UndefinedResponseError()}`
-        : `if (response.data) { out.out(JSON.stringify(response.data, null, 2)) } else { throw new Errors.UndefinedResponseError() }`
+function getAxiosResponseNextFlag(topicName, commandName) {
+    const formatterCall = `getFormatterForTopic("${topicName}", "${commandName}")`
+
+    if (topicName === "logs") {
+        return `if (response.data) {
+            const outputData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
+            if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(outputData), null, 2))
+            } else {
+                const formatter = ${formatterCall}
+                out.out(formatter ? formatter(outputData) : JSON.stringify(outputData, null, 2))
+            }
+        } else { throw new Errors.UndefinedResponseError() }`
+    }
+
+    return `if (response.data) {
+        if (flags.json) {
+            out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+        } else {
+            const formatter = ${formatterCall}
+            out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+        }
+    } else { throw new Errors.UndefinedResponseError() }`
 }
 
 function accessSpecifier(param) {

@@ -4,6 +4,7 @@ import chalk from "chalk"
 import { Output } from "../../output"
 import { FreeClimbApi, FreeClimbResponse } from "../../freeclimb"
 import * as Errors from "../../errors"
+import { wrapJsonOutput, getFormatterForTopic } from "../../ui/format"
 
 export class incomingNumbersBuy extends Command {
     static description = ` Purchase a new phone number for the specified account. If the specified phone number is available, FreeClimb will add it to the account. To find an available phone number, use the /AvailablePhoneNumbers endpoint.`
@@ -20,6 +21,7 @@ export class incomingNumbersBuy extends Command {
             required: false,
         }),
         next: flags.boolean({ hidden: true }),
+        json: flags.boolean({ description: "Output as JSON (for scripting/agents)", default: false }),
         help: flags.help({ char: "h" }),
     }
 
@@ -51,7 +53,12 @@ export class incomingNumbersBuy extends Command {
                     )
                 )
             } else if (response.data) {
-                out.out(JSON.stringify(response.data, null, 2))
+                if (flags.json) {
+                out.out(JSON.stringify(wrapJsonOutput(response.data), null, 2))
+            } else {
+                const formatter = getFormatterForTopic("incoming-numbers", "buy")
+                out.out(formatter ? formatter(response.data) : JSON.stringify(response.data, null, 2))
+            }
             } else {
                 throw new Errors.UndefinedResponseError()
             }

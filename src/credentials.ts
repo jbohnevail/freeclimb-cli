@@ -17,23 +17,35 @@ export const cred = {
     },
     get accountId() {
         return (async () => {
+            // Priority: Environment variables first (zero-config), then keytar
+            const envAccountId = env.accountId
+            if (envAccountId) {
+                return envAccountId
+            }
+
             try {
                 const keyContents = await keytar.findCredentials("FreeClimb")
                 const { account } = keyContents[0]
                 return account
             } catch (error) {
-                return env.accountId
+                return ""
             }
         })()
     },
     get apiKey() {
         return (async () => {
+            // Priority: Environment variables first (zero-config), then keytar
+            const envApiKey = env.apiKey
+            if (envApiKey) {
+                return envApiKey
+            }
+
             try {
                 const keyContents = await keytar.findCredentials("FreeClimb")
                 const { password } = keyContents[0]
                 return password
             } catch (error) {
-                return env.apiKey
+                return ""
             }
         })()
     },
