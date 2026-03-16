@@ -15,10 +15,11 @@ authentication. Useful for accessing endpoints not covered by
 other CLI commands. Accepts the full API payload via --data as JSON.
 
 The endpoint can be:
-  - A path starting with / (e.g., /Calls)
-  - A full URL (e.g., https://www.freeclimb.com/apiserver/Accounts/.../Calls)
+  - A path starting with / (e.g., /Calls) - recommended
+  - A full FreeClimb URL (e.g., https://www.freeclimb.com/apiserver/Accounts/.../Calls)
 
 For account-scoped endpoints, the account ID is automatically included.
+Full URLs are restricted to FreeClimb domains for credential safety.
 `
 
     static args = [
@@ -51,7 +52,7 @@ For account-scoped endpoints, the account ID is automatically included.
         }),
         json: flags.boolean({
             description:
-                "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
+                "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
             default: false,
         }),
         raw: flags.boolean({
@@ -99,6 +100,27 @@ For account-scoped endpoints, the account ID is automatically included.
         let url = args.endpoint
         if (url.startsWith("/")) {
             url = `${baseUrl}/Accounts/${accountId}${url}`
+        } else {
+            try {
+                const parsed = new URL(url)
+                const allowedHosts = ["freeclimb.com", "www.freeclimb.com"]
+                const isCustomBase = Environment.getString("FREECLIMB_CLI_BASE_URL") !== ""
+                if (isCustomBase) {
+                    const baseHost = new URL(baseUrl).hostname
+                    allowedHosts.push(baseHost)
+                }
+                if (!allowedHosts.some((h) => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`))) {
+                    this.error(
+                        chalk.red(
+                            `Refusing to send credentials to non-FreeClimb host: ${parsed.hostname}\n` +
+                            "Use a path starting with / for account-scoped endpoints, or set FREECLIMB_CLI_BASE_URL for custom domains."
+                        ),
+                        { exit: 1 }
+                    )
+                }
+            } catch {
+                this.error(chalk.red(`Invalid URL: ${url}`), { exit: 1 })
+            }
         }
 
         const params: Record<string, string> = {}

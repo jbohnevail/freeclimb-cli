@@ -11,9 +11,11 @@
 
 import * as readline from "readline"
 import axios from "axios"
-import { tools, ToolName } from "./tools"
 import { cred } from "../credentials"
 import { Environment } from "../environment"
+import { tools, ToolName } from "./tools"
+
+const CLI_VERSION = "0.5.4"
 
 const API_BASE_URL =
     Environment.getString("FREECLIMB_CLI_BASE_URL") || "https://www.freeclimb.com/apiserver"
@@ -118,10 +120,8 @@ async function handleToolCall(
             return (await client.get(`/Applications/${args.applicationId}`)).data
 
         // Account information
-        case "get_account": {
-            const accountId = await cred.accountId
-            return (await client.get(`/Accounts/${accountId}`)).data
-        }
+        case "get_account":
+            return (await client.get("")).data
 
         // Logs
         case "list_logs":
@@ -205,7 +205,7 @@ async function handleRequest(request: JsonRpcRequest): Promise<void> {
                     },
                     serverInfo: {
                         name: "freeclimb",
-                        version: "0.5.4",
+                        version: CLI_VERSION,
                     },
                 }
                 break
@@ -269,23 +269,26 @@ export async function startMcpServer(): Promise<void> {
         terminal: false,
     })
 
-    rl.on("line", async (line) => {
-        try {
-            const request = JSON.parse(line) as JsonRpcRequest
-            await handleRequest(request)
-        } catch (error: any) {
-            sendResponse({
-                jsonrpc: "2.0",
-                id: null,
-                error: {
-                    code: -32700,
-                    message: "Parse error",
-                },
-            })
-        }
+    let requestQueue: Promise<void> = Promise.resolve()
+
+    rl.on("line", (line) => {
+        requestQueue = requestQueue.then(async () => {
+            try {
+                const request = JSON.parse(line) as JsonRpcRequest
+                await handleRequest(request)
+            } catch {
+                sendResponse({
+                    jsonrpc: "2.0",
+                    id: null,
+                    error: {
+                        code: -32700,
+                        message: "Parse error",
+                    },
+                })
+            }
+        })
     })
 
-    // Keep the process running
     await new Promise<void>(() => {})
 }
 
@@ -297,8 +300,8 @@ export function generateMcpConfig(): string {
                 command: "freeclimb",
                 args: ["mcp", "start"],
                 env: {
-                    FREECLIMB_ACCOUNT_ID: "${FREECLIMB_ACCOUNT_ID}",
-                    FREECLIMB_API_KEY: "${FREECLIMB_API_KEY}",
+                    FREECLIMB_ACCOUNT_ID: "<YOUR_ACCOUNT_ID>",
+                    FREECLIMB_API_KEY: "<YOUR_API_KEY>",
                 },
             },
         },

@@ -266,7 +266,7 @@ function getAdditionalFlags(topicName, tail, pagination, isMutating) {
         data += "\n\t\tnext: flags.boolean({hidden: true}),"
     }
 
-    data += `\n\t\tjson: flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),`
+    data += `\n\t\tjson: flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),`
     data += `\n\t\tfields: flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),`
 
     if (isMutating) {

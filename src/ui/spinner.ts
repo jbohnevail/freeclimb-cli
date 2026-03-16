@@ -41,26 +41,29 @@ export function createSpinner(options: SpinnerOptions = {}): Spinner {
 
     const spinner = ora(oraOptions)
 
-    // Override success/fail/warn/info to use our icons
     const originalSucceed = spinner.succeed.bind(spinner)
     const originalFail = spinner.fail.bind(spinner)
     const originalWarn = spinner.warn.bind(spinner)
     const originalInfo = spinner.info.bind(spinner)
 
     spinner.succeed = (text?: string) => {
-        return originalSucceed(text)
+        spinner.stopAndPersist({ symbol: icons.success(), text })
+        return spinner
     }
 
     spinner.fail = (text?: string) => {
-        return originalFail(text)
+        spinner.stopAndPersist({ symbol: icons.error(), text })
+        return spinner
     }
 
     spinner.warn = (text?: string) => {
-        return originalWarn(text)
+        spinner.stopAndPersist({ symbol: icons.warning(), text })
+        return spinner
     }
 
     spinner.info = (text?: string) => {
-        return originalInfo(text)
+        spinner.stopAndPersist({ symbol: icons.info(), text })
+        return spinner
     }
 
     return spinner
