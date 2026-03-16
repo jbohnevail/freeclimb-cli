@@ -928,24 +928,25 @@
                     { cmd: 'applications list | create', desc: 'Manage applications' },
                     { cmd: 'incoming-numbers buy | list', desc: 'Manage phone numbers' },
                     { cmd: 'logs list | filter', desc: 'View account logs' },
-                    { cmd: 'mcp start | config', desc: 'AI agent integration' }
+                    { cmd: 'mcp start | config', desc: 'AI agent integration' },
+                    { cmd: 'api <endpoint>', desc: 'Authenticated API request' }
                 ];
 
                 html += '<div class="term-commands">';
                 for (const c of commands) {
-                    html += `<div class="term-command-line">  ${span('$', state.colorSecondary)} ${span('freeclimb ' + c.cmd, state.colorAccent)}  <span style="color: ${state.colorSecondary}">${escapeHtml(c.desc)}</span></div>`;
+                    html += `<div class="term-command-line">  ${span('$', state.colorSecondary)} ${span('freeclimb ' + c.cmd, state.colorSecondary)}  <span style="color: ${state.colorSecondary}">${escapeHtml(c.desc)}</span></div>`;
                 }
                 html += '</div>';
             }
 
             // Try hint
             if (state.showTryHint) {
-                html += `<div class="term-prompt">${sp}  ${span('try:', state.colorSecondary)} ${span('freeclimb calls:list --json', state.colorAccent)}</div>`;
+                html += `<div class="term-prompt">${sp}  ${span('try:', state.colorSuccess)} ${span('freeclimb calls:list --json', state.colorSuccess)}</div>`;
             }
 
             // Docs link
             if (state.showDocsLink) {
-                html += `<div class="term-dim" style="text-decoration: underline">${sp}  Learn more at https://docs.freeclimb.com/docs/freeclimb-cli-quickstart</div>`;
+                html += `<div class="term-dim">${sp}  ${span('Learn more', state.colorAccent)} at <span style="text-decoration: underline">https://docs.freeclimb.com/docs/freeclimb-cli-quickstart</span></div>`;
             }
 
             return html;
