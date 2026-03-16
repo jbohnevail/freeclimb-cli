@@ -88,7 +88,7 @@ export const icons = {
     info: (): string => {
         const icon = "\u2139"
         if (!supportsColor()) return icon
-        return chalk.hex(BrandColors.navy)(icon)
+        return chalk.hex(BrandColors.darkTeal)(icon)
     },
 
     // Filled circle (active)

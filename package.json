@@ -119,9 +119,6 @@
       },
       "accounts": {
         "description": " You get a FreeClimb Account at signup. This includes an account ID and an API key. These two properties enable you to connect and communicate with FreeClimb."
-      },
-      "mcp": {
-        "description": "MCP (Model Context Protocol) server for AI agent integration. Allows Claude, Copilot, and other AI assistants to interact with FreeClimb."
       }
     }
   },

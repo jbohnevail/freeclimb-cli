@@ -40,7 +40,8 @@ Useful for troubleshooting authentication or connectivity issues.
         help: flags.help({ char: "h" }),
     }
 
-    private useSpinners: boolean = false
+    private useSpinners = false
+
     private currentSpinner: Spinner | null = null
 
     async run() {

@@ -92,7 +92,7 @@ export function keyValue(pairs: KeyValuePair[], keyWidth?: number): string[] {
                     formattedValue = chalk.red(pair.value)
                     break
                 case "info":
-                    formattedValue = chalk.hex(BrandColors.navy)(pair.value)
+                    formattedValue = chalk.hex(BrandColors.darkTeal)(pair.value)
                     break
             }
         }
