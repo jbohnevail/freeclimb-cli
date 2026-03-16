@@ -6,6 +6,11 @@ import { box, getBoxChars } from "./chars"
 export interface StructuredOutput<T = unknown> {
     success: boolean
     data: T
+    error?: {
+        code: number
+        message: string
+        suggestion?: string
+    }
     pagination?: {
         page: number
         total?: number

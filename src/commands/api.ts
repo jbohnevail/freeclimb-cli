@@ -4,13 +4,15 @@ import axios from "axios"
 import { cred } from "../credentials"
 import { Environment } from "../environment"
 import { wrapJsonOutput } from "../ui/format"
+import { getOutputFormat } from "../agent-config"
+import { rejectControlChars, filterFieldsDeep } from "../validation"
 
 export class Api extends Command {
     static description = `Make authenticated API requests to FreeClimb.
 
 This command allows you to make raw API requests with automatic
 authentication. Useful for accessing endpoints not covered by
-other CLI commands.
+other CLI commands. Accepts the full API payload via --data as JSON.
 
 The endpoint can be:
   - A path starting with / (e.g., /Calls)
@@ -36,19 +38,29 @@ For account-scoped endpoints, the account ID is automatically included.
         }),
         data: flags.string({
             char: "d",
-            description: "JSON data for POST/PUT requests",
+            description: "JSON data for POST/PUT requests (accepts full API payload)",
         }),
         param: flags.string({
             char: "p",
             description: "Query parameter (format: key=value, can be repeated)",
             multiple: true,
         }),
+        fields: flags.string({
+            description:
+                "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+        }),
         json: flags.boolean({
-            description: "Output as JSON (for scripting/agents)",
+            description:
+                "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
             default: false,
         }),
         raw: flags.boolean({
             description: "Output raw response without wrapping",
+            default: false,
+        }),
+        "dry-run": flags.boolean({
+            description:
+                "Validate the request without executing it. Shows what would be sent to the API.",
             default: false,
         }),
         help: flags.help({ char: "h" }),
@@ -60,10 +72,15 @@ For account-scoped endpoints, the account ID is automatically included.
         "$ freeclimb api /Calls -p status=completed -p to=+15551234567",
         '$ freeclimb api /Messages --method POST -d \'{"to":"+15551234567","from":"+15559876543","text":"Hello"}\'',
         "$ freeclimb api /IncomingPhoneNumbers --json",
+        "$ freeclimb api /Calls --fields callId,status,from,to",
+        "$ freeclimb api /Messages --method POST --dry-run -d '{\"to\":\"+15551234567\"}'",
     ]
 
     async run() {
-        const { args, flags } = this.parse(Api)
+        const { args, flags: cmdFlags } = this.parse(Api)
+        const outputFormat = getOutputFormat(cmdFlags.json, cmdFlags.raw)
+
+        rejectControlChars(args.endpoint, "endpoint")
 
         const accountId = await cred.accountId
         const apiKey = await cred.apiKey
@@ -79,16 +96,15 @@ For account-scoped endpoints, the account ID is automatically included.
             Environment.getString("FREECLIMB_CLI_BASE_URL") ||
             "https://www.freeclimb.com/apiserver"
 
-        // Build URL
         let url = args.endpoint
         if (url.startsWith("/")) {
             url = `${baseUrl}/Accounts/${accountId}${url}`
         }
 
-        // Parse query parameters
         const params: Record<string, string> = {}
-        if (flags.param) {
-            for (const p of flags.param) {
+        if (cmdFlags.param) {
+            for (const p of cmdFlags.param) {
+                rejectControlChars(p, "param")
                 const [key, ...valueParts] = p.split("=")
                 if (key && valueParts.length > 0) {
                     params[key] = valueParts.join("=")
@@ -96,20 +112,36 @@ For account-scoped endpoints, the account ID is automatically included.
             }
         }
 
-        // Parse body data
-        let data: unknown = undefined
-        if (flags.data) {
+        let data: unknown
+        if (cmdFlags.data) {
             try {
-                data = JSON.parse(flags.data)
+                data = JSON.parse(cmdFlags.data)
             } catch {
                 this.error(chalk.red("Invalid JSON in --data flag"), { exit: 1 })
             }
         }
 
+        if (cmdFlags["dry-run"]) {
+            const dryRunOutput = {
+                dryRun: true,
+                method: cmdFlags.method,
+                url,
+                params: Object.keys(params).length > 0 ? params : undefined,
+                data,
+            }
+            if (outputFormat === "json" || outputFormat === "raw") {
+                this.log(JSON.stringify(dryRunOutput, null, 2))
+            } else {
+                this.log(chalk.yellow("DRY RUN - No API call will be made"))
+                this.log(JSON.stringify(dryRunOutput, null, 2))
+            }
+            return
+        }
+
         try {
             const response = await axios({
                 url,
-                method: flags.method as "GET" | "POST" | "PUT" | "DELETE",
+                method: cmdFlags.method as "GET" | "POST" | "PUT" | "DELETE",
                 auth: { username: accountId, password: apiKey },
                 params: Object.keys(params).length > 0 ? params : undefined,
                 data,
@@ -118,12 +150,20 @@ For account-scoped endpoints, the account ID is automatically included.
                 },
             })
 
-            if (flags.raw) {
-                this.log(JSON.stringify(response.data, null, 2))
-            } else if (flags.json) {
+            let responseData = response.data
+            if (cmdFlags.fields) {
+                responseData = filterFieldsDeep(
+                    responseData,
+                    cmdFlags.fields.split(",").map((f: string) => f.trim())
+                )
+            }
+
+            if (outputFormat === "raw") {
+                this.log(JSON.stringify(responseData, null, 2))
+            } else if (outputFormat === "json") {
                 this.log(
                     JSON.stringify(
-                        wrapJsonOutput(response.data, {
+                        wrapJsonOutput(responseData, {
                             command: `api ${args.endpoint}`,
                         }),
                         null,
@@ -131,25 +171,22 @@ For account-scoped endpoints, the account ID is automatically included.
                     )
                 )
             } else {
-                // Human-readable output with status
                 this.log(chalk.green(`${response.status} ${response.statusText}`))
                 this.log("")
-                this.log(JSON.stringify(response.data, null, 2))
+                this.log(JSON.stringify(responseData, null, 2))
             }
         } catch (error: any) {
             if (error.response) {
-                const status = error.response.status
-                const statusText = error.response.statusText
-                const data = error.response.data
+                const { status, statusText, data: errData } = error.response
 
-                if (flags.json || flags.raw) {
+                if (outputFormat === "json" || outputFormat === "raw") {
                     this.log(
                         JSON.stringify(
                             {
                                 error: true,
                                 status,
                                 statusText,
-                                data,
+                                data: errData,
                             },
                             null,
                             2
@@ -158,7 +195,7 @@ For account-scoped endpoints, the account ID is automatically included.
                     this.exit(1)
                 } else {
                     this.error(
-                        chalk.red(`${status} ${statusText}\n${JSON.stringify(data, null, 2)}`),
+                        chalk.red(`${status} ${statusText}\n${JSON.stringify(errData, null, 2)}`),
                         { exit: 1 }
                     )
                 }
