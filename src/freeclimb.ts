@@ -8,26 +8,9 @@ type Errorer = { error(message: string, exitCode: { exit: number }): any }
 type Body = { data: Record<string, any> }
 type Query = { params: Record<string, any> } // the linter recommends Record<string, any> to represent any object
 
-type AxiosMethodType =
-    | "get"
-    | "GET"
-    | "delete"
-    | "DELETE"
-    | "head"
-    | "HEAD"
-    | "options"
-    | "OPTIONS"
-    | "post"
-    | "POST"
-    | "put"
-    | "PUT"
-    | "patch"
-    | "PATCH"
-    | "link"
-    | "LINK"
-    | "unlink"
-    | "UNLINK"
-    | undefined
+import type { Method } from "axios"
+
+type AxiosMethodType = Method | undefined
 
 export type FreeClimbErrorResponse = { response: Body }
 
@@ -66,8 +49,8 @@ export class FreeClimbApi {
             this.errorHandler.error(err.message, { exit: err.code })
         }
     ) {
-        const accountId = await cred.accountId
-        const apiKey = await cred.apiKey
+        const accountId = (await cred.accountId) || ""
+        const apiKey = (await cred.apiKey) || ""
         await axios(
             `${this.baseUrl}${this.authenticate ? `/Accounts/${accountId}` : ``}${this.endpoint}`,
             {

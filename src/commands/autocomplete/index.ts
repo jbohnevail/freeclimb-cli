@@ -1,4 +1,4 @@
-import Index from "@oclif/plugin-autocomplete/lib/commands/autocomplete"
+import Index from "@oclif/plugin-autocomplete/lib/commands/autocomplete/index.js"
 
 export class CustomAutocomplete extends Index {
     static description = "Display autocomplete installation instructions"

@@ -1,27 +1,28 @@
-import * as keytar from "keytar"
+import { Entry } from "@napi-rs/keyring"
 import { env } from "./environment"
 
-function removeAfter(
-    credentials: { account: string; password: string }[],
-    lastIndex: number
-): void {
-    credentials
-        .filter((credential, index) => index > lastIndex)
-        .forEach((credential) => keytar.deletePassword("FreeClimb", credential.account))
-}
+const SERVICE_NAME = "FreeClimb"
+const ACCOUNT_KEY = "accountId"
+const API_KEY_KEY = "apiKey"
 
 export const cred = {
-    async removeCredentials(after: number) {
-        const keyContents = await keytar.findCredentials("FreeClimb")
-        removeAfter(keyContents, after)
+    async removeCredentials() {
+        try {
+            new Entry(SERVICE_NAME, ACCOUNT_KEY).deletePassword()
+        } catch {
+            // ignore if not found
+        }
+        try {
+            new Entry(SERVICE_NAME, API_KEY_KEY).deletePassword()
+        } catch {
+            // ignore if not found
+        }
     },
     get accountId() {
         return (async () => {
             try {
-                const keyContents = await keytar.findCredentials("FreeClimb")
-                const { account } = keyContents[0]
-                return account
-            } catch (error) {
+                return new Entry(SERVICE_NAME, ACCOUNT_KEY).getPassword()
+            } catch {
                 return env.accountId
             }
         })()
@@ -29,12 +30,14 @@ export const cred = {
     get apiKey() {
         return (async () => {
             try {
-                const keyContents = await keytar.findCredentials("FreeClimb")
-                const { password } = keyContents[0]
-                return password
-            } catch (error) {
+                return new Entry(SERVICE_NAME, API_KEY_KEY).getPassword()
+            } catch {
                 return env.apiKey
             }
         })()
+    },
+    async setCredentials(accountId: string, apiKey: string) {
+        new Entry(SERVICE_NAME, ACCOUNT_KEY).setPassword(accountId)
+        new Entry(SERVICE_NAME, API_KEY_KEY).setPassword(apiKey)
     },
 }
