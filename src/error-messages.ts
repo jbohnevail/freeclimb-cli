@@ -1,4 +1,5 @@
 import chalk from "chalk"
+import { isAgentMode } from "./agent-config"
 
 const { red, yellow, cyan, dim, bold } = chalk
 
@@ -236,6 +237,21 @@ function formatEnhancedError(
     tryCommands: string[],
     docUrl?: string
 ): string {
+    if (isAgentMode()) {
+        return JSON.stringify(
+            {
+                error: true,
+                code,
+                message,
+                suggestion,
+                tryCommands: tryCommands.length > 0 ? tryCommands : undefined,
+                docUrl: docUrl || undefined,
+            },
+            null,
+            2
+        )
+    }
+
     const lines: string[] = []
 
     lines.push("")

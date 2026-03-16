@@ -1,6 +1,7 @@
 import chalk from "chalk"
 import { errorWithSuggestions, returnFormat } from "./error-messages"
 import { parse } from "./parse-errors"
+import { isAgentMode } from "./agent-config"
 
 export abstract class FreeClimbError {
     message: string
@@ -8,7 +9,11 @@ export abstract class FreeClimbError {
     code: number
 
     constructor(newMessage: string, newCode: number) {
-        this.message = chalk.red(newMessage)
+        if (isAgentMode()) {
+            this.message = newMessage
+        } else {
+            this.message = chalk.red(newMessage)
+        }
         this.code = newCode
     }
 }
