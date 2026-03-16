@@ -24,6 +24,7 @@
     "@types/chai": "^4",
     "@types/mocha": "^10",
     "@types/node": "^18",
+    "@types/sinon": "^21.0.0",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
     "chai": "^4",
@@ -40,6 +41,7 @@
     "nyc": "^17",
     "oclif": "^4",
     "prettier": "^3",
+    "sinon": "^21.0.3",
     "ts-node": "^10",
     "typescript": "^5"
   },
