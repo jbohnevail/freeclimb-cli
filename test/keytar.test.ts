@@ -7,6 +7,6 @@ describe("Test @napi-rs/keyring", () => {
         entry.setPassword("automatedTestPassword")
         expect(entry.getPassword()).to.equal("automatedTestPassword")
         entry.deletePassword()
-        expect(() => entry.getPassword()).to.throw()
+        expect(entry.getPassword()).to.be.null
     })
 })

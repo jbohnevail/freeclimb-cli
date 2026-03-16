@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import nock from "nock"
 import sinon from "sinon"
-import * as inquirerPrompts from "@inquirer/prompts"
+import { prompts } from "../src/prompts"
 import { runCommand } from "@oclif/test"
 
 describe("Test for login command", function () {
@@ -11,7 +11,7 @@ describe("Test for login command", function () {
     })
 
     it("Test exit code 2 is produced when user responds N", async () => {
-        sinon.stub(inquirerPrompts, "confirm").resolves(false)
+        sinon.stub(prompts, "confirm").resolves(false)
         const { error } = await runCommand(["login"])
         expect(error?.oclif?.exit).to.equal(2)
     })
@@ -22,8 +22,8 @@ describe("Test for login command", function () {
             .get(`/apiserver/Accounts/${testAccount}`)
             .reply(500, "error")
 
-        sinon.stub(inquirerPrompts, "confirm").resolves(true)
-        sinon.stub(inquirerPrompts, "password").resolves(testAccount)
+        sinon.stub(prompts, "confirm").resolves(true)
+        sinon.stub(prompts, "password").resolves(testAccount)
         const { stdout } = await runCommand(["login"])
         expect(stdout).to.contain(
             "<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.-->"
@@ -36,8 +36,8 @@ describe("Test for login command", function () {
             .get(`/apiserver/Accounts/${testAccount}`)
             .reply(500, "error")
 
-        sinon.stub(inquirerPrompts, "confirm").resolves(true)
-        sinon.stub(inquirerPrompts, "password").resolves(testAccount)
+        sinon.stub(prompts, "confirm").resolves(true)
+        sinon.stub(prompts, "password").resolves(testAccount)
         const { stdout } = await runCommand(["login"])
         expect(stdout).to.contain(
             "<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.-->"
@@ -51,8 +51,8 @@ describe("Test for login command", function () {
             .get(`/apiserver/Accounts/${testAccount}`)
             .reply(200, testJson)
 
-        sinon.stub(inquirerPrompts, "confirm").resolves(true)
-        sinon.stub(inquirerPrompts, "password").resolves(testAccount)
+        sinon.stub(prompts, "confirm").resolves(true)
+        sinon.stub(prompts, "password").resolves(testAccount)
         const { stdout } = await runCommand(["login"])
         expect(stdout).to.contain(
             "<---Your ACCOUNT_ID and API_KEY have been verified through Freeclimb.--->"

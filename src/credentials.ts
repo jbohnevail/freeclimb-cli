@@ -10,18 +10,18 @@ export const cred = {
         try {
             new Entry(SERVICE_NAME, ACCOUNT_KEY).deletePassword()
         } catch {
-            // ignore if not found
         }
         try {
             new Entry(SERVICE_NAME, API_KEY_KEY).deletePassword()
         } catch {
-            // ignore if not found
         }
     },
     get accountId() {
         return (async () => {
             try {
-                return new Entry(SERVICE_NAME, ACCOUNT_KEY).getPassword()
+                const val = new Entry(SERVICE_NAME, ACCOUNT_KEY).getPassword()
+                if (val) return val
+                return env.accountId
             } catch {
                 return env.accountId
             }
@@ -30,7 +30,9 @@ export const cred = {
     get apiKey() {
         return (async () => {
             try {
-                return new Entry(SERVICE_NAME, API_KEY_KEY).getPassword()
+                const val = new Entry(SERVICE_NAME, API_KEY_KEY).getPassword()
+                if (val) return val
+                return env.apiKey
             } catch {
                 return env.apiKey
             }

@@ -39,10 +39,10 @@ export class FreeClimbApi {
         onSuccess: (response: FreeClimbResponse) => any,
         onError = (error: any) => {
             let err: Errors.FreeClimbError
-            if (error.message && error.code) {
-                err = error
-            } else if (error.response) {
+            if (error.response) {
                 err = new Errors.FreeClimbAPIError(error.response.data)
+            } else if (error instanceof Errors.FreeClimbError) {
+                err = error
             } else {
                 err = new Errors.DefaultFatalError(error)
             }

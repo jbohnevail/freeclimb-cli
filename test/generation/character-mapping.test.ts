@@ -1,4 +1,6 @@
 import { expect } from "chai"
+import { createRequire } from "module"
+const require = createRequire(import.meta.url)
 const mapChars = require("../../generation/commands/character-mapping")
 const apiInfo = require("../../generation/schema/generated-api-schema.json")
 const localFlags = require("./test-local-flags.json")

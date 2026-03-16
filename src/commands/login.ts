@@ -1,8 +1,8 @@
 import { Command, Flags } from "@oclif/core"
-import { confirm, password } from "@inquirer/prompts"
 import chalk from "chalk"
 import { cred } from "../credentials"
 import * as Errors from "../errors"
+import { prompts } from "../prompts"
 import { FreeClimbApi, FreeClimbResponse, FreeClimbErrorResponse } from "../freeclimb"
 
 export class login extends Command {
@@ -27,20 +27,18 @@ export class login extends Command {
 
         await this.parse(login)
         this.log("You can find your Account ID and API Key at https://www.freeclimb.com/dashboard")
-        const confirmation: boolean = await confirm({
-            message:
-                "If you are already logged in to the FreeClimb CLI on this computer, you will first be logged out of that account. Would you like to continue?",
-            default: false,
-        })
+        const confirmation: boolean = await prompts.confirm(
+            "If you are already logged in to the FreeClimb CLI on this computer, you will first be logged out of that account. Would you like to continue?"
+        )
 
         if (confirmation) {
-            const accountId = await password({
-                message: "-> The Account ID of your FreeClimb Account",
-            })
+            const accountId = await prompts.password(
+                "-> The Account ID of your FreeClimb Account"
+            )
 
-            const apiKey = await password({
-                message: "-> Your API Key for your FreeClimb Account",
-            })
+            const apiKey = await prompts.password(
+                "-> Your API Key for your FreeClimb Account"
+            )
             await cred.removeCredentials()
             try {
                 await cred.setCredentials(accountId, apiKey)
