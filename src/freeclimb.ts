@@ -1,4 +1,5 @@
 import axios from "axios"
+import type { Method } from "axios"
 import { cred } from "./credentials"
 import { Environment } from "./environment"
 import * as Errors from "./errors"
@@ -6,9 +7,7 @@ import * as Errors from "./errors"
 type Errorer = { error(message: string, exitCode: { exit: number }): any }
 
 type Body = { data: Record<string, any> }
-type Query = { params: Record<string, any> } // the linter recommends Record<string, any> to represent any object
-
-import type { Method } from "axios"
+type Query = { params: Record<string, any> }
 
 type AxiosMethodType = Method | undefined
 

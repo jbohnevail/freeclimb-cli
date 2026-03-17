@@ -38,7 +38,6 @@ errorMessage.set(69, "Ensure the file URL is returning a non-empty response body
 errorMessage.set(76, "To resolve choose one of the following and retry command. /nDelete an exsisting number /nor /nupgrade to full account")
 errorMessage.set(77, "The resource you attempted to retrieve or modify has been deleted and can no longer be accessed.")
 
-
 export function errorWithSuggestions(errorM: any) {
     const suggestion = errorMessage.get(errorM.code) || "Refer to URL"
     return returnFormat(errorM.code, errorM.message, errorM.url, suggestion)
