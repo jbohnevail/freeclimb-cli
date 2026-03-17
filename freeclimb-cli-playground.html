@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeClimb CLI Playground</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #484f58;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .preset-bar {
+            display: flex;
+            gap: 6px;
+        }
+
+        .preset-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.15s;
+        }
+
+        .preset-btn:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .preset-btn.active {
+            background: #004e63;
+            border-color: #26697a;
+            color: white;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .controls-panel {
+            width: 300px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+
+        .controls-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .controls-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .controls-tab.active {
+            color: #fa660a;
+            border-bottom-color: #fa660a;
+            background: var(--bg-secondary);
+        }
+
+        .controls-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .preview-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .preview-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .terminal {
+            background: #0a0a0a;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 100%;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .terminal-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .prompt-output {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 16px;
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .prompt-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-btn {
+            background: #fa660a;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .copy-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .copy-btn.copied {
+            background: #c2ff18;
+            color: #000;
+        }
+
+        .prompt-text {
+            font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* Control Styling */
+        .control-section {
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        .control-label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        input[type="text"],
+        select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        input[type="color"] {
+            width: 32px;
+            height: 28px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            min-width: 50px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.15s;
+            border-radius: 4px;
+        }
+
+        .toggle-btn:hover {
+            background: var(--border-color);
+        }
+
+        .toggle-btn.active {
+            background: #004e63;
+            border-color: #26697a;
+            color: white;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .checkbox-label input {
+            accent-color: #fa660a;
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Quick action cards */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .quick-action {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .quick-action:hover {
+            border-color: #fa660a;
+        }
+
+        .quick-action-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #fa660a;
+        }
+
+        .quick-action-desc {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* View tabs */
+        .view-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 16px;
+        }
+
+        .view-tab {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 12px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .view-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .view-tab.active {
+            color: #fa660a;
+            border-bottom-color: #fa660a;
+        }
+
+        /* Terminal content styles */
+        .term-banner {
+            white-space: pre;
+            margin-bottom: 12px;
+        }
+
+        .term-tagline {
+            margin-bottom: 16px;
+            padding-left: 2px;
+        }
+
+        .term-dim { opacity: 0.6; }
+        .term-bold { font-weight: bold; }
+
+        .command-input-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .command-prompt {
+            margin-right: 8px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--text-primary);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        .term-box {
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin: 8px 0;
+        }
+
+        .term-box-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+        }
+
+        .term-table {
+            margin: 8px 0;
+        }
+
+        .term-table-header {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .term-table-separator {
+            margin-bottom: 6px;
+        }
+
+        .term-table-row {
+            margin-bottom: 1px;
+        }
+
+        .info-callout {
+            border-left: 3px solid;
+            padding: 8px 12px;
+            margin: 12px 0;
+            font-size: 12px;
+            background: rgba(250, 102, 10, 0.1);
+        }
+
+        /* Color swatch display */
+        .color-swatches {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .swatch-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .swatch-label {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        /* Collapsible sections */
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+
+        .collapsible-header:hover {
+            color: var(--text-primary);
+        }
+
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.2s ease;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+        }
+
+        .chevron {
+            transition: transform 0.2s;
+        }
+
+        .chevron.collapsed {
+            transform: rotate(-90deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div>
+                <h1>FreeClimb CLI Playground</h1>
+                <span class="header-subtitle">Interactive demo & design customizer</span>
+            </div>
+        </div>
+        <div class="preset-bar">
+            <button class="preset-btn active" onclick="applyPreset('default')">Default</button>
+            <button class="preset-btn" onclick="applyPreset('vibrant')">Vibrant</button>
+            <button class="preset-btn" onclick="applyPreset('minimal')">Minimal</button>
+            <button class="preset-btn" onclick="applyPreset('hacker')">Hacker</button>
+            <button class="preset-btn" onclick="applyPreset('corporate')">Corporate</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="controls-panel">
+            <div class="controls-tabs">
+                <button class="controls-tab active" onclick="setControlTab('commands')">Commands</button>
+                <button class="controls-tab" onclick="setControlTab('theme')">Theme</button>
+                <button class="controls-tab" onclick="setControlTab('layout')">Layout</button>
+            </div>
+
+            <div class="controls-content">
+                <!-- Commands Tab -->
+                <div id="tab-commands" class="tab-panel active">
+                    <div class="control-section">
+                        <div class="section-title">Command</div>
+                        <div class="control-group">
+                            <label class="control-label">Category</label>
+                            <select id="commandCategory" onchange="updateCommandList(); updateAll()">
+                                <option value="welcome">Welcome / Help</option>
+                                <option value="calls">Calls</option>
+                                <option value="sms">SMS / Messages</option>
+                                <option value="numbers">Phone Numbers</option>
+                                <option value="applications">Applications</option>
+                                <option value="conferences">Conferences</option>
+                                <option value="queues">Call Queues</option>
+                                <option value="recordings">Recordings</option>
+                                <option value="logs">Logs</option>
+                                <option value="mcp">MCP / AI Agent</option>
+                                <option value="errors">Error Examples</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Action</label>
+                            <select id="commandAction" onchange="updateAll()">
+                                <option value="welcome">freeclimb</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="section-title">Output</div>
+                        <div class="control-group">
+                            <label class="control-label">Format</label>
+                            <div class="toggle-group">
+                                <button class="toggle-btn active" data-group="outputFormat" data-value="formatted" onclick="setToggle(this)">Formatted</button>
+                                <button class="toggle-btn" data-group="outputFormat" data-value="json" onclick="setToggle(this)">JSON</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="section-title">Sample Data</div>
+                        <div class="control-group">
+                            <label class="control-label">Account Type</label>
+                            <select id="accountType" onchange="updateAll()">
+                                <option value="full">Full Account</option>
+                                <option value="trial">Trial Account</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Scenario</label>
+                            <select id="dataScenario" onchange="updateAll()">
+                                <option value="normal">Normal (mixed)</option>
+                                <option value="success">All Successful</option>
+                                <option value="errors">With Errors</option>
+                                <option value="empty">Empty Results</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Results</label>
+                            <select id="resultsCount" onchange="updateAll()">
+                                <option value="3">3 items</option>
+                                <option value="5" selected>5 items</option>
+                                <option value="10">10 items</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="section-title">Quick Actions</div>
+                        <div class="quick-actions">
+                            <div class="quick-action" onclick="quickDemo('welcome', 'welcome')">
+                                <div class="quick-action-title">Welcome</div>
+                                <div class="quick-action-desc">Home screen</div>
+                            </div>
+                            <div class="quick-action" onclick="quickDemo('welcome', 'status')">
+                                <div class="quick-action-title">Status</div>
+                                <div class="quick-action-desc">Account info</div>
+                            </div>
+                            <div class="quick-action" onclick="quickDemo('calls', 'calls:list')">
+                                <div class="quick-action-title">Calls</div>
+                                <div class="quick-action-desc">List calls</div>
+                            </div>
+                            <div class="quick-action" onclick="quickDemo('sms', 'sms:list')">
+                                <div class="quick-action-title">SMS</div>
+                                <div class="quick-action-desc">Messages</div>
+                            </div>
+                            <div class="quick-action" onclick="quickDemo('mcp', 'mcp:start')">
+                                <div class="quick-action-title">MCP</div>
+                                <div class="quick-action-desc">AI agents</div>
+                            </div>
+                            <div class="quick-action" onclick="quickDemo('errors', 'error:validation')">
+                                <div class="quick-action-title">Error</div>
+                                <div class="quick-action-desc">Error output</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme Tab -->
+                <div id="tab-theme" class="tab-panel">
+                    <div class="control-section">
+                        <div class="section-title">Brand Colors</div>
+
+                        <div class="control-group">
+                            <label class="control-label">Primary (Banner/Headers)</label>
+                            <div class="control-row">
+                                <input type="color" id="colorPrimary" value="#004e63" onchange="updateAll()">
+                                <input type="text" id="colorPrimaryHex" value="#004e63" onchange="syncColor('Primary')">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Secondary (Commands)</label>
+                            <div class="control-row">
+                                <input type="color" id="colorSecondary" value="#26697a" onchange="updateAll()">
+                                <input type="text" id="colorSecondaryHex" value="#26697a" onchange="syncColor('Secondary')">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Accent (Highlights)</label>
+                            <div class="control-row">
+                                <input type="color" id="colorAccent" value="#fa660a" onchange="updateAll()">
+                                <input type="text" id="colorAccentHex" value="#fa660a" onchange="syncColor('Accent')">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Success</label>
+                            <div class="control-row">
+                                <input type="color" id="colorSuccess" value="#c2ff18" onchange="updateAll()">
+                                <input type="text" id="colorSuccessHex" value="#c2ff18" onchange="syncColor('Success')">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Error</label>
+                            <div class="control-row">
+                                <input type="color" id="colorError" value="#f85149" onchange="updateAll()">
+                                <input type="text" id="colorErrorHex" value="#f85149" onchange="syncColor('Error')">
+                            </div>
+                        </div>
+
+                        <div class="color-swatches" id="colorSwatches"></div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="section-title">Icons</div>
+
+                        <div class="control-group">
+                            <label class="control-label">Success Icon</label>
+                            <select id="iconSuccess" onchange="updateAll()">
+                                <option value="✓">✓ Checkmark</option>
+                                <option value="✔" selected>✔ Heavy Check</option>
+                                <option value="●">● Filled Circle</option>
+                                <option value="✅">✅ Emoji</option>
+                                <option value="[OK]">[OK] Text</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Error Icon</label>
+                            <select id="iconError" onchange="updateAll()">
+                                <option value="✗">✗ X Mark</option>
+                                <option value="✘" selected>✘ Heavy X</option>
+                                <option value="○">○ Empty Circle</option>
+                                <option value="❌">❌ Emoji</option>
+                                <option value="[FAIL]">[FAIL] Text</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Pending Icon</label>
+                            <select id="iconPending" onchange="updateAll()">
+                                <option value="○">○ Empty Circle</option>
+                                <option value="◐">◐ Half Circle</option>
+                                <option value="⏳" selected>⏳ Hourglass</option>
+                                <option value="⧖">⧖ Hourglass Alt</option>
+                                <option value="...">... Dots</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Arrow/Chevron</label>
+                            <select id="iconArrow" onchange="updateAll()">
+                                <option value="→">→ Arrow</option>
+                                <option value="›" selected>› Chevron</option>
+                                <option value="▶">▶ Triangle</option>
+                                <option value="->">>> ASCII</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showIcons" checked onchange="updateAll()">
+                                Show status icons
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="colorizeStatus" checked onchange="updateAll()">
+                                Colorize status values
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layout Tab -->
+                <div id="tab-layout" class="tab-panel">
+                    <div class="control-section">
+                        <div class="section-title">Banner</div>
+
+                        <div class="control-group">
+                            <label class="control-label">Style</label>
+                            <select id="bannerType" onchange="updateAll()">
+                                <option value="block">Block Letters (███)</option>
+                                <option value="slant">Slant Style</option>
+                                <option value="simple">Simple ASCII</option>
+                                <option value="none">No Banner</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Tagline</label>
+                            <input type="text" id="tagline" value="The communications CLI for developers and agents" onchange="updateAll()">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showTagline" checked onchange="updateAll()">
+                                Show tagline
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="section-title">Tables & Boxes</div>
+
+                        <div class="control-group">
+                            <label class="control-label">Border Style</label>
+                            <div class="toggle-group">
+                                <button class="toggle-btn" data-group="borderStyle" data-value="rounded" onclick="setToggle(this)">Rounded</button>
+                                <button class="toggle-btn" data-group="borderStyle" data-value="square" onclick="setToggle(this)">Square</button>
+                                <button class="toggle-btn" data-group="borderStyle" data-value="ascii" onclick="setToggle(this)">ASCII</button>
+                                <button class="toggle-btn active" data-group="borderStyle" data-value="none" onclick="setToggle(this)">None</button>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showTimestamps" checked onchange="updateAll()">
+                                Show timestamps
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="compactOutput" onchange="updateAll()">
+                                Compact output
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="section-title">Welcome Screen</div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showQuickCommands" checked onchange="updateAll()">
+                                Show command list
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showTryHint" checked onchange="updateAll()">
+                                Show "try:" hint
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showDocsLink" checked onchange="updateAll()">
+                                Show docs link
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="preview-panel">
+            <div class="view-tabs">
+                <button class="view-tab active" onclick="setView('terminal')">Terminal</button>
+                <button class="view-tab" onclick="setView('features')">Features</button>
+                <button class="view-tab" onclick="setView('commands')">All Commands</button>
+            </div>
+
+            <div class="preview-area">
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="terminal-dot red"></div>
+                            <div class="terminal-dot yellow"></div>
+                            <div class="terminal-dot green"></div>
+                        </div>
+                        <div class="terminal-title" id="terminalTitle">freeclimb</div>
+                        <div style="width: 52px"></div>
+                    </div>
+                    <div class="terminal-content" id="terminalContent"></div>
+                </div>
+            </div>
+
+            <div class="prompt-output">
+                <div class="prompt-header">
+                    <span class="prompt-label">Generated Prompt</span>
+                    <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+                </div>
+                <div class="prompt-text" id="promptText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default values
+        const DEFAULTS = {
+            colorPrimary: '#004e63',
+            colorSecondary: '#26697a',
+            colorAccent: '#fa660a',
+            colorSuccess: '#c2ff18',
+            colorError: '#f85149',
+            bannerType: 'block',
+            tagline: 'The communications CLI for developers and agents',
+            showTagline: true,
+            borderStyle: 'none',
+            colorizeStatus: true,
+            showIcons: true,
+            iconSuccess: '✔',
+            iconError: '✘',
+            iconPending: '⏳',
+            iconArrow: '›',
+            showQuickCommands: true,
+            showTryHint: true,
+            showDocsLink: true,
+            compactOutput: false,
+            showTimestamps: true,
+            outputFormat: 'formatted',
+            commandCategory: 'welcome',
+            commandAction: 'welcome',
+            accountType: 'full',
+            dataScenario: 'normal',
+            resultsCount: '5'
+        };
+
+        let state = { ...DEFAULTS };
+        let currentView = 'terminal';
+        let currentControlTab = 'commands';
+
+        // Presets
+        const presets = {
+            default: { ...DEFAULTS },
+            vibrant: {
+                ...DEFAULTS,
+                colorPrimary: '#6366f1',
+                colorSecondary: '#818cf8',
+                colorAccent: '#f59e0b',
+                colorSuccess: '#10b981',
+                colorError: '#ef4444',
+                iconSuccess: '✔',
+                iconArrow: '▶'
+            },
+            minimal: {
+                ...DEFAULTS,
+                colorPrimary: '#6b7280',
+                colorSecondary: '#9ca3af',
+                colorAccent: '#374151',
+                colorSuccess: '#059669',
+                colorError: '#dc2626',
+                bannerType: 'simple',
+                borderStyle: 'none',
+                showIcons: false,
+                showTryHint: false,
+                compactOutput: true
+            },
+            hacker: {
+                ...DEFAULTS,
+                colorPrimary: '#22c55e',
+                colorSecondary: '#4ade80',
+                colorAccent: '#22c55e',
+                colorSuccess: '#22c55e',
+                colorError: '#ef4444',
+                bannerType: 'slant',
+                borderStyle: 'ascii',
+                iconSuccess: '[OK]',
+                iconError: '[FAIL]',
+                iconPending: '...',
+                iconArrow: '>>'
+            },
+            corporate: {
+                ...DEFAULTS,
+                colorPrimary: '#1e40af',
+                colorSecondary: '#3b82f6',
+                colorAccent: '#60a5fa',
+                colorSuccess: '#16a34a',
+                colorError: '#dc2626',
+                bannerType: 'simple',
+                borderStyle: 'square',
+                iconSuccess: '✔',
+                iconArrow: '›'
+            }
+        };
+
+        // Banner designs
+        const banners = {
+            block: `███████╗██████╗ ███████╗███████╗ ██████╗██╗     ██╗███╗   ███╗██████╗
+██╔════╝██╔══██╗██╔════╝██╔════╝██╔════╝██║     ██║████╗ ████║██╔══██╗
+█████╗  ██████╔╝█████╗  █████╗  ██║     ██║     ██║██╔████╔██║██████╔╝
+██╔══╝  ██╔══██╗██╔══╝  ██╔══╝  ██║     ██║     ██║██║╚██╔╝██║██╔══██╗
+██║     ██║  ██║███████╗███████╗╚██████╗███████╗██║██║ ╚═╝ ██║██████╔╝
+╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚═╝╚═════╝ `,
+            slant: `    ______               _________ _           __
+   / ____/_______  ___  / ____/ (_)___ ___  / /_
+  / /_  / ___/ _ \\/ _ \\/ /   / / / __ \`__ \\/ __ \\
+ / __/ / /  /  __/  __/ /___/ / / / / / / / /_/ /
+/_/   /_/   \\___/\\___/\\____/_/_/_/ /_/ /_/_.___/ `,
+            simple: `  ___              ___ _ _       _
+ | __| _ ___ ___ / __| (_)_ __ | |__
+ | _| '_/ -_) -_) (__| | | '  \\| '_ \\
+ |_||_| \\___\\___|\___|_|_|_|_|_|_.__/`,
+            none: ''
+        };
+
+        // Box characters
+        const boxChars = {
+            rounded: { tl: '╭', tr: '╮', bl: '╰', br: '╯', h: '─', v: '│', lt: '├', rt: '┤' },
+            square: { tl: '┌', tr: '┐', bl: '└', br: '┘', h: '─', v: '│', lt: '├', rt: '┤' },
+            ascii: { tl: '+', tr: '+', bl: '+', br: '+', h: '-', v: '|', lt: '+', rt: '+' },
+            none: { tl: '', tr: '', bl: '', br: '', h: '', v: '', lt: '', rt: '' }
+        };
+
+        // Command configurations
+        const commandLists = {
+            welcome: [
+                { value: 'welcome', label: 'freeclimb' },
+                { value: 'help', label: 'freeclimb --help' },
+                { value: 'status', label: 'freeclimb status' },
+                { value: 'diagnose', label: 'freeclimb diagnose' }
+            ],
+            calls: [
+                { value: 'calls:list', label: 'freeclimb calls:list' },
+                { value: 'calls:get', label: 'freeclimb calls:get <id>' },
+                { value: 'calls:make', label: 'freeclimb calls:make' }
+            ],
+            sms: [
+                { value: 'sms:list', label: 'freeclimb sms:list' },
+                { value: 'sms:get', label: 'freeclimb sms:get <id>' },
+                { value: 'sms:send', label: 'freeclimb sms:send' }
+            ],
+            numbers: [
+                { value: 'incoming-numbers:list', label: 'freeclimb incoming-numbers:list' },
+                { value: 'incoming-numbers:buy', label: 'freeclimb incoming-numbers:buy' },
+                { value: 'available-numbers:list', label: 'freeclimb available-numbers:list' }
+            ],
+            applications: [
+                { value: 'applications:list', label: 'freeclimb applications:list' },
+                { value: 'applications:create', label: 'freeclimb applications:create' }
+            ],
+            conferences: [
+                { value: 'conferences:list', label: 'freeclimb conferences:list' },
+                { value: 'conference-participants:list', label: 'freeclimb conference-participants:list' }
+            ],
+            queues: [
+                { value: 'call-queues:list', label: 'freeclimb call-queues:list' },
+                { value: 'queue-members:list', label: 'freeclimb queue-members:list' }
+            ],
+            recordings: [
+                { value: 'recordings:list', label: 'freeclimb recordings:list' },
+                { value: 'recordings:download', label: 'freeclimb recordings:download <id>' }
+            ],
+            logs: [
+                { value: 'logs:list', label: 'freeclimb logs:list' },
+                { value: 'logs:filter', label: 'freeclimb logs:filter' }
+            ],
+            mcp: [
+                { value: 'mcp:start', label: 'freeclimb mcp:start' },
+                { value: 'mcp:config', label: 'freeclimb mcp:config' }
+            ],
+            errors: [
+                { value: 'error:auth', label: 'Authentication Error' },
+                { value: 'error:notfound', label: 'Resource Not Found' },
+                { value: 'error:validation', label: 'Validation Error' },
+                { value: 'error:ratelimit', label: 'Rate Limit Error' }
+            ]
+        };
+
+        // Sample data generators
+        function generateCalls() {
+            const statuses = state.dataScenario === 'success' ? ['completed'] :
+                           state.dataScenario === 'errors' ? ['completed', 'failed', 'failed', 'busy', 'no-answer'] :
+                           ['completed', 'in-progress', 'queued', 'ringing', 'failed'];
+            return Array.from({length: parseInt(state.resultsCount)}, (_, i) => ({
+                id: `CA${(1234567890 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                from: `+1555${(1000000 + i).toString().slice(0, 7)}`,
+                to: `+1555${(9000000 - i).toString().slice(0, 7)}`,
+                status: statuses[i % statuses.length],
+                duration: Math.floor(Math.random() * 300) + 10,
+                created: new Date(Date.now() - i * 3600000).toISOString().replace('T', ' ').slice(0, 19)
+            }));
+        }
+
+        function generateSms() {
+            const statuses = state.dataScenario === 'success' ? ['delivered'] :
+                           state.dataScenario === 'errors' ? ['delivered', 'failed', 'undelivered'] :
+                           ['delivered', 'sent', 'queued', 'sending', 'failed'];
+            return Array.from({length: parseInt(state.resultsCount)}, (_, i) => ({
+                id: `SM${(9876543210 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                from: `+1555${(1000000 + i).toString().slice(0, 7)}`,
+                to: `+1555${(9000000 - i).toString().slice(0, 7)}`,
+                status: statuses[i % statuses.length],
+                text: ['Hello!', 'Code: 123456', 'Meeting 3pm', 'Package here', 'Call back'][i % 5],
+                created: new Date(Date.now() - i * 1800000).toISOString().replace('T', ' ').slice(0, 19)
+            }));
+        }
+
+        function generateNumbers() {
+            return Array.from({length: Math.min(parseInt(state.resultsCount), 5)}, (_, i) => ({
+                id: `PN${(1111111111 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                phoneNumber: `+1555${(1234567 + i).toString().slice(0, 7)}`,
+                alias: ['Main', 'Support', 'Sales', 'Marketing', 'Dev'][i],
+                voice: true, sms: true
+            }));
+        }
+
+        function generateApplications() {
+            return Array.from({length: Math.min(parseInt(state.resultsCount), 5)}, (_, i) => ({
+                id: `AP${(2222222222 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                alias: ['IVR', 'SMS Bot', 'Call Center', 'Notify', 'Dev'][i],
+                voiceUrl: `https://api.example.com/v/${i + 1}`
+            }));
+        }
+
+        function generateConferences() {
+            const statuses = ['inProgress', 'terminated', 'empty'];
+            return Array.from({length: Math.min(parseInt(state.resultsCount), 4)}, (_, i) => ({
+                id: `CF${(3333333333 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                alias: ['Standup', 'Client', 'All Hands', 'Support'][i],
+                status: statuses[i % statuses.length],
+                participants: Math.floor(Math.random() * 10) + 1
+            }));
+        }
+
+        function generateQueues() {
+            return Array.from({length: Math.min(parseInt(state.resultsCount), 4)}, (_, i) => ({
+                id: `QU${(4444444444 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                alias: ['Support', 'Sales', 'VIP', 'General'][i],
+                currentSize: Math.floor(Math.random() * 20),
+                maxSize: 100,
+                avgWait: Math.floor(Math.random() * 120) + 30
+            }));
+        }
+
+        function generateRecordings() {
+            return Array.from({length: parseInt(state.resultsCount)}, (_, i) => ({
+                id: `RE${(5555555555 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                callId: `CA${(1234567890 + i).toString().padStart(32, '0').slice(0, 32)}`,
+                duration: Math.floor(Math.random() * 300) + 30,
+                created: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10)
+            }));
+        }
+
+        function generateLogs() {
+            const levels = state.dataScenario === 'errors' ? ['ERROR', 'WARNING', 'ERROR'] : ['INFO', 'INFO', 'WARNING', 'DEBUG'];
+            const messages = ['Incoming call', 'SMS delivered', 'Call connected', 'Webhook called', 'Rate limit'];
+            return Array.from({length: parseInt(state.resultsCount)}, (_, i) => ({
+                timestamp: new Date(Date.now() - i * 60000).toISOString(),
+                level: levels[i % levels.length],
+                requestId: `REQ${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+                message: messages[i % messages.length]
+            }));
+        }
+
+        // UI helpers
+        function escapeHtml(text) {
+            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function color(text, colorValue) {
+            return state.colorizeStatus ? `<span style="color: ${colorValue}">${escapeHtml(text)}</span>` : escapeHtml(text);
+        }
+
+        function statusIcon(status) {
+            if (!state.showIcons) return '';
+            const icons = {
+                completed: state.iconSuccess, delivered: state.iconSuccess, active: '●', inProgress: '●',
+                'in-progress': state.iconPending, queued: state.iconPending, pending: state.iconPending,
+                ringing: state.iconPending, sending: state.iconPending, sent: state.iconPending,
+                failed: state.iconError, error: state.iconError, busy: state.iconError,
+                'no-answer': state.iconError, undelivered: state.iconError,
+                terminated: '○', empty: '○'
+            };
+            return (icons[status] || '') + ' ';
+        }
+
+        function statusColor(status) {
+            if (!state.colorizeStatus) return 'inherit';
+            const colors = {
+                completed: state.colorSuccess, delivered: state.colorSuccess, active: state.colorSuccess, inProgress: state.colorSuccess,
+                'in-progress': state.colorAccent, queued: state.colorAccent, pending: state.colorAccent, ringing: state.colorAccent,
+                sending: state.colorAccent, sent: state.colorAccent,
+                failed: state.colorError, error: state.colorError, busy: state.colorError,
+                'no-answer': state.colorError, undelivered: state.colorError
+            };
+            return colors[status] || 'inherit';
+        }
+
+        // Control functions
+        function setControlTab(tab) {
+            currentControlTab = tab;
+            document.querySelectorAll('.controls-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.controls-tab[onclick="setControlTab('${tab}')"]`).classList.add('active');
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        function setView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.view-tab[onclick="setView('${view}')"]`).classList.add('active');
+            renderPreview();
+        }
+
+        function setToggle(btn) {
+            const group = btn.dataset.group;
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state[group] = btn.dataset.value;
+            updateAll();
+        }
+
+        function syncColor(name) {
+            const hex = document.getElementById(`color${name}Hex`).value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+                document.getElementById(`color${name}`).value = hex;
+                updateAll();
+            }
+        }
+
+        function updateCommandList() {
+            const category = document.getElementById('commandCategory').value;
+            const actionSelect = document.getElementById('commandAction');
+            const commands = commandLists[category] || commandLists.welcome;
+            actionSelect.innerHTML = commands.map(cmd => `<option value="${cmd.value}">${cmd.label}</option>`).join('');
+            state.commandCategory = category;
+            state.commandAction = commands[0].value;
+        }
+
+        function quickDemo(category, action) {
+            document.getElementById('commandCategory').value = category;
+            updateCommandList();
+            document.getElementById('commandAction').value = action;
+            state.commandAction = action;
+            updateAll();
+        }
+
+        function readState() {
+            state.colorPrimary = document.getElementById('colorPrimary').value;
+            state.colorSecondary = document.getElementById('colorSecondary').value;
+            state.colorAccent = document.getElementById('colorAccent').value;
+            state.colorSuccess = document.getElementById('colorSuccess').value;
+            state.colorError = document.getElementById('colorError').value;
+            state.bannerType = document.getElementById('bannerType').value;
+            state.tagline = document.getElementById('tagline').value;
+            state.showTagline = document.getElementById('showTagline').checked;
+            state.colorizeStatus = document.getElementById('colorizeStatus').checked;
+            state.showIcons = document.getElementById('showIcons').checked;
+            state.iconSuccess = document.getElementById('iconSuccess').value;
+            state.iconError = document.getElementById('iconError').value;
+            state.iconPending = document.getElementById('iconPending').value;
+            state.iconArrow = document.getElementById('iconArrow').value;
+            state.showQuickCommands = document.getElementById('showQuickCommands').checked;
+            state.showTryHint = document.getElementById('showTryHint').checked;
+            state.showDocsLink = document.getElementById('showDocsLink').checked;
+            state.compactOutput = document.getElementById('compactOutput').checked;
+            state.showTimestamps = document.getElementById('showTimestamps').checked;
+            state.commandCategory = document.getElementById('commandCategory').value;
+            state.commandAction = document.getElementById('commandAction').value;
+            state.accountType = document.getElementById('accountType').value;
+            state.dataScenario = document.getElementById('dataScenario').value;
+            state.resultsCount = document.getElementById('resultsCount').value;
+
+            // Sync hex inputs
+            document.getElementById('colorPrimaryHex').value = state.colorPrimary;
+            document.getElementById('colorSecondaryHex').value = state.colorSecondary;
+            document.getElementById('colorAccentHex').value = state.colorAccent;
+            document.getElementById('colorSuccessHex').value = state.colorSuccess;
+            document.getElementById('colorErrorHex').value = state.colorError;
+        }
+
+        function applyPreset(name) {
+            Object.assign(state, presets[name]);
+
+            // Update all controls
+            document.getElementById('colorPrimary').value = state.colorPrimary;
+            document.getElementById('colorPrimaryHex').value = state.colorPrimary;
+            document.getElementById('colorSecondary').value = state.colorSecondary;
+            document.getElementById('colorSecondaryHex').value = state.colorSecondary;
+            document.getElementById('colorAccent').value = state.colorAccent;
+            document.getElementById('colorAccentHex').value = state.colorAccent;
+            document.getElementById('colorSuccess').value = state.colorSuccess;
+            document.getElementById('colorSuccessHex').value = state.colorSuccess;
+            document.getElementById('colorError').value = state.colorError;
+            document.getElementById('colorErrorHex').value = state.colorError;
+            document.getElementById('bannerType').value = state.bannerType;
+            document.getElementById('tagline').value = state.tagline;
+            document.getElementById('showTagline').checked = state.showTagline;
+            document.getElementById('colorizeStatus').checked = state.colorizeStatus;
+            document.getElementById('showIcons').checked = state.showIcons;
+            document.getElementById('iconSuccess').value = state.iconSuccess;
+            document.getElementById('iconError').value = state.iconError;
+            document.getElementById('iconPending').value = state.iconPending;
+            document.getElementById('iconArrow').value = state.iconArrow;
+            document.getElementById('showQuickCommands').checked = state.showQuickCommands;
+            document.getElementById('showTryHint').checked = state.showTryHint;
+            document.getElementById('showDocsLink').checked = state.showDocsLink;
+            document.getElementById('compactOutput').checked = state.compactOutput;
+            document.getElementById('showTimestamps').checked = state.showTimestamps;
+            document.getElementById('commandCategory').value = state.commandCategory;
+            updateCommandList();
+            document.getElementById('commandAction').value = state.commandAction;
+            document.getElementById('accountType').value = state.accountType;
+            document.getElementById('dataScenario').value = state.dataScenario;
+            document.getElementById('resultsCount').value = state.resultsCount;
+
+            // Update toggle buttons
+            document.querySelectorAll('[data-group="borderStyle"]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === state.borderStyle);
+            });
+            document.querySelectorAll('[data-group="outputFormat"]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === state.outputFormat);
+            });
+
+            // Update preset buttons
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.preset-btn[onclick="applyPreset('${name}')"]`).classList.add('active');
+
+            updateAll();
+        }
+
+        function updateAll() {
+            readState();
+            renderPreview();
+            updatePrompt();
+            updateColorSwatches();
+            updateTerminalTitle();
+        }
+
+        function updateTerminalTitle() {
+            const actionSelect = document.getElementById('commandAction');
+            const label = actionSelect.options[actionSelect.selectedIndex]?.text || 'freeclimb';
+            document.getElementById('terminalTitle').textContent = label;
+        }
+
+        function updateColorSwatches() {
+            const swatches = document.getElementById('colorSwatches');
+            swatches.innerHTML = `
+                <div class="color-swatch"><div class="swatch-preview" style="background: ${state.colorPrimary}"></div><span class="swatch-label">Primary</span></div>
+                <div class="color-swatch"><div class="swatch-preview" style="background: ${state.colorSecondary}"></div><span class="swatch-label">Secondary</span></div>
+                <div class="color-swatch"><div class="swatch-preview" style="background: ${state.colorAccent}"></div><span class="swatch-label">Accent</span></div>
+                <div class="color-swatch"><div class="swatch-preview" style="background: ${state.colorSuccess}"></div><span class="swatch-label">Success</span></div>
+                <div class="color-swatch"><div class="swatch-preview" style="background: ${state.colorError}"></div><span class="swatch-label">Error</span></div>
+            `;
+        }
+
+        // Render functions
+        function renderPreview() {
+            const content = document.getElementById('terminalContent');
+
+            if (currentView === 'features') {
+                content.innerHTML = renderFeatures();
+                return;
+            }
+            if (currentView === 'commands') {
+                content.innerHTML = renderAllCommands();
+                return;
+            }
+
+            // JSON output
+            if (state.outputFormat === 'json') {
+                content.innerHTML = renderCommandLine() + '<div style="margin-top: 12px">' + renderJsonOutput() + '</div>';
+                return;
+            }
+
+            // Formatted output
+            content.innerHTML = renderCommandLine() + '<div style="margin-top: 12px">' + renderOutput() + '</div>';
+        }
+
+        function renderCommandLine() {
+            const actionSelect = document.getElementById('commandAction');
+            const label = actionSelect.options[actionSelect.selectedIndex]?.text || 'freeclimb';
+            return `<div class="command-input-wrapper">
+                <span class="command-prompt" style="color: ${state.colorSuccess}">$</span>
+                <span>${escapeHtml(label)}</span>
+                <span class="cursor"></span>
+            </div>`;
+        }
+
+        function renderOutput() {
+            const action = state.commandAction;
+            const renderers = {
+                'welcome': renderWelcome,
+                'help': renderHelp,
+                'status': renderStatus,
+                'diagnose': renderDiagnose,
+                'calls:list': renderCallsList,
+                'calls:get': renderCallDetail,
+                'calls:make': renderCallMade,
+                'sms:list': renderSmsList,
+                'sms:send': renderSmsSent,
+                'sms:get': renderSmsDetail,
+                'incoming-numbers:list': renderNumbersList,
+                'incoming-numbers:buy': renderNumberBought,
+                'available-numbers:list': renderAvailableNumbers,
+                'applications:list': renderApplicationsList,
+                'applications:create': renderAppCreated,
+                'conferences:list': renderConferencesList,
+                'conference-participants:list': renderParticipantsList,
+                'call-queues:list': renderQueuesList,
+                'queue-members:list': renderQueueMembersList,
+                'recordings:list': renderRecordingsList,
+                'recordings:download': renderRecordingDownload,
+                'logs:list': renderLogsList,
+                'logs:filter': renderLogsList,
+                'mcp:start': renderMcpStart,
+                'mcp:config': renderMcpConfig,
+                'error:auth': renderErrorAuth,
+                'error:notfound': renderErrorNotFound,
+                'error:validation': renderErrorValidation,
+                'error:ratelimit': renderErrorRateLimit
+            };
+            return (renderers[action] || renderWelcome)();
+        }
+
+        function renderWelcome() {
+            let html = '';
+            const sp = state.compactOutput ? '' : '\n';
+
+            if (state.bannerType !== 'none') {
+                html += `<div class="term-banner" style="color: ${state.colorPrimary}">${escapeHtml(banners[state.bannerType])}</div>`;
+            }
+
+            if (state.showTagline) {
+                html += `<div class="term-tagline" style="color: ${state.colorPrimary}">${sp}  ${escapeHtml(state.tagline)}</div>`;
+            }
+
+            if (state.showQuickCommands) {
+                html += '<div style="margin: 16px 0">';
+                const commands = [
+                    { cmd: 'calls make | list | get', desc: 'Make and manage calls' },
+                    { cmd: 'sms send | list | get', desc: 'Send and manage SMS' },
+                    { cmd: 'applications list | create', desc: 'Manage applications' },
+                    { cmd: 'incoming-numbers buy | list', desc: 'Manage phone numbers' },
+                    { cmd: 'logs list | filter', desc: 'View account logs' },
+                    { cmd: 'mcp start | config', desc: 'AI agent integration' }
+                ];
+                for (const c of commands) {
+                    html += `<div>  ${color('$', state.colorSecondary)} ${color('freeclimb ' + c.cmd, state.colorSecondary)}  <span style="opacity: 0.6">${escapeHtml(c.desc)}</span></div>`;
+                }
+                html += '</div>';
+            }
+
+            if (state.showTryHint) {
+                html += `<div style="margin: 16px 0">\n  ${color('try:', state.colorSuccess)} ${color('freeclimb calls:list --json', state.colorSuccess)}</div>`;
+            }
+
+            if (state.showDocsLink) {
+                html += `<div style="opacity: 0.6">\n  Learn more at <span style="text-decoration: underline">https://docs.freeclimb.com/docs/freeclimb-cli-quickstart</span></div>`;
+            }
+
+            return html;
+        }
+
+        function renderStatus() {
+            const accountId = 'AC' + '1234567890abcdef'.repeat(2).slice(0, 30);
+            const type = state.accountType === 'trial' ? 'TRIAL' : 'FULL';
+            const typeColor = state.accountType === 'trial' ? state.colorAccent : state.colorSuccess;
+            const balance = state.accountType === 'trial' ? '$10.00' : '$250.00';
+
+            return renderBox('FreeClimb Account Status', [
+                [color('Account ID', state.colorSecondary), accountId],
+                [color('Type', state.colorSecondary), color(type, typeColor)],
+                [color('Status', state.colorSecondary), `<span style="color: ${state.colorSuccess}">${statusIcon('active')}ACTIVE</span>`],
+                [color('Balance', state.colorSecondary), balance]
+            ]) + renderBox('Resources', [
+                [color('Phone Numbers', state.colorSecondary), '3 owned'],
+                [color('Applications', state.colorSecondary), '5 configured'],
+                [color('Active Calls', state.colorSecondary), '2']
+            ]) + renderQuickActions([
+                'freeclimb incoming-numbers:list',
+                'freeclimb applications:list'
+            ]);
+        }
+
+        function renderDiagnose() {
+            return renderBox('Connectivity Check', [
+                [`<span style="color: ${state.colorSuccess}">${statusIcon('completed')}API Endpoint</span>`, 'reachable'],
+                [`<span style="color: ${state.colorSuccess}">${statusIcon('completed')}Authentication</span>`, 'valid'],
+                [`<span style="color: ${state.colorSuccess}">${statusIcon('completed')}Account Status</span>`, 'active'],
+                [`<span style="color: ${state.colorSuccess}">${statusIcon('completed')}Webhook Test</span>`, 'responding']
+            ]) + `<div style="margin-top: 12px; color: ${state.colorSuccess}">${state.iconSuccess} All systems operational</div>`;
+        }
+
+        function renderHelp() {
+            return `<div style="margin-bottom: 16px">${color('FreeClimb CLI', state.colorAccent)} - Communications API for developers</div>
+                <div style="margin-bottom: 12px">${color('USAGE', state.colorSecondary)}</div>
+                <div style="margin-bottom: 16px; padding-left: 12px">$ freeclimb [COMMAND]</div>
+                <div style="margin-bottom: 12px">${color('COMMANDS', state.colorSecondary)}</div>
+                <div style="padding-left: 12px">
+                    <div>${color('login', state.colorSecondary)}       Authenticate with FreeClimb</div>
+                    <div>${color('status', state.colorSecondary)}      Show account status</div>
+                    <div>${color('calls', state.colorSecondary)}       Manage calls</div>
+                    <div>${color('sms', state.colorSecondary)}         Send and manage SMS</div>
+                    <div>${color('applications', state.colorSecondary)} Manage applications</div>
+                    <div>${color('mcp', state.colorSecondary)}         MCP server for AI agents</div>
+                </div>`;
+        }
+
+        function renderCallsList() {
+            if (state.dataScenario === 'empty') return renderEmptyState('calls', 'freeclimb calls:make');
+            const calls = generateCalls();
+            return renderTable('Calls',
+                state.showTimestamps ? ['ID', 'FROM', 'TO', 'STATUS', 'CREATED'] : ['ID', 'FROM', 'TO', 'STATUS'],
+                calls.map(c => state.showTimestamps ? [
+                    { value: c.id.slice(0, 14) + '...', dim: true },
+                    c.from, c.to,
+                    { value: statusIcon(c.status) + c.status, color: statusColor(c.status) },
+                    c.created
+                ] : [
+                    { value: c.id.slice(0, 14) + '...', dim: true },
+                    c.from, c.to,
+                    { value: statusIcon(c.status) + c.status, color: statusColor(c.status) }
+                ]),
+                `Showing ${calls.length} of 127`, 'freeclimb calls:list --next'
+            );
+        }
+
+        function renderCallDetail() {
+            const call = generateCalls()[0];
+            return renderBox('Call Details', [
+                [color('Call ID', state.colorSecondary), call.id],
+                [color('Status', state.colorSecondary), `<span style="color: ${statusColor(call.status)}">${statusIcon(call.status)}${call.status}</span>`],
+                [color('From', state.colorSecondary), call.from],
+                [color('To', state.colorSecondary), call.to],
+                [color('Duration', state.colorSecondary), call.duration + 's'],
+                [color('Created', state.colorSecondary), call.created]
+            ]) + renderQuickActions(['freeclimb recordings:list --call-id ' + call.id.slice(0, 14) + '...']);
+        }
+
+        function renderCallMade() {
+            return `<div style="color: ${state.colorSuccess}">${statusIcon('completed')}Call initiated successfully</div>` +
+                renderBox('', [
+                    [color('Call ID', state.colorSecondary), 'CA' + Math.random().toString(36).slice(2, 10).toUpperCase()],
+                    [color('From', state.colorSecondary), '+15551234567'],
+                    [color('To', state.colorSecondary), '+15559876543'],
+                    [color('Status', state.colorSecondary), `<span style="color: ${state.colorAccent}">${statusIcon('queued')}queued</span>`]
+                ]);
+        }
+
+        function renderSmsList() {
+            if (state.dataScenario === 'empty') return renderEmptyState('messages', 'freeclimb sms:send');
+            const messages = generateSms();
+            return renderTable('Messages',
+                ['ID', 'FROM', 'TO', 'STATUS', 'TEXT'],
+                messages.map(m => [
+                    { value: m.id.slice(0, 12) + '...', dim: true },
+                    m.from, m.to,
+                    { value: statusIcon(m.status) + m.status, color: statusColor(m.status) },
+                    m.text.slice(0, 15) + (m.text.length > 15 ? '...' : '')
+                ]),
+                `Showing ${messages.length} of 89`
+            );
+        }
+
+        function renderSmsDetail() {
+            const msg = generateSms()[0];
+            return renderBox('Message Details', [
+                [color('Message ID', state.colorSecondary), msg.id],
+                [color('Status', state.colorSecondary), `<span style="color: ${statusColor(msg.status)}">${statusIcon(msg.status)}${msg.status}</span>`],
+                [color('From', state.colorSecondary), msg.from],
+                [color('To', state.colorSecondary), msg.to],
+                [color('Text', state.colorSecondary), msg.text]
+            ]);
+        }
+
+        function renderSmsSent() {
+            return `<div style="color: ${state.colorSuccess}">${statusIcon('completed')}Message sent successfully</div>` +
+                renderBox('', [
+                    [color('Message ID', state.colorSecondary), 'SM' + Math.random().toString(36).slice(2, 10).toUpperCase()],
+                    [color('To', state.colorSecondary), '+15559876543'],
+                    [color('Status', state.colorSecondary), `<span style="color: ${state.colorAccent}">${statusIcon('queued')}queued</span>`]
+                ]);
+        }
+
+        function renderNumbersList() {
+            if (state.dataScenario === 'empty') return renderEmptyState('phone numbers', 'freeclimb incoming-numbers:buy');
+            const numbers = generateNumbers();
+            return renderTable('Phone Numbers',
+                ['ID', 'NUMBER', 'ALIAS', 'VOICE', 'SMS'],
+                numbers.map(n => [
+                    { value: n.id.slice(0, 12) + '...', dim: true },
+                    n.phoneNumber, n.alias,
+                    n.voice ? `<span style="color: ${state.colorSuccess}">${state.iconSuccess}</span>` : '-',
+                    n.sms ? `<span style="color: ${state.colorSuccess}">${state.iconSuccess}</span>` : '-'
+                ])
+            );
+        }
+
+        function renderNumberBought() {
+            return `<div style="color: ${state.colorSuccess}">${statusIcon('completed')}Phone number purchased</div>` +
+                renderBox('', [
+                    [color('Number', state.colorSecondary), '+15551234567'],
+                    [color('Alias', state.colorSecondary), 'New Line'],
+                    [color('Voice', state.colorSecondary), `<span style="color: ${state.colorSuccess}">${state.iconSuccess} enabled</span>`],
+                    [color('SMS', state.colorSecondary), `<span style="color: ${state.colorSuccess}">${state.iconSuccess} enabled</span>`]
+                ]);
+        }
+
+        function renderAvailableNumbers() {
+            return renderTable('Available Numbers',
+                ['NUMBER', 'REGION', 'CAPABILITIES'],
+                [
+                    ['+15551000001', 'CA', 'voice, sms'],
+                    ['+15551000002', 'CA', 'voice, sms, mms'],
+                    ['+15551000003', 'NY', 'voice, sms'],
+                    ['+15551000004', 'TX', 'voice'],
+                    ['+15551000005', 'FL', 'voice, sms']
+                ],
+                'Use --area-code or --region to filter'
+            );
+        }
+
+        function renderApplicationsList() {
+            if (state.dataScenario === 'empty') return renderEmptyState('applications', 'freeclimb applications:create');
+            const apps = generateApplications();
+            return renderTable('Applications',
+                ['ID', 'ALIAS', 'VOICE URL'],
+                apps.map(a => [
+                    { value: a.id.slice(0, 12) + '...', dim: true },
+                    a.alias, a.voiceUrl
+                ])
+            );
+        }
+
+        function renderAppCreated() {
+            return `<div style="color: ${state.colorSuccess}">${statusIcon('completed')}Application created</div>` +
+                renderBox('', [
+                    [color('App ID', state.colorSecondary), 'AP' + Math.random().toString(36).slice(2, 10).toUpperCase()],
+                    [color('Alias', state.colorSecondary), 'New App'],
+                    [color('Voice URL', state.colorSecondary), 'https://api.example.com/voice']
+                ]);
+        }
+
+        function renderConferencesList() {
+            if (state.dataScenario === 'empty') return renderEmptyState('conferences');
+            const conferences = generateConferences();
+            return renderTable('Conferences',
+                ['ID', 'ALIAS', 'STATUS', 'PARTICIPANTS'],
+                conferences.map(c => [
+                    { value: c.id.slice(0, 12) + '...', dim: true },
+                    c.alias,
+                    { value: statusIcon(c.status) + c.status, color: statusColor(c.status) },
+                    c.participants.toString()
+                ])
+            );
+        }
+
+        function renderParticipantsList() {
+            return renderTable('Conference Participants',
+                ['ID', 'CALL ID', 'STATUS'],
+                [
+                    [{ value: 'CP123...', dim: true }, { value: 'CA456...', dim: true }, { value: statusIcon('active') + 'active', color: state.colorSuccess }],
+                    [{ value: 'CP124...', dim: true }, { value: 'CA457...', dim: true }, { value: statusIcon('active') + 'active', color: state.colorSuccess }]
+                ]
+            );
+        }
+
+        function renderQueuesList() {
+            if (state.dataScenario === 'empty') return renderEmptyState('queues');
+            const queues = generateQueues();
+            return renderTable('Call Queues',
+                ['ID', 'ALIAS', 'SIZE', 'AVG WAIT'],
+                queues.map(q => [
+                    { value: q.id.slice(0, 12) + '...', dim: true },
+                    q.alias, `${q.currentSize}/${q.maxSize}`, `${q.avgWait}s`
+                ])
+            );
+        }
+
+        function renderQueueMembersList() {
+            return renderTable('Queue Members',
+                ['POSITION', 'CALL ID', 'WAIT TIME'],
+                [
+                    ['1', { value: 'CA123...', dim: true }, '45s'],
+                    ['2', { value: 'CA124...', dim: true }, '32s'],
+                    ['3', { value: 'CA125...', dim: true }, '18s']
+                ]
+            );
+        }
+
+        function renderRecordingsList() {
+            if (state.dataScenario === 'empty') return renderEmptyState('recordings');
+            const recordings = generateRecordings();
+            return renderTable('Recordings',
+                ['ID', 'CALL ID', 'DURATION', 'CREATED'],
+                recordings.map(r => [
+                    { value: r.id.slice(0, 12) + '...', dim: true },
+                    { value: r.callId.slice(0, 12) + '...', dim: true },
+                    r.duration + 's', r.created
+                ])
+            );
+        }
+
+        function renderRecordingDownload() {
+            return `<div style="color: ${state.colorSuccess}">${statusIcon('completed')}Recording downloaded</div>
+                <div style="margin-top: 8px; opacity: 0.6">Saved to: ./recording-RE123456.wav</div>`;
+        }
+
+        function renderLogsList() {
+            const logs = generateLogs();
+            const levelColors = { INFO: state.colorSecondary, WARNING: state.colorAccent, ERROR: state.colorError, DEBUG: '#6b7280' };
+            return renderTable('Logs',
+                ['TIME', 'LEVEL', 'REQUEST', 'MESSAGE'],
+                logs.map(l => [
+                    l.timestamp.slice(11, 19),
+                    { value: l.level, color: levelColors[l.level] },
+                    l.requestId, l.message
+                ])
+            );
+        }
+
+        function renderMcpStart() {
+            return `<div style="color: ${state.colorSuccess}">${statusIcon('active')}MCP Server started</div>` +
+                renderBox('Server Info', [
+                    [color('Status', state.colorSecondary), `<span style="color: ${state.colorSuccess}">● Running</span>`],
+                    [color('Transport', state.colorSecondary), 'stdio'],
+                    [color('Tools', state.colorSecondary), '15 available']
+                ]) +
+                `<div class="info-callout" style="border-color: ${state.colorAccent}">AI agents can now interact with FreeClimb via MCP protocol.</div>
+                <div style="margin-top: 12px; opacity: 0.6">Press Ctrl+C to stop</div>`;
+        }
+
+        function renderMcpConfig() {
+            return renderBox('MCP Configuration', []) +
+                `<pre style="margin: 8px 0; font-size: 11px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 4px">{
+  "mcpServers": {
+    "freeclimb": {
+      "command": "freeclimb",
+      "args": ["mcp:start"]
+    }
+  }
+}</pre>
+<div style="opacity: 0.6; font-size: 11px">Add to your MCP client config file.</div>`;
+        }
+
+        function renderErrorAuth() {
+            return `<div style="color: ${state.colorError}">${statusIcon('failed')}Error: Authentication failed</div>` +
+                renderBox('', [
+                    [color('Code', state.colorSecondary), 'INVALID_CREDENTIALS'],
+                    [color('Message', state.colorSecondary), 'Invalid account ID or API key']
+                ], state.colorError) +
+                `<div style="margin-top: 12px; opacity: 0.6">To fix:</div>
+                <div>  ${color('1.', state.colorSecondary)} ${color('freeclimb login', state.colorAccent)} to re-authenticate</div>
+                <div>  ${color('2.', state.colorSecondary)} Check credentials at dashboard</div>`;
+        }
+
+        function renderErrorNotFound() {
+            return `<div style="color: ${state.colorError}">${statusIcon('failed')}Error: Resource not found</div>` +
+                renderBox('', [
+                    [color('Code', state.colorSecondary), 'NOT_FOUND'],
+                    [color('Resource', state.colorSecondary), 'Call CA1234567890...'],
+                    [color('Message', state.colorSecondary), 'The specified call does not exist']
+                ], state.colorError) +
+                renderQuickActions(['freeclimb calls:list']);
+        }
+
+        function renderErrorValidation() {
+            return `<div style="color: ${state.colorError}">${statusIcon('failed')}Error: Invalid phone number format</div>` +
+                renderBox('', [
+                    [color('Code', state.colorSecondary), 'INVALID_PHONE_NUMBER'],
+                    [color('Input', state.colorSecondary), '123-456-7890'],
+                    [color('Expected', state.colorSecondary), 'E.164 format (+15551234567)']
+                ], state.colorError) +
+                `<div style="margin-top: 12px; opacity: 0.6">Example:</div>
+                <div>  ${color('freeclimb sms:send +15551234567 +15559876543 "Hello"', state.colorAccent)}</div>`;
+        }
+
+        function renderErrorRateLimit() {
+            return `<div style="color: ${state.colorError}">${statusIcon('failed')}Error: Rate limit exceeded</div>` +
+                renderBox('', [
+                    [color('Code', state.colorSecondary), 'RATE_LIMIT_EXCEEDED'],
+                    [color('Limit', state.colorSecondary), '100 requests/minute'],
+                    [color('Retry After', state.colorSecondary), '45 seconds']
+                ], state.colorError) +
+                `<div class="info-callout" style="border-color: ${state.colorAccent}">Consider implementing exponential backoff.</div>`;
+        }
+
+        // Helper renderers
+        function renderBox(title, rows, borderColor) {
+            const box = boxChars[state.borderStyle];
+            const hasBox = state.borderStyle !== 'none';
+            const bColor = borderColor || state.colorPrimary;
+
+            let html = '<div class="term-box" style="';
+            if (hasBox) {
+                html += `border: 1px solid ${bColor}`;
+            }
+            html += '">';
+
+            if (title) {
+                html += `<div class="term-box-title" style="color: ${state.colorAccent}; ${hasBox ? `border-bottom: 1px solid ${bColor}` : ''}">${title}</div>`;
+            }
+
+            for (const [label, value] of rows) {
+                html += `<div>${label}  ${value}</div>`;
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        function renderTable(title, headers, rows, footer, nextCmd) {
+            const colWidths = headers.map((h, i) =>
+                Math.max(h.length, ...rows.map(r => {
+                    const cell = r[i];
+                    const text = typeof cell === 'object' ? cell.value : cell;
+                    return String(text).replace(/<[^>]*>/g, '').length;
+                })) + 2
+            );
+
+            let html = `<div class="term-table">`;
+            html += `<div style="color: ${state.colorAccent}; font-weight: bold; margin-bottom: 8px">${title}</div>`;
+
+            // Headers
+            html += `<div class="term-table-header" style="color: ${state.colorPrimary}">`;
+            headers.forEach((h, i) => {
+                html += `<span style="display: inline-block; min-width: ${colWidths[i] * 7}px">${h}</span>`;
+            });
+            html += `</div>`;
+
+            // Separator
+            html += `<div class="term-table-separator" style="color: ${state.colorPrimary}">${'─'.repeat(colWidths.reduce((a, b) => a + b, 0))}</div>`;
+
+            // Rows
+            rows.forEach(row => {
+                html += `<div class="term-table-row">`;
+                row.forEach((cell, i) => {
+                    const text = typeof cell === 'object' ? cell.value : cell;
+                    const cellColor = typeof cell === 'object' && cell.color ? cell.color : 'inherit';
+                    const dim = typeof cell === 'object' && cell.dim;
+                    const displayText = typeof cell === 'string' ? escapeHtml(cell) : text;
+                    html += `<span style="display: inline-block; min-width: ${colWidths[i] * 7}px; ${dim ? 'opacity: 0.6;' : ''} color: ${cellColor}">${displayText}</span>`;
+                });
+                html += `</div>`;
+            });
+
+            html += `</div>`;
+
+            if (footer) {
+                html += `<div style="margin-top: 10px; opacity: 0.6; font-size: 12px">${footer}</div>`;
+            }
+            if (nextCmd) {
+                html += `<div style="margin-top: 4px">  ${color(state.iconArrow, state.colorAccent)} ${color(nextCmd, state.colorAccent)}</div>`;
+            }
+
+            return html;
+        }
+
+        function renderEmptyState(resource, createCmd) {
+            let html = `<div style="text-align: center; padding: 24px; opacity: 0.7">
+                <div style="font-size: 24px; margin-bottom: 8px">○</div>
+                <div>No ${resource} found</div>
+            </div>`;
+            if (createCmd) {
+                html += `<div style="text-align: center; margin-top: 12px">
+                    <span style="opacity: 0.6">Create with</span> ${color(createCmd, state.colorAccent)}
+                </div>`;
+            }
+            return html;
+        }
+
+        function renderQuickActions(commands) {
+            let html = '<div style="margin-top: 12px">';
+            html += '<div style="opacity: 0.6; font-size: 11px">Quick actions:</div>';
+            for (const cmd of commands) {
+                html += `<div>  ${color(state.iconArrow, state.colorAccent)} ${color(cmd, state.colorAccent)}</div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function renderJsonOutput() {
+            const action = state.commandAction;
+            let data;
+
+            switch (action) {
+                case 'status':
+                    data = { accountId: 'AC' + '1234567890abcdef'.repeat(2).slice(0, 30), type: state.accountType, status: 'active', balance: state.accountType === 'trial' ? 10 : 250 };
+                    break;
+                case 'calls:list':
+                    data = { calls: state.dataScenario === 'empty' ? [] : generateCalls(), total: 127 };
+                    break;
+                case 'sms:list':
+                    data = { messages: state.dataScenario === 'empty' ? [] : generateSms(), total: 89 };
+                    break;
+                case 'incoming-numbers:list':
+                    data = { incomingPhoneNumbers: state.dataScenario === 'empty' ? [] : generateNumbers() };
+                    break;
+                case 'applications:list':
+                    data = { applications: state.dataScenario === 'empty' ? [] : generateApplications() };
+                    break;
+                case 'mcp:start':
+                    data = { status: 'running', transport: 'stdio', tools: 15 };
+                    break;
+                default:
+                    data = { success: true };
+            }
+
+            return `<pre style="font-size: 11px; color: ${state.colorSecondary}">${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        function renderFeatures() {
+            return `<div style="padding: 8px">
+                <h2 style="color: ${state.colorAccent}; margin-bottom: 16px; font-size: 16px">FreeClimb CLI Features</h2>
+                ${renderBox('Voice & Calls', [
+                    ['•', 'Make outbound calls programmatically'],
+                    ['•', 'List and filter call history'],
+                    ['•', 'Update active calls'],
+                    ['•', 'Access call recordings']
+                ])}
+                ${renderBox('SMS & Messaging', [
+                    ['•', 'Send SMS messages'],
+                    ['•', 'Track delivery status'],
+                    ['•', 'View message history']
+                ])}
+                ${renderBox('AI Agent Integration (MCP)', [
+                    ['•', 'Built-in MCP server'],
+                    ['•', '15+ tools for Claude'],
+                    ['•', 'Automate workflows']
+                ])}
+                ${renderBox('Developer Experience', [
+                    ['•', 'Secure credential storage'],
+                    ['•', 'JSON output for scripting'],
+                    ['•', 'Colorized output']
+                ])}
+            </div>`;
+        }
+
+        function renderAllCommands() {
+            const categories = [
+                { name: 'Auth', cmds: ['login', 'logout', 'status', 'diagnose'] },
+                { name: 'Calls', cmds: ['calls:list', 'calls:get', 'calls:make', 'calls:update'] },
+                { name: 'SMS', cmds: ['sms:list', 'sms:get', 'sms:send'] },
+                { name: 'Numbers', cmds: ['incoming-numbers:list', 'incoming-numbers:buy', 'available-numbers:list'] },
+                { name: 'Apps', cmds: ['applications:list', 'applications:create', 'applications:update'] },
+                { name: 'Conferences', cmds: ['conferences:list', 'conference-participants:list'] },
+                { name: 'Queues', cmds: ['call-queues:list', 'queue-members:list'] },
+                { name: 'Recordings', cmds: ['recordings:list', 'recordings:download'] },
+                { name: 'Logs', cmds: ['logs:list', 'logs:filter'] },
+                { name: 'MCP', cmds: ['mcp:start', 'mcp:config'] }
+            ];
+
+            let html = `<div style="padding: 8px">
+                <h2 style="color: ${state.colorAccent}; margin-bottom: 16px; font-size: 16px">All Commands (54+)</h2>`;
+
+            for (const cat of categories) {
+                html += renderBox(cat.name, cat.cmds.map(c => ['', color('freeclimb ' + c, state.colorSecondary)]));
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        function updatePrompt() {
+            const changes = [];
+
+            // Colors
+            if (state.colorPrimary !== DEFAULTS.colorPrimary) changes.push(`primary color: ${state.colorPrimary}`);
+            if (state.colorSecondary !== DEFAULTS.colorSecondary) changes.push(`secondary color: ${state.colorSecondary}`);
+            if (state.colorAccent !== DEFAULTS.colorAccent) changes.push(`accent color: ${state.colorAccent}`);
+            if (state.colorSuccess !== DEFAULTS.colorSuccess) changes.push(`success color: ${state.colorSuccess}`);
+            if (state.colorError !== DEFAULTS.colorError) changes.push(`error color: ${state.colorError}`);
+
+            // Banner
+            if (state.bannerType !== DEFAULTS.bannerType) {
+                const names = { block: 'block letters', slant: 'slant style', simple: 'simple ASCII', none: 'no banner' };
+                changes.push(`banner: ${names[state.bannerType]}`);
+            }
+            if (state.tagline !== DEFAULTS.tagline) changes.push(`tagline: "${state.tagline}"`);
+            if (!state.showTagline) changes.push('hide tagline');
+
+            // Tables
+            if (state.borderStyle !== DEFAULTS.borderStyle) {
+                const names = { rounded: 'rounded', square: 'square', ascii: 'ASCII', none: 'no borders' };
+                changes.push(`table borders: ${names[state.borderStyle]}`);
+            }
+            if (!state.colorizeStatus) changes.push('disable status colors');
+            if (!state.showIcons) changes.push('hide status icons');
+
+            // Icons
+            if (state.iconSuccess !== DEFAULTS.iconSuccess) changes.push(`success icon: ${state.iconSuccess}`);
+            if (state.iconError !== DEFAULTS.iconError) changes.push(`error icon: ${state.iconError}`);
+            if (state.iconPending !== DEFAULTS.iconPending) changes.push(`pending icon: ${state.iconPending}`);
+            if (state.iconArrow !== DEFAULTS.iconArrow) changes.push(`arrow: ${state.iconArrow}`);
+
+            // Layout
+            if (!state.showQuickCommands) changes.push('hide command list');
+            if (!state.showTryHint) changes.push('hide try hint');
+            if (!state.showDocsLink) changes.push('hide docs link');
+            if (state.compactOutput) changes.push('compact output');
+            if (!state.showTimestamps) changes.push('hide timestamps');
+
+            const promptEl = document.getElementById('promptText');
+
+            if (changes.length === 0) {
+                promptEl.textContent = 'Using default FreeClimb CLI theme. Customize settings to generate a prompt.';
+                return;
+            }
+
+            let prompt = `Update the FreeClimb CLI theme with:\n\n`;
+            prompt += changes.map(c => `• ${c}`).join('\n');
+            prompt += `\n\nApply to: src/ui/theme.ts, src/ui/banner.ts, src/ui/chars.ts, src/ui/components.ts, src/ui/format.ts`;
+
+            promptEl.textContent = prompt;
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('promptText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Initialize
+        updateCommandList();
+        updateAll();
+    </script>
+</body>
+</html>

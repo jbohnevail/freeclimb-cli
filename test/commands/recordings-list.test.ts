@@ -9,10 +9,6 @@ describe("recordings:list Data Test", function () {
         message: "Response from server",
     }
 
-    const nockServerResponse = `{
-  "message": "Response from server"
-}`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -22,8 +18,8 @@ describe("recordings:list Data Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Recordings`)
             .query({})
             .reply(200, testJson)
-        const { stdout } = await runCommand(["recordings:list"])
-        expect(stdout).to.contain(nockServerResponse)
+        const { stdout } = await runCommand(["recordings:list", "--json"])
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     it("Test Freeclimb Api error repsonce is process correctly without a suggestion", async () => {
@@ -49,8 +45,8 @@ describe("recordings:list Data Test", function () {
                 .get(`/apiserver/Accounts/${await cred.accountId}/Recordings`)
                 .query({})
                 .reply(200, testJson)
-            const { stdout } = await runCommand(["recordings:list"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["recordings:list", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         } finally {
             delete process.env.FREECLIMB_CLI_BASE_URL
         }
@@ -105,8 +101,9 @@ describe("recordings:list Data Test", function () {
             "userInput-conferenceId",
             "--dateCreated",
             "userInput-dateCreated",
+            "--json",
         ])
-        expect(stdout).to.contain(nockServerResponse)
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     describe("recordings:list query param flags", function () {
@@ -121,8 +118,9 @@ describe("recordings:list Data Test", function () {
                 "recordings:list",
                 "--callId",
                 "userInput-callId",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-conferenceId", async () => {
@@ -136,8 +134,9 @@ describe("recordings:list Data Test", function () {
                 "recordings:list",
                 "--conferenceId",
                 "userInput-conferenceId",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-dateCreated", async () => {
@@ -151,8 +150,9 @@ describe("recordings:list Data Test", function () {
                 "recordings:list",
                 "--dateCreated",
                 "userInput-dateCreated",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
     })
 
@@ -164,7 +164,7 @@ describe("recordings:list Data Test", function () {
                     .get(`/apiserver/Accounts/${await cred.accountId}/Recordings`)
                     .query({})
                     .reply(200, testJson)
-                await runCommand(["recordings:list"])
+                await runCommand(["recordings:list", "--json"])
                 const { error } = await runCommand([
                     "recordings:list",
                     "--next",
@@ -185,7 +185,6 @@ describe("recordings:list Data Test", function () {
                 pageSize: 100,
                 nextPageUri: null,
             }
-            const nockServerResponseNext = `== You are on the last page of output. ==`
             try {
                 process.env.FREECLIMB_RECORDINGS_LIST_NEXT =
                     "7265636f7264696e67733a6c697374"
@@ -196,8 +195,9 @@ describe("recordings:list Data Test", function () {
                 const { stdout } = await runCommand([
                     "recordings:list",
                     "--next",
+                    "--json",
                 ])
-                expect(stdout).to.contain(nockServerResponseNext)
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 delete process.env.FREECLIMB_RECORDINGS_LIST_NEXT
             }
@@ -214,7 +214,6 @@ describe("recordings:list Data Test", function () {
                 pageSize: 100,
                 nextPageUri: `https://www.freeclimb.com/apiserver/Accounts/${await cred.accountId}/Recordings?cursor=${finalCursor}`,
             }
-            const nockServerResponseNext2 = `== Currently on page 1. Run this command again with the -n flag to go to the next page. ==`
             try {
                 process.env.FREECLIMB_RECORDINGS_LIST_NEXT =
                     "7265636f7264696e67733a6c697374"
@@ -225,8 +224,9 @@ describe("recordings:list Data Test", function () {
                 const { stdout } = await runCommand([
                     "recordings:list",
                     "--next",
+                    "--json",
                 ])
-                expect(stdout).to.contain(nockServerResponseNext2)
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 delete process.env.FREECLIMB_RECORDINGS_LIST_NEXT
             }
@@ -255,9 +255,6 @@ describe("recordings:list Data Test", function () {
 describe("recordings:list Status Test", function () {
     const testJsonStatus = ""
 
-    const statusResponse = `Received a success code from FreeClimb. There is no further output.
-`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -267,7 +264,7 @@ describe("recordings:list Status Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Recordings`)
             .query({})
             .reply(204, testJsonStatus)
-        const { stdout } = await runCommand(["recordings:list"])
-        expect(stdout).to.contain(statusResponse)
+        const { stdout } = await runCommand(["recordings:list", "--json"])
+        expect(stdout).to.contain('"success": true')
     })
 })

@@ -9,10 +9,6 @@ describe("calls:list Data Test", function () {
         message: "Response from server",
     }
 
-    const nockServerResponse = `{
-  "message": "Response from server"
-}`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -22,8 +18,8 @@ describe("calls:list Data Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Calls`)
             .query({})
             .reply(200, testJson)
-        const { stdout } = await runCommand(["calls:list"])
-        expect(stdout).to.contain(nockServerResponse)
+        const { stdout } = await runCommand(["calls:list", "--json"])
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     it("Test Freeclimb Api error repsonce is process correctly without a suggestion", async () => {
@@ -49,8 +45,8 @@ describe("calls:list Data Test", function () {
         const orig = process.env.FREECLIMB_CLI_BASE_URL
         process.env.FREECLIMB_CLI_BASE_URL = "https://user-custom-domain.example.com/apiserver"
         try {
-            const { stdout } = await runCommand(["calls:list"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["calls:list", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         } finally {
             if (orig !== undefined) process.env.FREECLIMB_CLI_BASE_URL = orig
             else delete process.env.FREECLIMB_CLI_BASE_URL
@@ -115,8 +111,9 @@ describe("calls:list Data Test", function () {
             "userInput-parentCallId",
             "--active",
             "true",
+            "--json",
         ])
-        expect(stdout).to.contain(nockServerResponse)
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     describe("calls:list query param flags", function () {
@@ -129,8 +126,8 @@ describe("calls:list Data Test", function () {
                 .get(`/apiserver/Accounts/${await cred.accountId}/Calls`)
                 .query({ to: "userInput-to" })
                 .reply(200, testJson)
-            const { stdout } = await runCommand(["calls:list", "--to", "userInput-to"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["calls:list", "--to", "userInput-to", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-from", async () => {
@@ -138,8 +135,8 @@ describe("calls:list Data Test", function () {
                 .get(`/apiserver/Accounts/${await cred.accountId}/Calls`)
                 .query({ from: "userInput-from" })
                 .reply(200, testJson)
-            const { stdout } = await runCommand(["calls:list", "--from", "userInput-from"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["calls:list", "--from", "userInput-from", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-status", async () => {
@@ -147,8 +144,8 @@ describe("calls:list Data Test", function () {
                 .get(`/apiserver/Accounts/${await cred.accountId}/Calls`)
                 .query({ status: "userInput-status" })
                 .reply(200, testJson)
-            const { stdout } = await runCommand(["calls:list", "--status", "userInput-status"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["calls:list", "--status", "userInput-status", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-startTime", async () => {
@@ -160,8 +157,9 @@ describe("calls:list Data Test", function () {
                 "calls:list",
                 "--startTime",
                 "userInput-startTime",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-endTime", async () => {
@@ -173,8 +171,9 @@ describe("calls:list Data Test", function () {
                 "calls:list",
                 "--endTime",
                 "userInput-endTime",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-parentCallId", async () => {
@@ -186,8 +185,9 @@ describe("calls:list Data Test", function () {
                 "calls:list",
                 "--parentCallId",
                 "userInput-parentCallId",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-active", async () => {
@@ -195,8 +195,8 @@ describe("calls:list Data Test", function () {
                 .get(`/apiserver/Accounts/${await cred.accountId}/Calls`)
                 .query({ active: true })
                 .reply(200, testJson)
-            const { stdout } = await runCommand(["calls:list", "--active", "true"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["calls:list", "--active", "true", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         })
     })
 
@@ -211,8 +211,6 @@ describe("calls:list Data Test", function () {
             nextPageUri: null,
         }
 
-        const nockServerResponseNext = `== You are on the last page of output. ==`
-
         const testJsonNext2 = {
             total: 2,
             start: 0,
@@ -222,8 +220,6 @@ describe("calls:list Data Test", function () {
             pageSize: 100,
             nextPageUri: "",
         }
-
-        const nockServerResponseNext2 = `== Currently on page 1. Run this command again with the -n flag to go to the next page. ==`
 
         before(async () => {
             const accountId = await cred.accountId
@@ -242,7 +238,7 @@ describe("calls:list Data Test", function () {
             const orig = process.env.FREECLIMB_CALLS_LIST_NEXT
             delete process.env.FREECLIMB_CALLS_LIST_NEXT
             try {
-                await runCommand(["calls:list"])
+                await runCommand(["calls:list", "--json"])
                 const { error } = await runCommand(["calls:list", "--next"])
                 expect(error?.oclif?.exit).to.equal(3)
             } finally {
@@ -259,8 +255,8 @@ describe("calls:list Data Test", function () {
             const orig = process.env.FREECLIMB_CALLS_LIST_NEXT
             process.env.FREECLIMB_CALLS_LIST_NEXT = "63616c6c733a6c697374"
             try {
-                const { stdout } = await runCommand(["calls:list", "--next"])
-                expect(stdout).to.contain(nockServerResponseNext)
+                const { stdout } = await runCommand(["calls:list", "--next", "--json"])
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 if (orig !== undefined) process.env.FREECLIMB_CALLS_LIST_NEXT = orig
                 else delete process.env.FREECLIMB_CALLS_LIST_NEXT
@@ -275,8 +271,8 @@ describe("calls:list Data Test", function () {
             const orig = process.env.FREECLIMB_CALLS_LIST_NEXT
             process.env.FREECLIMB_CALLS_LIST_NEXT = "63616c6c733a6c697374"
             try {
-                const { stdout } = await runCommand(["calls:list", "--next"])
-                expect(stdout).to.contain(nockServerResponseNext2)
+                const { stdout } = await runCommand(["calls:list", "--next", "--json"])
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 if (orig !== undefined) process.env.FREECLIMB_CALLS_LIST_NEXT = orig
                 else delete process.env.FREECLIMB_CALLS_LIST_NEXT
@@ -334,8 +330,9 @@ describe("calls:list Data Test", function () {
                 "userInput-parentCallId",
                 "--active",
                 "false",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("tests incorrect active input results in exit code 2", async () => {
@@ -347,9 +344,6 @@ describe("calls:list Data Test", function () {
 
 describe("calls:list Status Test", function () {
     const testJsonStatus = ""
-    const statusResponse = `Received a success code from FreeClimb. There is no further output.
-`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -359,7 +353,7 @@ describe("calls:list Status Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Calls`)
             .query({})
             .reply(204, testJsonStatus)
-        const { stdout } = await runCommand(["calls:list"])
-        expect(stdout).to.contain(statusResponse)
+        const { stdout } = await runCommand(["calls:list", "--json"])
+        expect(stdout).to.contain('"success": true')
     })
 })

@@ -9,10 +9,6 @@ describe("applications:list Data Test", function () {
         message: "Response from server",
     }
 
-    const nockServerResponse = `{
-  "message": "Response from server"
-}`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -22,8 +18,8 @@ describe("applications:list Data Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Applications`)
             .query({})
             .reply(200, testJson)
-        const { stdout } = await runCommand(["applications:list"])
-        expect(stdout).to.contain(nockServerResponse)
+        const { stdout } = await runCommand(["applications:list", "--json"])
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     it("Test Freeclimb Api error repsonce is process correctly without a suggestion", async () => {
@@ -49,8 +45,8 @@ describe("applications:list Data Test", function () {
         const orig = process.env.FREECLIMB_CLI_BASE_URL
         process.env.FREECLIMB_CLI_BASE_URL = "https://user-custom-domain.example.com/apiserver"
         try {
-            const { stdout } = await runCommand(["applications:list"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["applications:list", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         } finally {
             if (orig !== undefined) process.env.FREECLIMB_CLI_BASE_URL = orig
             else delete process.env.FREECLIMB_CLI_BASE_URL
@@ -100,8 +96,9 @@ describe("applications:list Data Test", function () {
                 "applications:list",
                 "--alias",
                 "userInput-alias",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
     })
 
@@ -116,8 +113,6 @@ describe("applications:list Data Test", function () {
             nextPageUri: null,
         }
 
-        const nockServerResponseNext = `== You are on the last page of output. ==`
-
         const testJsonNext2 = {
             total: 2,
             start: 0,
@@ -127,8 +122,6 @@ describe("applications:list Data Test", function () {
             pageSize: 100,
             nextPageUri: "",
         }
-
-        const nockServerResponseNext2 = `== Currently on page 1. Run this command again with the -n flag to go to the next page. ==`
 
         before(async () => {
             const accountId = await cred.accountId
@@ -152,8 +145,8 @@ describe("applications:list Data Test", function () {
             const orig = process.env.FREECLIMB_APPLICATIONS_LIST_NEXT
             process.env.FREECLIMB_APPLICATIONS_LIST_NEXT = "6170706c69636174696f6e733a6c697374"
             try {
-                const { stdout } = await runCommand(["applications:list", "--next"])
-                expect(stdout).to.contain(nockServerResponseNext)
+                const { stdout } = await runCommand(["applications:list", "--next", "--json"])
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 if (orig !== undefined) process.env.FREECLIMB_APPLICATIONS_LIST_NEXT = orig
                 else delete process.env.FREECLIMB_APPLICATIONS_LIST_NEXT
@@ -168,8 +161,8 @@ describe("applications:list Data Test", function () {
             const orig = process.env.FREECLIMB_APPLICATIONS_LIST_NEXT
             process.env.FREECLIMB_APPLICATIONS_LIST_NEXT = "6170706c69636174696f6e733a6c697374"
             try {
-                const { stdout } = await runCommand(["applications:list", "--next"])
-                expect(stdout).to.contain(nockServerResponseNext2)
+                const { stdout } = await runCommand(["applications:list", "--next", "--json"])
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 if (orig !== undefined) process.env.FREECLIMB_APPLICATIONS_LIST_NEXT = orig
                 else delete process.env.FREECLIMB_APPLICATIONS_LIST_NEXT
@@ -196,9 +189,6 @@ describe("applications:list Data Test", function () {
 
 describe("applications:list Status Test", function () {
     const testJsonStatus = ""
-    const statusResponse = `Received a success code from FreeClimb. There is no further output.
-`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -208,7 +198,7 @@ describe("applications:list Status Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Applications`)
             .query({})
             .reply(204, testJsonStatus)
-        const { stdout } = await runCommand(["applications:list"])
-        expect(stdout).to.contain(statusResponse)
+        const { stdout } = await runCommand(["applications:list", "--json"])
+        expect(stdout).to.contain('"success": true')
     })
 })

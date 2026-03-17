@@ -65,9 +65,17 @@ export class Environment {
 
 export const env = {
     get accountId() {
-        return Environment.getString("ACCOUNT_ID")
+        // Support both new FREECLIMB_ prefix and legacy ACCOUNT_ID
+        return (
+            Environment.getString("FREECLIMB_ACCOUNT_ID") ||
+            Environment.getString("ACCOUNT_ID")
+        )
     },
     get apiKey() {
-        return Environment.getString("API_KEY")
+        // Support both new FREECLIMB_ prefix and legacy API_KEY
+        return (
+            Environment.getString("FREECLIMB_API_KEY") ||
+            Environment.getString("API_KEY")
+        )
     },
 }
