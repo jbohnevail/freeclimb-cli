@@ -1,4 +1,4 @@
-import { Help, Interfaces } from "@oclif/core"
+import { Command, Help, Interfaces } from "@oclif/core"
 import chalk from "chalk"
 import { getWelcomeBanner } from "./ui/banner"
 import { BrandColors, supportsColor } from "./ui/theme"
@@ -92,7 +92,7 @@ export default class FreeClimbHelpClass extends Help {
         return output
     }
 
-    protected formatCommands(commands: Interfaces.Command[]): string {
+    protected formatCommands(commands: Array<Command.Loadable>): string {
         if (commands.length === 0) return ""
 
         const chars = getBoxChars()

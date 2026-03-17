@@ -1,4 +1,4 @@
-import { Command, Flags } from "@oclif/core"
+import { Args, Command, Flags } from "@oclif/core"
 
 export class CustomAutocomplete extends Command {
     static description = "Display autocomplete installation instructions"

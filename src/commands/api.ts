@@ -1,4 +1,4 @@
-import { Command, flags } from "@oclif/command"
+import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import axios from "axios"
 import { cred } from "../credentials"
@@ -21,49 +21,45 @@ The endpoint can be:
 For account-scoped endpoints, the account ID is automatically included.
 `
 
-    static args = [
-        {
-            name: "endpoint",
-            description: "API endpoint path (e.g., /Calls, /Messages)",
-            required: true,
-        },
-    ]
+    static args = {
+		endpoint: Args.string({description: "API endpoint path (e.g., /Calls, /Messages)", required: false}),
+	}
 
     static flags = {
-        method: flags.string({
+        method: Flags.string({
             char: "X",
             description: "HTTP method",
             options: ["GET", "POST", "PUT", "DELETE"],
             default: "GET",
         }),
-        data: flags.string({
+        data: Flags.string({
             char: "d",
             description: "JSON data for POST/PUT requests (accepts full API payload)",
         }),
-        param: flags.string({
+        param: Flags.string({
             char: "p",
             description: "Query parameter (format: key=value, can be repeated)",
             multiple: true,
         }),
-        fields: flags.string({
+        fields: Flags.string({
             description:
                 "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
         }),
-        json: flags.boolean({
+        json: Flags.boolean({
             description:
                 "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
             default: false,
         }),
-        raw: flags.boolean({
+        raw: Flags.boolean({
             description: "Output raw response without wrapping",
             default: false,
         }),
-        "dry-run": flags.boolean({
+        "dry-run": Flags.boolean({
             description:
                 "Validate the request without executing it. Shows what would be sent to the API.",
             default: false,
         }),
-        help: flags.help({ char: "h" }),
+        help: Flags.help({ char: "h" }),
     }
 
     static examples = [
@@ -77,7 +73,7 @@ For account-scoped endpoints, the account ID is automatically included.
     ]
 
     async run() {
-        const { args, flags: cmdFlags } = this.parse(Api)
+        const { args, flags: cmdFlags } = await this.parse(Api)
         const outputFormat = getOutputFormat(cmdFlags.json, cmdFlags.raw)
 
         rejectControlChars(args.endpoint, "endpoint")
@@ -96,7 +92,7 @@ For account-scoped endpoints, the account ID is automatically included.
             Environment.getString("FREECLIMB_CLI_BASE_URL") ||
             "https://www.freeclimb.com/apiserver"
 
-        let url = args.endpoint
+        let url = args.endpoint!
         if (url.startsWith("/")) {
             url = `${baseUrl}/Accounts/${accountId}${url}`
         }

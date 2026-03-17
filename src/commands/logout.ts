@@ -1,4 +1,4 @@
-import { Command, Flags } from "@oclif/core"
+import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import { cred } from "../credentials"
 

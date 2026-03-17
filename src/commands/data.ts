@@ -1,4 +1,4 @@
-import { Command, Flags } from "@oclif/core"
+import { Args, Command, Flags } from "@oclif/core"
 
 export class data extends Command {
     static description = `Find your data directory. You can store your credentials here in a .env file, after setting permissions appropriately. See https://oclif.io/docs/config for how to change this location.`

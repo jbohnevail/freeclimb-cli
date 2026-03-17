@@ -1,4 +1,4 @@
-import { Command, flags } from "@oclif/command"
+import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import { generateMcpConfig } from "../../mcp/server"
 
@@ -23,15 +23,15 @@ Environment variables:
 `
 
     static flags = {
-        help: flags.help({ char: "h" }),
-        raw: flags.boolean({
+        help: Flags.help({ char: "h" }),
+        raw: Flags.boolean({
             description: "Output raw JSON without formatting or instructions",
             default: false,
         }),
     }
 
     async run() {
-        const { flags } = this.parse(McpConfig)
+        const { flags } = await this.parse(McpConfig)
         const config = generateMcpConfig()
 
         if (flags.raw) {

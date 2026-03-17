@@ -1,4 +1,4 @@
-import { Command, flags } from "@oclif/command"
+import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import axios from "axios"
 import { cred } from "../credentials"
@@ -34,15 +34,15 @@ Use --json for machine-readable output.
 `
 
     static flags = {
-        json: flags.boolean({
+        json: Flags.boolean({
             description: "Output as JSON (for scripting/agents)",
             default: false,
         }),
-        help: flags.help({ char: "h" }),
+        help: Flags.help({ char: "h" }),
     }
 
     async run() {
-        const { flags } = this.parse(Status)
+        const { flags } = await this.parse(Status)
 
         const accountId = await cred.accountId
         const apiKey = await cred.apiKey

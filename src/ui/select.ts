@@ -1,7 +1,6 @@
-import * as inquirer from "inquirer"
+import { select as inquirerSelect, confirm as inquirerConfirm, input as inquirerInput, password as inquirerPassword, checkbox as inquirerCheckbox } from "@inquirer/prompts"
 import chalk from "chalk"
 import { BrandColors, isTTY } from "./theme"
-import { icons } from "./chars"
 
 export interface SelectChoice<T = string> {
     name: string
@@ -14,7 +13,6 @@ export interface SelectOptions {
     pageSize?: number
 }
 
-// Single-choice selection menu
 export async function select<T = string>(
     message: string,
     choices: Array<SelectChoice<T> | string>,
@@ -24,16 +22,10 @@ export async function select<T = string>(
         throw new Error("Interactive selection requires a TTY. Use --json flag for non-interactive output.")
     }
 
-    // Normalize choices to SelectChoice format
     const normalizedChoices = choices.map((choice) => {
         if (typeof choice === "string") {
             return { name: choice, value: choice as unknown as T }
         }
-        return choice
-    })
-
-    // Format choices with FreeClimb styling
-    const formattedChoices = normalizedChoices.map((choice) => {
         let display = choice.name
         if (choice.description) {
             display = `${choice.name} ${chalk.dim(`- ${choice.description}`)}`
@@ -41,25 +33,17 @@ export async function select<T = string>(
         return {
             name: display,
             value: choice.value,
-            disabled: choice.disabled,
+            disabled: choice.disabled ? true : false,
         }
     })
 
-    const { selection } = await inquirer.prompt([
-        {
-            type: "list",
-            name: "selection",
-            message: chalk.hex(BrandColors.orange)(message),
-            choices: formattedChoices,
-            pageSize: options.pageSize || 10,
-            prefix: icons.chevron(),
-        },
-    ])
-
-    return selection
+    return inquirerSelect({
+        message: chalk.hex(BrandColors.orange)(message),
+        choices: normalizedChoices,
+        pageSize: options.pageSize || 10,
+    }) as Promise<T>
 }
 
-// Multi-choice selection menu (checkboxes)
 export async function multiSelect<T = string>(
     message: string,
     choices: Array<SelectChoice<T> | string>,
@@ -69,16 +53,10 @@ export async function multiSelect<T = string>(
         throw new Error("Interactive selection requires a TTY. Use --json flag for non-interactive output.")
     }
 
-    // Normalize choices to SelectChoice format
     const normalizedChoices = choices.map((choice) => {
         if (typeof choice === "string") {
             return { name: choice, value: choice as unknown as T }
         }
-        return choice
-    })
-
-    // Format choices with FreeClimb styling
-    const formattedChoices = normalizedChoices.map((choice) => {
         let display = choice.name
         if (choice.description) {
             display = `${choice.name} ${chalk.dim(`- ${choice.description}`)}`
@@ -86,31 +64,18 @@ export async function multiSelect<T = string>(
         return {
             name: display,
             value: choice.value,
-            disabled: choice.disabled,
+            disabled: choice.disabled ? true : false,
         }
     })
 
-    const { selections } = await inquirer.prompt([
-        {
-            type: "checkbox",
-            name: "selections",
-            message: chalk.hex(BrandColors.orange)(message),
-            choices: formattedChoices,
-            pageSize: options.pageSize || 10,
-            prefix: icons.chevron(),
-            validate: (answer: T[]) => {
-                if (options.required && answer.length === 0) {
-                    return "Please select at least one option"
-                }
-                return true
-            },
-        },
-    ])
-
-    return selections
+    return inquirerCheckbox({
+        message: chalk.hex(BrandColors.orange)(message),
+        choices: normalizedChoices,
+        pageSize: options.pageSize || 10,
+        required: options.required,
+    }) as Promise<T[]>
 }
 
-// Yes/No confirmation prompt
 export async function confirm(
     message: string,
     defaultValue = false
@@ -119,20 +84,12 @@ export async function confirm(
         throw new Error("Interactive confirmation requires a TTY. Use --yes flag for non-interactive mode.")
     }
 
-    const { confirmed } = await inquirer.prompt([
-        {
-            type: "confirm",
-            name: "confirmed",
-            message: chalk.hex(BrandColors.orange)(message),
-            default: defaultValue,
-            prefix: icons.chevron(),
-        },
-    ])
-
-    return confirmed
+    return inquirerConfirm({
+        message: chalk.hex(BrandColors.orange)(message),
+        default: defaultValue,
+    })
 }
 
-// Text input prompt
 export async function input(
     message: string,
     options: {
@@ -145,24 +102,21 @@ export async function input(
         throw new Error("Interactive input requires a TTY.")
     }
 
-    const promptType = options.mask ? "password" : "input"
-
-    const { value } = await inquirer.prompt([
-        {
-            type: promptType,
-            name: "value",
+    if (options.mask) {
+        return inquirerPassword({
             message: chalk.hex(BrandColors.orange)(message),
-            default: options.default,
-            validate: options.validate,
             mask: options.mask,
-            prefix: icons.chevron(),
-        },
-    ])
+            validate: options.validate,
+        })
+    }
 
-    return value
+    return inquirerInput({
+        message: chalk.hex(BrandColors.orange)(message),
+        default: options.default,
+        validate: options.validate,
+    })
 }
 
-// Numbered list selection (for when you want numbered items)
 export async function numberedSelect<T = string>(
     message: string,
     choices: Array<SelectChoice<T> | string>,
@@ -172,7 +126,6 @@ export async function numberedSelect<T = string>(
         throw new Error("Interactive selection requires a TTY. Use --json flag for non-interactive output.")
     }
 
-    // Normalize and number choices
     const normalizedChoices = choices.map((choice, index) => {
         if (typeof choice === "string") {
             return {
@@ -187,20 +140,13 @@ export async function numberedSelect<T = string>(
         return {
             name: display,
             value: choice.value,
-            disabled: choice.disabled,
+            disabled: choice.disabled ? true : false,
         }
     })
 
-    const { selection } = await inquirer.prompt([
-        {
-            type: "list",
-            name: "selection",
-            message: chalk.hex(BrandColors.orange)(message),
-            choices: normalizedChoices,
-            pageSize: options.pageSize || 10,
-            prefix: icons.chevron(),
-        },
-    ])
-
-    return selection
+    return inquirerSelect({
+        message: chalk.hex(BrandColors.orange)(message),
+        choices: normalizedChoices,
+        pageSize: options.pageSize || 10,
+    }) as Promise<T>
 }

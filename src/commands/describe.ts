@@ -1,5 +1,4 @@
-import { Command, flags } from "@oclif/command"
-import * as Config from "@oclif/config"
+import { Args, Command, Flags, Interfaces } from "@oclif/core"
 import { getOutputFormat } from "../agent-config"
 
 interface CommandSchema {
@@ -42,24 +41,20 @@ Examples:
   freeclimb describe --all             # Full schema for every command
 `
 
-    static args = [
-        {
-            name: "command_or_topic",
-            description: "Command (e.g. calls:list) or topic (e.g. calls) to describe",
-            required: false,
-        },
-    ]
+    static args = {
+		command_or_topic: Args.string({description: "Command (e.g. calls:list) or topic (e.g. calls) to describe", required: false}),
+	}
 
     static flags = {
-        all: flags.boolean({
+        all: Flags.boolean({
             description: "Show full schema for all commands",
             default: false,
         }),
-        help: flags.help({ char: "h" }),
+        help: Flags.help({ char: "h" }),
     }
 
     async run() {
-        const { args, flags: parsedFlags } = this.parse(Describe)
+        const { args, flags: parsedFlags } = await this.parse(Describe)
         const { commands } = this.config
         const topics = this.getTopics()
 
@@ -110,8 +105,8 @@ Examples:
         this.error(`Unknown command or topic: ${input}`, { exit: 1 })
     }
 
-    private getTopics(): Config.Topic[] {
-        const topicMap = new Map<string, Config.Topic>()
+    private getTopics(): Interfaces.Topic[] {
+        const topicMap = new Map<string, Interfaces.Topic>()
         for (const cmd of this.config.commands) {
             const parts = cmd.id.split(":")
             if (parts.length > 1) {
@@ -129,7 +124,7 @@ Examples:
         return [...topicMap.values()].sort((a, b) => a.name.localeCompare(b.name))
     }
 
-    private commandToSchema(cmd: Config.Command): CommandSchema {
+    private commandToSchema(cmd: Command.Loadable): CommandSchema {
         const schema: CommandSchema = {
             command: cmd.id,
             description: (cmd.description || "").trim(),
@@ -156,11 +151,11 @@ Examples:
         }
 
         if (cmd.args) {
-            for (const arg of cmd.args) {
+            for (const [name, arg] of Object.entries(cmd.args)) {
                 schema.args.push({
-                    name: arg.name,
-                    required: Boolean(arg.required),
-                    description: (arg.description || "").trim(),
+                    name,
+                    required: Boolean((arg as any).required),
+                    description: ((arg as any).description || "").trim(),
                 })
             }
         }

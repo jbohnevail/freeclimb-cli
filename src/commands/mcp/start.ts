@@ -1,4 +1,4 @@
-import { Command, flags } from "@oclif/command"
+import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import { startMcpServer } from "../../mcp/server"
 
@@ -25,7 +25,7 @@ To configure Claude Desktop to use this server:
 `
 
     static flags = {
-        help: flags.help({ char: "h" }),
+        help: Flags.help({ char: "h" }),
     }
 
     async run() {

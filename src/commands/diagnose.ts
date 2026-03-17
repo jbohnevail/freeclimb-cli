@@ -1,4 +1,4 @@
-import { Command, flags } from "@oclif/command"
+import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import axios from "axios"
 import { cred } from "../credentials"
@@ -33,11 +33,11 @@ Useful for troubleshooting authentication or connectivity issues.
 `
 
     static flags = {
-        json: flags.boolean({
+        json: Flags.boolean({
             description: "Output as JSON (for scripting/agents)",
             default: false,
         }),
-        help: flags.help({ char: "h" }),
+        help: Flags.help({ char: "h" }),
     }
 
     private useSpinners = false
@@ -45,7 +45,7 @@ Useful for troubleshooting authentication or connectivity issues.
     private currentSpinner: Spinner | null = null
 
     async run() {
-        const { flags } = this.parse(Diagnose)
+        const { flags } = await this.parse(Diagnose)
 
         // Use spinners only for TTY and non-JSON output
         this.useSpinners = !flags.json && isTTY()

@@ -5,7 +5,8 @@ export class ValidationError extends Error {
     }
 }
 
-export function rejectControlChars(input: string, fieldName: string): void {
+export function rejectControlChars(input: string | undefined, fieldName: string): void {
+    if (input === undefined || input === null) return
     for (let i = 0; i < input.length; i++) {
         const code = input.charCodeAt(i)
         if (code < 0x20 && code !== 0x0a && code !== 0x0d && code !== 0x09) {
@@ -16,7 +17,7 @@ export function rejectControlChars(input: string, fieldName: string): void {
     }
 }
 
-export function validateResourceId(id: string, fieldName: string): void {
+export function validateResourceId(id: string | undefined, fieldName: string): void {
     if (!id || id.trim().length === 0) {
         throw new ValidationError(`${fieldName} cannot be empty`)
     }
@@ -48,7 +49,8 @@ export function validateResourceId(id: string, fieldName: string): void {
     rejectControlChars(id, fieldName)
 }
 
-export function validatePhoneNumber(number: string, fieldName: string): void {
+export function validatePhoneNumber(number: string | undefined, fieldName: string): void {
+    if (number === undefined || number === null) return
     rejectControlChars(number, fieldName)
 
     if (!/^\+?\d+$/.test(number)) {
@@ -58,7 +60,8 @@ export function validatePhoneNumber(number: string, fieldName: string): void {
     }
 }
 
-export function validateUrl(url: string, fieldName: string): void {
+export function validateUrl(url: string | undefined, fieldName: string): void {
+    if (url === undefined || url === null) return
     rejectControlChars(url, fieldName)
 
     try {
