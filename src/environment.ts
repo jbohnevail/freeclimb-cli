@@ -1,5 +1,5 @@
 import * as path from "path"
-import { load, config } from "dotenv"
+import { config } from "dotenv"
 import * as fs from "fs"
 
 export class Environment {

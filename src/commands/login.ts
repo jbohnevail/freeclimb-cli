@@ -1,16 +1,15 @@
-import { Command, flags } from "@oclif/command"
-import cli from "cli-ux"
-import * as keytar from "keytar"
+import { Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import { cred } from "../credentials"
 import * as Errors from "../errors"
+import { prompts } from "../prompts"
 import { FreeClimbApi, FreeClimbResponse, FreeClimbErrorResponse } from "../freeclimb"
 
 export class login extends Command {
     static description = `Log in to FreeClimb with your credentials. Alternatively you can set the ACCOUNT_ID and API_KEY environment variables. To learn how to put them in a file, run freeclimb data -h`
 
     static flags = {
-        help: flags.help({ char: "h" }),
+        help: Flags.help({ char: "h" }),
     }
 
     async run() {
@@ -22,27 +21,27 @@ export class login extends Command {
         }
         const verifyErrorResponse = (error: FreeClimbErrorResponse) => {
             const respError =
-                "\n<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.--> \n"
+                "\n<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.-->\n"
             this.log(chalk.red(respError))
         }
 
-        const { flags } = this.parse(login)
+        await this.parse(login)
         this.log("You can find your Account ID and API Key at https://www.freeclimb.com/dashboard")
-        const confirmation: boolean = await cli.confirm(
-            "If you are already logged in to the FreeClimb CLI on this computer, you will first be logged out of that account. Would you like to continue? [y/N]"
+        const confirmation: boolean = await prompts.confirm(
+            "If you are already logged in to the FreeClimb CLI on this computer, you will first be logged out of that account. Would you like to continue?"
         )
 
         if (confirmation) {
-            const accountId = await cli.prompt("-> The Account ID of your FreeClimb Account", {
-                type: "hide",
-            })
+            const accountId = await prompts.password(
+                "-> The Account ID of your FreeClimb Account"
+            )
 
-            const apiKey = await cli.prompt("-> Your API Key for your FreeClimb Account", {
-                type: "hide",
-            })
-            await cred.removeCredentials(-1)
+            const apiKey = await prompts.password(
+                "-> Your API Key for your FreeClimb Account"
+            )
+            await cred.removeCredentials()
             try {
-                await keytar.setPassword("FreeClimb", accountId, apiKey)
+                await cred.setCredentials(accountId, apiKey)
             } catch (error: any) {
                 const err = new Errors.SetPasswordError(error.message)
                 this.error(err.message, { exit: err.code })

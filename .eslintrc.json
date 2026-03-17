@@ -2,7 +2,6 @@
   "extends": ["oclif", "oclif-typescript", "plugin:@typescript-eslint/recommended", "prettier"],
   "parser": "@typescript-eslint/parser",
   "plugins": [
-    // add suite of typescript syntax rules
     "@typescript-eslint",
     "import",
     "no-only-tests"
@@ -12,21 +11,22 @@
     "before": true,
     "after": true
   },
+  "settings": {
+    "import/resolver": {
+      "typescript": {}
+    }
+  },
   "rules": {
     "no-await-in-loop": ["warn"],
     "node/no-extraneous-import": "off",
     "prefer-destructuring": ["error", { "object": true, "array": false }],
-    // deprecated - eventually use node/global-require
     "global-require": ["warn"],
     "no-var": ["error"],
     "no-param-reassign": ["error", { "props": false }],
     "no-underscore-dangle": ["error"],
-    "no-shadow": ["warn"],
-    // in TS it is not uncommon to see constrcutors without bodies in ambient declarations
     "no-useless-constructor": "off",
     "no-use-before-define": "off",
     "eqeqeq": "error",
-    // https://www.npmjs.com/package/eslint-plugin-import
     "import/no-named-as-default": ["warn"],
     "import/no-dynamic-require": ["warn"],
     "import/order": [
@@ -36,30 +36,61 @@
       }
     ],
     "import/no-default-export": ["error"],
-    // https://www.npmjs.com/package/@typescript-eslint/eslint-plugin
+    "import/no-unresolved": "off",
+    "import/namespace": "off",
+    "import/default": "off",
+    "import/no-named-as-default-member": "off",
+    "import/no-duplicates": "warn",
     "@typescript-eslint/explicit-member-accessibility": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-empty-interface": "warn",
-    "@typescript-eslint/no-parameter-properties": "off",
     "@typescript-eslint/no-namespace": ["error", { "allowDeclarations": true }],
     "@typescript-eslint/no-unused-vars": ["warn", { "args": "none" }],
-    "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/triple-slash-reference": [
       "error",
       { "path": "never", "types": "never", "lib": "never" }
     ],
     "@typescript-eslint/no-empty-function": "warn",
-    "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }]
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
+    "perfectionist/sort-objects": "off",
+    "perfectionist/sort-imports": "off",
+    "perfectionist/sort-classes": "off",
+    "perfectionist/sort-named-imports": "off",
+    "perfectionist/sort-union-types": "off",
+    "padding-line-between-statements": "off",
+    "object-shorthand": "off",
+    "prefer-arrow-callback": "off",
+    "unicorn/no-typeof-undefined": "off",
+    "unicorn/numeric-separators-style": "off",
+    "unicorn/better-regex": "off",
+    "unicorn/prefer-number-properties": "off",
+    "unicorn/prefer-node-protocol": "off",
+    "unicorn/prefer-module": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/prefer-spread": "off",
+    "unicorn/prefer-optional-catch-binding": "off",
+    "unicorn/prefer-array-flat-map": "off",
+    "unicorn/text-encoding-identifier-case": "off",
+    "unicorn/prefer-string-replace-all": "off",
+    "unicorn/explicit-length-check": "off",
+    "unicorn/prefer-logical-operator-over-ternary": "off",
+    "unicorn/prefer-ternary": "off",
+    "unicorn/prefer-at": "off",
+    "unicorn/import-style": "off",
+    "perfectionist/sort-intersection-types": "off",
+    "no-promise-executor-return": "off",
+    "prefer-regex-literals": "off",
+    "valid-jsdoc": "off",
+    "n/no-process-exit": "off"
   },
   "overrides": [
-    // eslint will lint ts and tsx files as well since they are matched in an overrides entry
     { "files": ["*.js", "*.ts"] },
-    // disable core no-unused-expressions rule in favor of a chai-friendly version for spec files
     {
       "files": ["*.spec.js", "*.spec.ts", "*.spec.tsx"],
       "rules": {
-        "@typescript-eslint/no-unused-expressions": 0,
-        "chai-friendly/no-unused-expressions": 2
+        "@typescript-eslint/no-unused-expressions": 0
       }
     },
     {
@@ -69,7 +100,6 @@
       }
     },
     {
-      // overrides for any and all JS
       "files": ["*.js"],
       "rules": {
         "@typescript-eslint/no-var-requires": "off",
@@ -78,30 +108,26 @@
       }
     },
     {
-      // overrides for file generation js
       "files": ["generation/**/*.js"],
       "rules": {
-        "no-template-curly-in-string": "off", // because the scripts write to command files that use string interpolation
+        "no-template-curly-in-string": "off",
         "no-param-reassign": "warn",
         "no-regex-spaces": "warn"
       }
     },
     {
-      // overrides for generated typescript files
       "files": ["src/commands/*/*.ts"],
       "rules": {
-        "no-underscore-dangle": "off" // this is turned off because OCLIF uses _help() to show help
+        "no-underscore-dangle": "off"
       }
     },
     {
-      // overrides for the help class
       "files": ["src/help.ts"],
       "rules": {
-        "import/no-default-export": "off" // OCLIF internally requires the default export for this class
+        "import/no-default-export": "off"
       }
     },
     {
-      // overrides for the deployment scripts
       "files": ["deployment-scripts/*.js"],
       "rules": {
         "no-process-exit": "off",
