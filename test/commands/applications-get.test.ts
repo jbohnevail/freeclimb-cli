@@ -103,7 +103,7 @@ describe("applications:get Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_APPLICATIONS_GET_NEXT
-            process.env.FREECLIMB_APPLICATIONS_GET_NEXT = undefined
+            delete process.env.FREECLIMB_APPLICATIONS_GET_NEXT
             try {
                 await runCommand(["applications:get", "userInput-applicationId"])
                 const { error } = await runCommand([

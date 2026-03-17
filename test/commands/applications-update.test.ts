@@ -270,7 +270,7 @@ describe("applications:update Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_APPLICATIONS_UPDATE_NEXT
-            process.env.FREECLIMB_APPLICATIONS_UPDATE_NEXT = undefined
+            delete process.env.FREECLIMB_APPLICATIONS_UPDATE_NEXT
             try {
                 await runCommand(["applications:update", "userInput-applicationId"])
                 const { error } = await runCommand([

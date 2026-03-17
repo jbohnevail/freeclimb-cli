@@ -132,7 +132,7 @@ describe("calls:list-call-logs Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_CALLS_LIST_CALL_LOGS_NEXT
-            process.env.FREECLIMB_CALLS_LIST_CALL_LOGS_NEXT = undefined
+            delete process.env.FREECLIMB_CALLS_LIST_CALL_LOGS_NEXT
             try {
                 await runCommand(["calls:list-call-logs", "userInput-callId"])
                 const { error } = await runCommand([

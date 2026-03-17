@@ -368,7 +368,7 @@ describe("calls:make Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_CALLS_MAKE_NEXT
-            process.env.FREECLIMB_CALLS_MAKE_NEXT = undefined
+            delete process.env.FREECLIMB_CALLS_MAKE_NEXT
             try {
                 await runCommand([
                     "calls:make",

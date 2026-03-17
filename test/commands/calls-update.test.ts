@@ -136,7 +136,7 @@ describe("calls:update Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_CALLS_UPDATE_NEXT
-            process.env.FREECLIMB_CALLS_UPDATE_NEXT = undefined
+            delete process.env.FREECLIMB_CALLS_UPDATE_NEXT
             try {
                 await runCommand(["calls:update", "userInput-callId", "userInput-status"])
                 const { error } = await runCommand([

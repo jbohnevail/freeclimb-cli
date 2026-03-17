@@ -143,7 +143,7 @@ describe("accounts:manage Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_ACCOUNTS_MANAGE_NEXT
-            process.env.FREECLIMB_ACCOUNTS_MANAGE_NEXT = undefined
+            delete process.env.FREECLIMB_ACCOUNTS_MANAGE_NEXT
             try {
                 await runCommand(["accounts:manage"])
                 const { error } = await runCommand(["accounts:manage", "--next"])

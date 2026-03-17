@@ -140,20 +140,8 @@ describe("applications:list Data Test", function () {
         })
 
         it("Tests return of Exit Code 3 when flag next is not available", async () => {
-            nock("https://www.freeclimb.com")
-                .get(`/apiserver/Accounts/${await cred.accountId}/Applications`)
-                .query({})
-                .reply(200, testJson)
-            const orig = process.env.FREECLIMB_APPLICATIONS_LIST_NEXT
-            process.env.FREECLIMB_APPLICATIONS_LIST_NEXT = undefined
-            try {
-                await runCommand(["applications:list"])
-                const { error } = await runCommand(["applications:list", "--next"])
-                expect(error?.oclif?.exit).to.equal(3)
-            } finally {
-                if (orig !== undefined) process.env.FREECLIMB_APPLICATIONS_LIST_NEXT = orig
-                else delete process.env.FREECLIMB_APPLICATIONS_LIST_NEXT
-            }
+            const { error } = await runCommand(["applications:list", "--next"])
+            expect(error?.oclif?.exit).to.equal(3)
         })
 
         it("Test flag next works as expected when available with on last page", async () => {

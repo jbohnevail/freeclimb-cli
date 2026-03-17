@@ -241,7 +241,7 @@ describe("applications:create Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_APPLICATIONS_CREATE_NEXT
-            process.env.FREECLIMB_APPLICATIONS_CREATE_NEXT = undefined
+            delete process.env.FREECLIMB_APPLICATIONS_CREATE_NEXT
             try {
                 await runCommand(["applications:create"])
                 const { error } = await runCommand(["applications:create", "--next"])

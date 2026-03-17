@@ -169,7 +169,7 @@ describe("call-queues:create Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_CALL_QUEUES_CREATE_NEXT
-            process.env.FREECLIMB_CALL_QUEUES_CREATE_NEXT = undefined
+            delete process.env.FREECLIMB_CALL_QUEUES_CREATE_NEXT
             try {
                 await runCommand(["call-queues:create"])
                 const { error } = await runCommand(["call-queues:create", "--next"])

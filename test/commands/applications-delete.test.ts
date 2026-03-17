@@ -103,7 +103,7 @@ describe("applications:delete Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_APPLICATIONS_DELETE_NEXT
-            process.env.FREECLIMB_APPLICATIONS_DELETE_NEXT = undefined
+            delete process.env.FREECLIMB_APPLICATIONS_DELETE_NEXT
             try {
                 await runCommand(["applications:delete", "userInput-applicationId"])
                 const { error } = await runCommand([

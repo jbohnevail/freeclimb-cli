@@ -251,7 +251,7 @@ describe("available-numbers:list Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_AVAILABLE_NUMBERS_LIST_NEXT
-            process.env.FREECLIMB_AVAILABLE_NUMBERS_LIST_NEXT = undefined
+            delete process.env.FREECLIMB_AVAILABLE_NUMBERS_LIST_NEXT
             try {
                 await runCommand(["available-numbers:list"])
                 const { error } = await runCommand(["available-numbers:list", "--next"])

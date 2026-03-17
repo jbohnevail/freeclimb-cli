@@ -180,7 +180,7 @@ describe("call-queues:update Data Test", function () {
                 .query({})
                 .reply(200, testJson)
             const orig = process.env.FREECLIMB_CALL_QUEUES_UPDATE_NEXT
-            process.env.FREECLIMB_CALL_QUEUES_UPDATE_NEXT = undefined
+            delete process.env.FREECLIMB_CALL_QUEUES_UPDATE_NEXT
             try {
                 await runCommand(["call-queues:update", "userInput-queueId"])
                 const { error } = await runCommand([
