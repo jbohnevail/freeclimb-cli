@@ -1,10 +1,10 @@
-const requiredParamTest = require("./components/required-param.js")
-const allTypeTest = require("./components/all-type.js")
-const optionalTypeTest = require("./components/optional-type.js")
-const maxItemFlagTest = require("./components/max-item-flag.js")
-const nextFlagTest = require("./components/next-flag.js")
-const booleanInputTest = require("./components/boolean-input.js")
-const statusCodeTest = require("./components/status-code.js")
+const requiredParamTest = require("./components/required-param.cjs")
+const allTypeTest = require("./components/all-type.cjs")
+const optionalTypeTest = require("./components/optional-type.cjs")
+const maxItemFlagTest = require("./components/max-item-flag.cjs")
+const nextFlagTest = require("./components/next-flag.cjs")
+const booleanInputTest = require("./components/boolean-input.cjs")
+const statusCodeTest = require("./components/status-code.cjs")
 
 function Tests(topic, command, commandName) {
     this.topic = topic.topic

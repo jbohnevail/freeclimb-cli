@@ -10,7 +10,7 @@ const fs = require("fs")
 const { exec } = require("child_process")
 const { parseCommandLine } = require("typescript")
 const apiInfo = require("../schema/generated-api-schema.json")
-const Tests = require("./cases")
+const Tests = require("./cases.cjs")
 
 // Create src/commands if directory does not already exist
 fs.mkdirSync("./test/commands", { recursive: true })

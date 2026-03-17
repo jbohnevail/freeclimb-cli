@@ -7,7 +7,7 @@
  * necessary component for generating test files. Changes made to this
  * file may affect generated test files.
  */
-const TestInstance = require("../outline.js")
+const TestInstance = require("../outline.cjs")
 
 let falseBooleanInputTest = function (additionalParam) {
     const falseParams = additionalParam.filter((param) => param.dataType === "boolean")

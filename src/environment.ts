@@ -1,6 +1,10 @@
-import * as path from "path"
-import { load, config } from "dotenv"
-import * as fs from "fs"
+import path from "node:path"
+import { config } from "dotenv"
+import fs from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname } from "node:path"
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export class Environment {
     private dataPath: string
@@ -36,9 +40,10 @@ export class Environment {
             if (prevContents.length > 0) {
                 // the file is not empty but doesn't have this particular variable
                 newContents = prevContents + "\n" + replacement // we add a newline at the beginning to leave the previous line unchanged
+            } else {
+                // otherwise if the file is empty, no newline is needed at the beginning
+                newContents = prevContents + replacement
             }
-            // otherwise if the file is empty, no newline is needed at the beginning
-            newContents = prevContents + replacement
         } else {
             newContents = prevContents.replace(regex, replacement)
         }

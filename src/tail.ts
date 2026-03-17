@@ -13,9 +13,9 @@ function processInput(timeStr: string) {
     }
 
     const finalOutput = []
-    let match: any
+    let match: RegExpExecArray | null
     while ((match = regexp.exec(timeStr.toLowerCase())) !== null) {
-        finalOutput.push({ unit: match.groups.unit, number: match.groups.number })
+        finalOutput.push({ unit: match.groups!.unit, number: match.groups!.number })
     }
     return finalOutput
 }
@@ -61,7 +61,7 @@ export function calculateSinceTimestamp(since: string) {
     let total = 0
     const timeSeperation = processInput(since)
     for (const timeSegment of timeSeperation) {
-        const time = parseInt(timeSegment.number, 10)
+        const time = Number.parseInt(timeSegment.number, 10)
         total += convertTime(timeSegment.unit, time)
     }
     return total

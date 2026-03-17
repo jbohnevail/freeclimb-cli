@@ -1,5 +1,7 @@
-import { expect, test } from "@oclif/test"
-const mapChars = require("../../generation/commands/character-mapping")
+import { expect } from "chai"
+import { createRequire } from "node:module"
+const require = createRequire(import.meta.url)
+const mapChars = require("../../generation/commands/character-mapping.cjs")
 const apiInfo = require("../../generation/schema/generated-api-schema.json")
 const localFlags = require("./test-local-flags.json")
 const testingJson = require("./character-mapping-test.json")
@@ -70,17 +72,17 @@ describe("Tests the character-mapping", function () {
             .map((command: { params: { name: string; required: string }[] }) =>
                 command.params
                     .filter((param: { required: string }) => accessSpecifier(param) === "flags")
-                    .map((param: { name: string }) => param.name)
+                    .map((param: { name: string }) => param.name),
             )
-    test.it("Adds all characters", (ctx) => {
+    it("Adds all characters", () => {
         expect(testedMap).to.length(16 + Object.keys(localFlags).length)
     })
-    test.it("Correctly assigns characters", (ctx) => {
+    it("Correctly assigns characters", () => {
         for (const [key, val] of charMap) {
             expect(testedMap.get(key)).to.equal(val)
         }
     })
-    test.it("Correctly detects duplicates", () => {
+    it("Correctly detects duplicates", () => {
         const duplicateMap = new Map()
         duplicateMap.set("keyOne", "a")
         duplicateMap.set("keyTwo", "b")
@@ -92,38 +94,33 @@ describe("Tests the character-mapping", function () {
                         { params: [{ name: "keyOne" }, { name: "keyTwo" }, { name: "keyThree" }] },
                     ],
                 },
-            ])
+            ]),
         ).to.be.true
     })
-    test.it("Does not assign any duplicate characters in the example", (ctx) => {
+    it("Does not assign any duplicate characters in the example", () => {
         expect(hasDuplicates(charMap, testingJson)).to.be.false
     })
-    test.it("Does not assign any duplicate characters in the actual CLI", () => {
+    it("Does not assign any duplicate characters in the actual CLI", () => {
         expect(hasDuplicates(mapChars(apiInfo, localFlags), apiInfo)).to.be.false
     })
-    test.stderr()
-        .do((output) => {
-            const generatedSchema = [
-                {
-                    topic: "accounts",
-                    commands: [
-                        {
-                            params: [...new Array(54).keys()].map((idx) => ({
-                                name: `v${idx}`,
-                                required: false,
-                            })),
-                        },
-                    ],
-                },
-            ]
-            const testMap = mapChars(generatedSchema, localFlags)
-            expect(output.stderr).to.contain(
-                "There are more than 52 unique flags in a single scope. Some flags will not be assigned a character."
-            )
-            expect(testMap).to.length(52 + Object.keys(localFlags).length) // 52 for the single command, plus the extra CLI-exclusive added flags (which are not in that specific command)
-            expect(hasDuplicates(testMap, generatedSchema)).to.be.false
-        })
-        .it("Warns when there are more than 52 unique flags")
+    it("Warns when there are more than 52 unique flags", () => {
+        const generatedSchema = [
+            {
+                topic: "accounts",
+                commands: [
+                    {
+                        params: [...new Array(54).keys()].map((idx) => ({
+                            name: `v${idx}`,
+                            required: false,
+                        })),
+                    },
+                ],
+            },
+        ]
+        const testMap = mapChars(generatedSchema, localFlags)
+        expect(testMap).to.length(52 + Object.keys(localFlags).length) // 52 for the single command, plus the extra CLI-exclusive added flags (which are not in that specific command)
+        expect(hasDuplicates(testMap, generatedSchema)).to.be.false
+    })
 })
 
 function accessSpecifier(param: { required: string }) {

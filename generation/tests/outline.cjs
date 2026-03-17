@@ -268,7 +268,7 @@ TestOutline.prototype.testNextFlagOutline = function () {
         .map((char) => char.charCodeAt(0).toString(16))
         .join("")
     return `
-    
+
     test.nock("https://www.freeclimb.com", async (api) =>
     api
         .get(${"`"}${this.url}${"`"})
@@ -293,7 +293,7 @@ TestOutline.prototype.testNextFlagOutline2 = function () {
         .join("")
     return (
         `const finalCursor = "freeClimbCLIAutomatedTestCursor"
-        
+
     before(() => {(async () => {
         ${this.testJson[0]}.nextPageUri = ${"`"}https://www.freeclimb.com${this.url}?cursor=` +
         "${finalCursor}" +
@@ -347,7 +347,7 @@ TestOutline.prototype.testNextFlagExitCodeUndefinedOutline = function () {
         .map((char) => char.charCodeAt(0).toString(16))
         .join("")
     return `
-    
+
     test.nock("https://www.freeclimb.com", async (api) =>
     api
         .get(${"`"}${this.url}${"`"})

@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "importHelpers": true,
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "lib",
     "rootDir": "src",
     "strict": true,
-    "composite": true,
-    "target": "es2017",
-    "noEmit": false
+    "target": "es2022",
+    "noEmit": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"]
 }

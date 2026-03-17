@@ -16,7 +16,7 @@ export class Page {
         if (pageNum === null) {
             this.pageNumber = 0
         } else {
-            this.pageNumber = parseInt(pageNum[1], 10)
+            this.pageNumber = Number.parseInt(pageNum[1], 10)
         }
     }
 

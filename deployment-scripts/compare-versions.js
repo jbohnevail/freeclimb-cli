@@ -16,7 +16,8 @@ if (!(versionRegex.test(oldVer) && versionRegex.test(newVer))) {
     process.exit(2)
 }
 
-const versionStringToNumber = (versionString) => parseInt(versionString.split(".").join(""), 10)
+const versionStringToNumber = (versionString) =>
+    Number.parseInt(versionString.split(".").join(""), 10)
 
 if (!(versionStringToNumber(newVer) > versionStringToNumber(oldVer))) {
     console.log("The new version number is not greater than the old version number.")

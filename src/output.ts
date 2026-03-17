@@ -1,5 +1,5 @@
-import { Page, Next } from "./pages"
-import { Environment } from "./environment"
+import { Page, Next } from "./pages.js"
+import { Environment } from "./environment.js"
 
 type Log = { log(x: string): any }
 type DataStore = Log & { config: { dataDir: string } }
@@ -16,7 +16,7 @@ export class Output {
         let envDir = storePath
         this.logger = logger
         this.commandName = Output.formatCommandNameUnderscores(logger.constructor.name)
-        if (logger as DataStore) {
+        if ("config" in logger) {
             envDir = (logger as DataStore).config.dataDir
         }
         this.environment = new Environment(envDir)
@@ -27,13 +27,13 @@ export class Output {
         this.logger.log(output)
         this.currentPage = new Page(output)
 
-        if (this.currentPage.next as string) {
+        if (this.currentPage.next) {
             this.environment.setStringPersist(
                 `FREECLIMB_${this.commandName}_NEXT`,
-                this.currentPage.next as string
+                this.currentPage.next as string,
             )
             this.logger.log(
-                `== Currently on page ${this.currentPage.num}. Run this command again with the -n flag to go to the next page. ==`
+                `== Currently on page ${this.currentPage.num}. Run this command again with the -n flag to go to the next page. ==`,
             )
         }
     }

@@ -1,6 +1,5 @@
 import chalk from "chalk"
-import { errorWithSuggestions, returnFormat } from "./error-messages"
-import { parse } from "./parse-errors"
+import { errorWithSuggestions, returnFormat } from "./error-messages.js"
 
 export abstract class FreeClimbError {
     message: string
@@ -13,11 +12,6 @@ export abstract class FreeClimbError {
     }
 }
 
-export class ParseError extends FreeClimbError {
-    constructor(error: any) {
-        super(parse(error), 2)
-    }
-}
 export class FreeClimbAPIError extends FreeClimbError {
     constructor(errorMessage: any) {
         if (errorMessage.status) {
@@ -39,9 +33,9 @@ export class UndefinedResponseError extends FreeClimbError {
                 1020,
                 "Reponse Undefined",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                "Re-run the command. If error persists, something went wrong on FreeClimb's end. Our engineers are hard at work resolving this problem."
+                "Re-run the command. If error persists, something went wrong on FreeClimb's end. Our engineers are hard at work resolving this problem.",
             ),
-            3
+            3,
         )
     }
 }
@@ -53,9 +47,9 @@ export class DefaultFatalError extends FreeClimbError {
                 1021,
                 "Program Error",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                `Please contact vail \n${error}`
+                `Please contact support \n${error}`,
             ),
-            4
+            4,
         )
     }
 }
@@ -66,9 +60,9 @@ export class NoNextPage extends FreeClimbError {
                 1003,
                 "No Next Page Output",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                "Run your initial command without the –next flag."
+                "Run your initial command without the –next flag.",
             ),
-            3
+            3,
         )
     }
 }
@@ -80,9 +74,9 @@ export class NoTimestamp extends FreeClimbError {
                 1019,
                 "Invalid Use of Timestamp",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                "You can not use tail and timestamp pql"
+                "You can not use tail and timestamp pql",
             ),
-            2
+            2,
         )
     }
 }
@@ -94,9 +88,9 @@ export class OutOfRange extends FreeClimbError {
                 1004,
                 "Out of Bounds",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                `Enter a ${param} ${direction} than or equal to ${bound}. Example: -${param} 10`
+                `Enter a ${param} ${direction} than or equal to ${bound}. Example: -${param} 10`,
             ),
-            2
+            2,
         )
     }
 }
@@ -108,9 +102,9 @@ export class SetPasswordError extends FreeClimbError {
                 1005,
                 "Keytar Error",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                `Re-run the login command. /nIf the error persists, please contact support@freeclimb.com`
+                `Re-run the login command. \nIf the error persists, please contact support@freeclimb.com`,
             ),
-            4
+            4,
         )
     }
 }
@@ -120,7 +114,7 @@ function invalidSuggestion() {
         1014,
         "Invalid Payload",
         "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-        "Make sure that all necessary flags and arguments have been formatted and/or spelled correctly."
+        "Make sure that all necessary flags and arguments have been formatted and/or spelled correctly.",
     )}`
 }
 
@@ -131,9 +125,9 @@ export class LoginCancelled extends FreeClimbError {
                 1006,
                 "Login Cancelled - No Credential Change",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                "Re-run the login command and agree to credential reset."
+                "Re-run the login command and agree to credential reset.",
             ),
-            2
+            2,
         )
     }
 }
@@ -146,9 +140,9 @@ export class SinceFormatError extends FreeClimbError {
                     1015,
                     errorMessage.name,
                     "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                    `Since is not compatible with the unit ${errorMessage.message}\n\n\t\tValid units of time include: \nw[weeks], d[day], h[hour], m[minute], s[second], ms[millisecond], ns[nanosecond]\n`
+                    `Since is not compatible with the unit ${errorMessage.message}\n\n\t\tValid units of time include: \nw[weeks], d[day], h[hour], m[minute], s[second], ms[millisecond], ns[nanosecond]\n`,
                 ),
-                2
+                2,
             )
         } else if (errorMessage.name === "Incorrect Format - Missing Number or Unit") {
             super(
@@ -156,9 +150,9 @@ export class SinceFormatError extends FreeClimbError {
                     1016,
                     errorMessage.name,
                     "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                    `${errorMessage.message} is missing a unit of time or number. For every time interval, a unit of time must be included. Ex 2h30m`
+                    `${errorMessage.message} is missing a unit of time or number. For every time interval, a unit of time must be included. Ex 2h30m`,
                 ),
-                2
+                2,
             )
         } else {
             super(
@@ -166,9 +160,9 @@ export class SinceFormatError extends FreeClimbError {
                     1017,
                     "Since Format Error",
                     "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                    "Check the formatting of since flag"
+                    "Check the formatting of since flag",
                 ),
-                2
+                2,
             )
         }
     }

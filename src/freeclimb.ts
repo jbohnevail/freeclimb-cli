@@ -1,7 +1,7 @@
 import axios from "axios"
-import { cred } from "./credentials"
-import { Environment } from "./environment"
-import * as Errors from "./errors"
+import { cred } from "./credentials.js"
+import { Environment } from "./environment.js"
+import * as Errors from "./errors.js"
 
 type Errorer = { error(message: string, exitCode: { exit: number }): any }
 
@@ -56,15 +56,15 @@ export class FreeClimbApi {
         onSuccess: (response: FreeClimbResponse) => any,
         onError = (error: any) => {
             let err: Errors.FreeClimbError
-            if (error.message && error.code) {
-                err = error
-            } else if (error.response) {
+            if (error.response) {
                 err = new Errors.FreeClimbAPIError(error.response.data)
+            } else if (error instanceof Errors.FreeClimbError) {
+                err = error
             } else {
                 err = new Errors.DefaultFatalError(error)
             }
             this.errorHandler.error(err.message, { exit: err.code })
-        }
+        },
     ) {
         const accountId = await cred.accountId
         const apiKey = await cred.apiKey
@@ -72,10 +72,10 @@ export class FreeClimbApi {
             `${this.baseUrl}${this.authenticate ? `/Accounts/${accountId}` : ``}${this.endpoint}`,
             {
                 method: method,
-                auth: { username: accountId, password: apiKey },
+                auth: { username: accountId ?? "", password: apiKey ?? "" },
                 params: (requestContent as Query) ? (requestContent as Query).params : undefined,
                 data: (requestContent as Body) ? (requestContent as Body).data : undefined,
-            }
+            },
         )
             .then(onSuccess)
             .catch(onError)

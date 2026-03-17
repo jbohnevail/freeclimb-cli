@@ -6,7 +6,7 @@
  * a part of the CLI but rather a necessary component for generating test
  * files. Changes made to this file may affect generated test files.
  */
-const TestInstance = require("../outline.js")
+const TestInstance = require("../outline.cjs")
 
 let allTypeTest = function (additionalParam, message) {
     if (additionalParam.length > 1) {
