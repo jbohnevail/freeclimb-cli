@@ -2,51 +2,32 @@
  * FreeClimb MCP Server
  *
  * Exposes FreeClimb CLI functionality as an MCP server for AI agents.
- * This allows Claude, Copilot, and other AI assistants to directly
- * interact with the FreeClimb API.
- *
- * Note: This is a simplified implementation that uses raw JSON-RPC over stdio.
- * For full MCP SDK support, upgrade TypeScript to v5+ and reinstall dependencies.
+ * Uses the official @modelcontextprotocol/sdk for protocol compliance.
  */
 
-import * as readline from "readline"
-import axios from "axios"
-import { cred } from "../credentials"
-import { Environment } from "../environment"
+import { Server } from "@modelcontextprotocol/sdk/server/index.js"
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
+import {
+    CallToolRequestSchema,
+    ListToolsRequestSchema,
+    ListResourcesRequestSchema,
+    ReadResourceRequestSchema,
+    ListPromptsRequestSchema,
+    GetPromptRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js"
+import { createApiAxios } from "../http"
 import { tools, ToolName } from "./tools"
 
-const CLI_VERSION = "0.5.4"
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { version: CLI_VERSION } = require("../../package.json")
 
-const API_BASE_URL =
-    Environment.getString("FREECLIMB_CLI_BASE_URL") || "https://www.freeclimb.com/apiserver"
-
-// Create axios instance for API calls
-async function createApiClient() {
-    const accountId = await cred.accountId
-    const apiKey = await cred.apiKey
-
-    return axios.create({
-        baseURL: `${API_BASE_URL}/Accounts/${accountId}`,
-        auth: {
-            username: accountId,
-            password: apiKey,
-        },
-        headers: {
-            "Content-Type": "application/json",
-        },
-    })
-}
-
-// Tool handlers
-async function handleToolCall(
-    name: ToolName,
-    args: Record<string, unknown>
-): Promise<unknown> {
-    const client = await createApiClient()
+// Tool handler
+async function handleToolCall(name: ToolName, args: Record<string, unknown>): Promise<unknown> {
+    const client = await createApiAxios()
 
     switch (name) {
         // Call management
-        case "make_call":
+        case "make_call": {
             return (
                 await client.post("/Calls", {
                     to: args.to,
@@ -55,8 +36,9 @@ async function handleToolCall(
                     timeout: args.timeout || 30,
                 })
             ).data
+        }
 
-        case "list_calls":
+        case "list_calls": {
             return (
                 await client.get("/Calls", {
                     params: {
@@ -66,12 +48,14 @@ async function handleToolCall(
                     },
                 })
             ).data
+        }
 
-        case "get_call":
+        case "get_call": {
             return (await client.get(`/Calls/${args.callId}`)).data
+        }
 
         // SMS management
-        case "send_sms":
+        case "send_sms": {
             return (
                 await client.post("/Messages", {
                     to: args.to,
@@ -79,8 +63,9 @@ async function handleToolCall(
                     text: args.text,
                 })
             ).data
+        }
 
-        case "list_sms":
+        case "list_sms": {
             return (
                 await client.get("/Messages", {
                     params: {
@@ -89,18 +74,22 @@ async function handleToolCall(
                     },
                 })
             ).data
+        }
 
-        case "get_sms":
+        case "get_sms": {
             return (await client.get(`/Messages/${args.messageId}`)).data
+        }
 
         // Phone number management
-        case "list_numbers":
+        case "list_numbers": {
             return (await client.get("/IncomingPhoneNumbers")).data
+        }
 
-        case "get_number":
+        case "get_number": {
             return (await client.get(`/IncomingPhoneNumbers/${args.phoneNumberId}`)).data
+        }
 
-        case "search_available_numbers":
+        case "search_available_numbers": {
             return (
                 await client.get("/AvailablePhoneNumbers", {
                     params: {
@@ -111,20 +100,24 @@ async function handleToolCall(
                     },
                 })
             ).data
+        }
 
         // Application management
-        case "list_applications":
+        case "list_applications": {
             return (await client.get("/Applications")).data
+        }
 
-        case "get_application":
+        case "get_application": {
             return (await client.get(`/Applications/${args.applicationId}`)).data
+        }
 
         // Account information
-        case "get_account":
+        case "get_account": {
             return (await client.get("")).data
+        }
 
         // Logs
-        case "list_logs":
+        case "list_logs": {
             return (
                 await client.get("/Logs", {
                     params: {
@@ -132,16 +125,18 @@ async function handleToolCall(
                     },
                 })
             ).data
+        }
 
-        case "filter_logs":
+        case "filter_logs": {
             return (
                 await client.post("/Logs", {
                     pql: args.pql,
                 })
             ).data
+        }
 
         // Recordings
-        case "list_recordings":
+        case "list_recordings": {
             return (
                 await client.get("/Recordings", {
                     params: {
@@ -149,9 +144,10 @@ async function handleToolCall(
                     },
                 })
             ).data
+        }
 
         // Conferences
-        case "list_conferences":
+        case "list_conferences": {
             return (
                 await client.get("/Conferences", {
                     params: {
@@ -159,137 +155,221 @@ async function handleToolCall(
                     },
                 })
             ).data
-
-        // Queues
-        case "list_queues":
-            return (await client.get("/Queues")).data
-
-        default:
-            throw new Error(`Unknown tool: ${name}`)
-    }
-}
-
-// JSON-RPC request/response types
-interface JsonRpcRequest {
-    jsonrpc: "2.0"
-    id: number | string
-    method: string
-    params?: Record<string, unknown>
-}
-
-interface JsonRpcResponse {
-    jsonrpc: "2.0"
-    id: number | string | null
-    result?: unknown
-    error?: {
-        code: number
-        message: string
-        data?: unknown
-    }
-}
-
-function sendResponse(response: JsonRpcResponse): void {
-    process.stdout.write(JSON.stringify(response) + "\n")
-}
-
-async function handleRequest(request: JsonRpcRequest): Promise<void> {
-    try {
-        let result: unknown
-
-        switch (request.method) {
-            case "initialize":
-                result = {
-                    protocolVersion: "2024-11-05",
-                    capabilities: {
-                        tools: {},
-                    },
-                    serverInfo: {
-                        name: "freeclimb",
-                        version: CLI_VERSION,
-                    },
-                }
-                break
-
-            case "tools/list":
-                result = {
-                    tools: Object.values(tools).map((tool) => ({
-                        name: tool.name,
-                        description: tool.description,
-                        inputSchema: tool.inputSchema,
-                    })),
-                }
-                break
-
-            case "tools/call": {
-                const params = request.params as {
-                    name: string
-                    arguments?: Record<string, unknown>
-                }
-                const toolResult = await handleToolCall(
-                    params.name as ToolName,
-                    params.arguments || {}
-                )
-                result = {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(toolResult, null, 2),
-                        },
-                    ],
-                }
-                break
-            }
-
-            default:
-                throw new Error(`Unknown method: ${request.method}`)
         }
 
-        sendResponse({
-            jsonrpc: "2.0",
-            id: request.id,
-            result,
-        })
-    } catch (error: any) {
-        sendResponse({
-            jsonrpc: "2.0",
-            id: request.id,
-            error: {
-                code: -32603,
-                message: error.message || "Internal error",
-                data: error.response?.data,
-            },
-        })
+        // Queues
+        case "list_queues": {
+            return (await client.get("/Queues")).data
+        }
+
+        default: {
+            throw new Error(`Unknown tool: ${name}`)
+        }
     }
 }
 
 export async function startMcpServer(): Promise<void> {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: false,
-    })
+    const server = new Server(
+        {
+            name: "freeclimb",
+            version: CLI_VERSION,
+        },
+        {
+            capabilities: {
+                tools: {},
+                resources: {},
+                prompts: {},
+            },
+        },
+    )
 
-    let requestQueue: Promise<void> = Promise.resolve()
+    // List tools
+    server.setRequestHandler(ListToolsRequestSchema, async () => ({
+        tools: Object.values(tools).map((tool) => ({
+            name: tool.name,
+            description: tool.description,
+            inputSchema: tool.inputSchema,
+        })),
+    }))
 
-    rl.on("line", (line) => {
-        requestQueue = requestQueue.then(async () => {
-            try {
-                const request = JSON.parse(line) as JsonRpcRequest
-                await handleRequest(request)
-            } catch {
-                sendResponse({
-                    jsonrpc: "2.0",
-                    id: null,
-                    error: {
-                        code: -32700,
-                        message: "Parse error",
+    // Call tools
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
+        try {
+            const toolResult = await handleToolCall(
+                request.params.name as ToolName,
+                (request.params.arguments as Record<string, unknown>) || {},
+            )
+            return {
+                content: [
+                    {
+                        type: "text" as const,
+                        text: JSON.stringify(toolResult, null, 2),
                     },
-                })
+                ],
             }
-        })
+        } catch (error: any) {
+            return {
+                content: [
+                    {
+                        type: "text" as const,
+                        text: JSON.stringify(
+                            {
+                                error: error.message || "Unknown error",
+                                details: error.response?.data,
+                            },
+                            null,
+                            2,
+                        ),
+                    },
+                ],
+                isError: true,
+            }
+        }
     })
 
-    await new Promise<void>(() => {})
+    // List resources
+    server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+        resources: [
+            {
+                uri: "freeclimb://account",
+                name: "Account Info",
+                description: "Current FreeClimb account information and status",
+                mimeType: "application/json",
+            },
+            {
+                uri: "freeclimb://numbers",
+                name: "Phone Numbers",
+                description: "All phone numbers owned by this account",
+                mimeType: "application/json",
+            },
+            {
+                uri: "freeclimb://applications",
+                name: "Applications",
+                description: "All applications configured in this account",
+                mimeType: "application/json",
+            },
+        ],
+    }))
+
+    // Read resources
+    server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+        const client = await createApiAxios()
+        let data: unknown
+
+        switch (request.params.uri) {
+            case "freeclimb://account": {
+                ;({ data } = await client.get(""))
+                break
+            }
+            case "freeclimb://numbers": {
+                ;({ data } = await client.get("/IncomingPhoneNumbers"))
+                break
+            }
+            case "freeclimb://applications": {
+                ;({ data } = await client.get("/Applications"))
+                break
+            }
+            default: {
+                throw new Error(`Unknown resource: ${request.params.uri}`)
+            }
+        }
+
+        return {
+            contents: [
+                {
+                    uri: request.params.uri,
+                    mimeType: "application/json",
+                    text: JSON.stringify(data, null, 2),
+                },
+            ],
+        }
+    })
+
+    // List prompts
+    server.setRequestHandler(ListPromptsRequestSchema, async () => ({
+        prompts: [
+            {
+                name: "send-sms",
+                description: "Guide through sending an SMS message via FreeClimb",
+                arguments: [
+                    { name: "to", description: "Destination phone number", required: true },
+                    { name: "message", description: "Message text to send", required: true },
+                ],
+            },
+            {
+                name: "make-call",
+                description: "Guide through making a phone call via FreeClimb",
+                arguments: [
+                    { name: "to", description: "Destination phone number", required: true },
+                    {
+                        name: "applicationId",
+                        description: "Application to handle the call",
+                        required: true,
+                    },
+                ],
+            },
+            {
+                name: "diagnose",
+                description:
+                    "Run FreeClimb CLI diagnostics to check connectivity and authentication",
+            },
+        ],
+    }))
+
+    // Get prompts
+    server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+        switch (request.params.name) {
+            case "send-sms": {
+                return {
+                    description: "Send an SMS message via FreeClimb",
+                    messages: [
+                        {
+                            role: "user" as const,
+                            content: {
+                                type: "text" as const,
+                                text: `Send an SMS to ${request.params.arguments?.to || "<number>"} with the message: "${request.params.arguments?.message || "<message>"}". First, use the list_numbers tool to find an available FreeClimb number to send from, then use send_sms.`,
+                            },
+                        },
+                    ],
+                }
+            }
+            case "make-call": {
+                return {
+                    description: "Make a phone call via FreeClimb",
+                    messages: [
+                        {
+                            role: "user" as const,
+                            content: {
+                                type: "text" as const,
+                                text: `Make a phone call to ${request.params.arguments?.to || "<number>"} using application ${request.params.arguments?.applicationId || "<appId>"}. First, use list_numbers to find an available FreeClimb number, then use make_call.`,
+                            },
+                        },
+                    ],
+                }
+            }
+            case "diagnose": {
+                return {
+                    description: "Run FreeClimb CLI diagnostics",
+                    messages: [
+                        {
+                            role: "user" as const,
+                            content: {
+                                type: "text" as const,
+                                text: "Run diagnostics on the FreeClimb CLI setup. Use the get_account tool to verify connectivity and authentication, then report the account status.",
+                            },
+                        },
+                    ],
+                }
+            }
+            default: {
+                throw new Error(`Unknown prompt: ${request.params.name}`)
+            }
+        }
+    })
+
+    // Connect via stdio transport
+    const transport = new StdioServerTransport()
+    await server.connect(transport)
 }
 
 // Generate MCP config for claude_desktop_config.json

@@ -3,6 +3,7 @@ import type { Method } from "axios"
 import { cred } from "./credentials"
 import { Environment } from "./environment"
 import * as Errors from "./errors"
+import { createApiAxios } from "./http"
 
 type Errorer = { error(message: string, exitCode: { exit: number }): any }
 
@@ -13,7 +14,7 @@ type AxiosMethodType = Method | undefined
 
 export type FreeClimbErrorResponse = { response: Body }
 
-export type FreeClimbResponse = Body & { status: number }
+export type FreeClimbResponse = Body & { config?: any; status: number }
 
 export class FreeClimbApi {
     private endpoint: string
@@ -46,19 +47,36 @@ export class FreeClimbApi {
                 err = new Errors.DefaultFatalError(error)
             }
             this.errorHandler.error(err.message, { exit: err.code })
-        }
+        },
     ) {
+        if (this.authenticate) {
+            // Use the resilient shared HTTP client for authenticated calls
+            try {
+                const client = await createApiAxios()
+                const response = await client.request({
+                    url: this.endpoint,
+                    method: method,
+                    params: (requestContent as Query)
+                        ? (requestContent as Query).params
+                        : undefined,
+                    data: (requestContent as Body) ? (requestContent as Body).data : undefined,
+                })
+                await onSuccess(response as FreeClimbResponse)
+            } catch (error: any) {
+                await onError(error)
+            }
+            return
+        }
+
+        // Unauthenticated calls use axios directly
         const accountId = (await cred.accountId) || ""
         const apiKey = (await cred.apiKey) || ""
-        await axios(
-            `${this.baseUrl}${this.authenticate ? `/Accounts/${accountId}` : ``}${this.endpoint}`,
-            {
-                method: method,
-                auth: { username: accountId, password: apiKey },
-                params: (requestContent as Query) ? (requestContent as Query).params : undefined,
-                data: (requestContent as Body) ? (requestContent as Body).data : undefined,
-            }
-        )
+        await axios(`${this.baseUrl}${this.endpoint}`, {
+            method: method,
+            auth: { username: accountId, password: apiKey },
+            params: (requestContent as Query) ? (requestContent as Query).params : undefined,
+            data: (requestContent as Body) ? (requestContent as Body).data : undefined,
+        })
             .then(onSuccess)
             .catch(onError)
     }

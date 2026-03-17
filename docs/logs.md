@@ -3,30 +3,38 @@
 
 A Log instance resource represents a log entry made by FreeClimb in the course of processing a PerCL script or servicing a REST API request. It is mostly useful for debugging purposes. The Logs list resource represents the set of logs generated for an account.
 
-* [`freeclimb logs:filter PQL`](#freeclimb-logsfilter-pql)
+* [`freeclimb logs:filter [PQL]`](#freeclimb-logsfilter-pql)
 * [`freeclimb logs:list`](#freeclimb-logslist)
 
-## `freeclimb logs:filter PQL`
+## `freeclimb logs:filter [PQL]`
 
 Returns the first page of Logs associated with the specified account.
 
 ```
 USAGE
-  $ freeclimb logs:filter PQL
+  $ freeclimb logs:filter [PQL] [-m <value>] [-q <value>] [-Q <value> -t] [-n] [--json] [--fields <value>]
+    [--dry-run] [-h]
 
 ARGUMENTS
-  PQL  The filter query for retrieving logs.
+  [PQL]  The filter query for retrieving logs.
 
-OPTIONS
-  -Q, --since=since      Determines time frame of logs to be printed out before starting tail. Ex.2h9m
-  -h, --help             show CLI help
-  -m, --maxItem=maxItem  Show only a certain number of the most recent logs on this page.
+FLAGS
+  -Q, --since=<value>    Determines time frame of logs to be printed out before starting tail. Ex.2h9m
+  -h, --help             Show CLI help.
+  -m, --maxItem=<value>  Show only a certain number of the most recent logs on this page.
   -n, --next             Displays the next page of output.
-  -q, --sleep=sleep      [default: 1000] Determines time waited between request for tail command. Defaults at 1 second.
+  -q, --sleep=<value>    [default: 1000] Determines time waited between request for tail command. Defaults at 1 second.
   -t, --tail             Polls the FreeClimb API to retrieve and display new logs as they occur.
+      --dry-run          Validate the request without executing it. Shows what would be sent to the API.
+      --fields=<value>   Comma-separated list of fields to include in the response. Limits output to protect context
+                         windows when used by agents.
+      --json             Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
+
+DESCRIPTION
+  Returns the first page of Logs associated with the specified account.
 ```
 
-_See code: [src/commands/logs/filter.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.5.4/src/commands/logs/filter.ts)_
+_See code: [src/commands/logs/filter.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/logs/filter.ts)_
 
 ## `freeclimb logs:list`
 
@@ -34,15 +42,22 @@ Returns all Logs associated with the specified account or a specific page of Log
 
 ```
 USAGE
-  $ freeclimb logs:list
+  $ freeclimb logs:list [-m <value>] [-q <value>] [-Q <value> -t] [-n] [--json] [--fields <value>] [-h]
 
-OPTIONS
-  -Q, --since=since      Determines time frame of logs to be printed out before starting tail. Ex.2h9m
-  -h, --help             show CLI help
-  -m, --maxItem=maxItem  Show only a certain number of the most recent logs on this page.
+FLAGS
+  -Q, --since=<value>    Determines time frame of logs to be printed out before starting tail. Ex.2h9m
+  -h, --help             Show CLI help.
+  -m, --maxItem=<value>  Show only a certain number of the most recent logs on this page.
   -n, --next             Displays the next page of output.
-  -q, --sleep=sleep      [default: 1000] Determines time waited between request for tail command. Defaults at 1 second.
+  -q, --sleep=<value>    [default: 1000] Determines time waited between request for tail command. Defaults at 1 second.
   -t, --tail             Polls the FreeClimb API to retrieve and display new logs as they occur.
+      --fields=<value>   Comma-separated list of fields to include in the response. Limits output to protect context
+                         windows when used by agents.
+      --json             Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
+
+DESCRIPTION
+  Returns all Logs associated with the specified account or a specific page of Logs as indicated by the URI in the
+  request.
 ```
 
-_See code: [src/commands/logs/list.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.5.4/src/commands/logs/list.ts)_
+_See code: [src/commands/logs/list.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/logs/list.ts)_

@@ -1,26 +1,26 @@
 import chalk from "chalk"
-import stripAnsi from "strip-ansi"
 import { BrandColors, supportsColor, isTTY } from "./theme"
-import { box, getBoxChars } from "./chars"
+import { getBoxChars } from "./chars"
 
 export interface StructuredOutput<T = unknown> {
-    success: boolean
     data: T
     error?: {
         code: number
         message: string
         suggestion?: string
     }
-    pagination?: {
-        page: number
-        total?: number
-        nextCursor?: string | null
-    }
     metadata: {
-        timestamp: string
         accountId?: string
         command?: string
+        requestId?: string
+        timestamp: string
     }
+    pagination?: {
+        nextCursor?: string | null
+        page: number
+        total?: number
+    }
+    success: boolean
 }
 
 export function wrapJsonOutput<T>(
@@ -30,8 +30,9 @@ export function wrapJsonOutput<T>(
         command?: string
         nextCursor?: string | null
         page?: number
+        requestId?: string
         total?: number
-    } = {}
+    } = {},
 ): StructuredOutput<T> {
     const output: StructuredOutput<T> = {
         success: true,
@@ -47,6 +48,10 @@ export function wrapJsonOutput<T>(
 
     if (options.command) {
         output.metadata.command = options.command
+    }
+
+    if (options.requestId) {
+        output.metadata.requestId = options.requestId
     }
 
     if (options.nextCursor !== undefined || options.page !== undefined) {
@@ -90,14 +95,18 @@ function colorStatus(value: string): string {
     if (!colorType) return value
 
     switch (colorType) {
-        case "success":
+        case "success": {
             return chalk.hex(BrandColors.lime)(value)
-        case "warning":
+        }
+        case "warning": {
             return chalk.hex(BrandColors.orange)(value)
-        case "error":
+        }
+        case "error": {
             return chalk.red(value)
-        default:
+        }
+        default: {
             return value
+        }
     }
 }
 
@@ -110,7 +119,7 @@ function truncateText(text: string, maxLen: number): string {
 
 export function formatTable(
     data: Record<string, unknown>[],
-    columns: { key: string; header: string; width?: number }[]
+    columns: { header: string; key: string; width?: number }[],
 ): string {
     if (data.length === 0) {
         return chalk.dim("No data available")
@@ -118,9 +127,7 @@ export function formatTable(
 
     const colWidths = columns.map((col) => {
         const headerLen = col.header.length
-        const maxDataLen = Math.max(
-            ...data.map((row) => String(row[col.key] || "").length)
-        )
+        const maxDataLen = Math.max(...data.map((row) => String(row[col.key] || "").length))
         return col.width || Math.max(headerLen, maxDataLen, 10)
     })
 
@@ -135,9 +142,10 @@ export function formatTable(
             .map((col, i) => {
                 const val = String(row[col.key] || "")
                 const isStatusCol = col.key.toLowerCase() === "status"
-                let displayVal = val.length > colWidths[i]
-                    ? truncateText(val, colWidths[i])
-                    : val.padEnd(colWidths[i])
+                let displayVal =
+                    val.length > colWidths[i]
+                        ? truncateText(val, colWidths[i])
+                        : val.padEnd(colWidths[i])
 
                 // Color status columns
                 if (isStatusCol) {
@@ -148,7 +156,7 @@ export function formatTable(
 
                 return displayVal
             })
-            .join("  ")
+            .join("  "),
     )
 
     return [headerRow, separator, ...rows].join("\n")
@@ -157,8 +165,8 @@ export function formatTable(
 // Format table with Unicode borders (for TTY environments)
 export function formatTableWithBorders(
     data: Record<string, unknown>[],
-    columns: { key: string; header: string; width?: number }[],
-    title?: string
+    columns: { header: string; key: string; width?: number }[],
+    title?: string,
 ): string {
     if (data.length === 0) {
         return chalk.dim("No data available")
@@ -174,9 +182,7 @@ export function formatTableWithBorders(
     // Calculate column widths
     const colWidths = columns.map((col) => {
         const headerLen = col.header.length
-        const maxDataLen = Math.max(
-            ...data.map((row) => String(row[col.key] || "").length)
-        )
+        const maxDataLen = Math.max(...data.map((row) => String(row[col.key] || "").length))
         return col.width || Math.max(headerLen, maxDataLen, 10)
     })
 
@@ -290,9 +296,7 @@ export function formatApplicationsList(data: unknown): string {
 }
 
 export function formatIncomingNumbersList(data: unknown): string {
-    const numbers = Array.isArray(data)
-        ? data
-        : (data as any)?.incomingPhoneNumbers || []
+    const numbers = Array.isArray(data) ? data : (data as any)?.incomingPhoneNumbers || []
 
     if (numbers.length === 0) {
         return chalk.dim("No incoming numbers found")
@@ -323,9 +327,7 @@ export function formatQueuesList(data: unknown): string {
 }
 
 export function formatConferencesList(data: unknown): string {
-    const conferences = Array.isArray(data)
-        ? data
-        : (data as any)?.conferences || []
+    const conferences = Array.isArray(data) ? data : (data as any)?.conferences || []
 
     if (conferences.length === 0) {
         return chalk.dim("No conferences found")
@@ -340,9 +342,7 @@ export function formatConferencesList(data: unknown): string {
 }
 
 export function formatRecordingsList(data: unknown): string {
-    const recordings = Array.isArray(data)
-        ? data
-        : (data as any)?.recordings || []
+    const recordings = Array.isArray(data) ? data : (data as any)?.recordings || []
 
     if (recordings.length === 0) {
         return chalk.dim("No recordings found")
@@ -378,9 +378,7 @@ export function formatSingleItem(data: Record<string, unknown>): string {
     for (const [key, value] of Object.entries(data)) {
         const formattedKey = chalk.cyan(key.padEnd(maxKeyLen))
         const formattedValue =
-            typeof value === "object"
-                ? JSON.stringify(value, null, 2)
-                : String(value)
+            typeof value === "object" ? JSON.stringify(value, null, 2) : String(value)
         lines.push(`${formattedKey}  ${formattedValue}`)
     }
 
@@ -389,7 +387,7 @@ export function formatSingleItem(data: Record<string, unknown>): string {
 
 export function getFormatterForTopic(
     topic: string,
-    commandName: string
+    commandName: string,
 ): ((data: unknown) => string) | null {
     const formatters: Record<string, (data: unknown) => string> = {
         "calls:list": formatCallsList,
