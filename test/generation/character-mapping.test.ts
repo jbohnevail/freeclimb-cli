@@ -1,8 +1,8 @@
 import { expect } from "chai"
-import mapChars from "../../generation/commands/character-mapping"
-import apiInfo from "../../generation/schema/generated-api-schema.json"
-import localFlags from "./test-local-flags.json"
-import testingJson from "./character-mapping-test.json"
+const mapChars = require("../../generation/commands/character-mapping")
+const apiInfo = require("../../generation/schema/generated-api-schema.json")
+const localFlags = require("./test-local-flags.json")
+const testingJson = require("./character-mapping-test.json")
 
 describe("Tests the character-mapping", function () {
     const testedMap = mapChars(testingJson, localFlags)
