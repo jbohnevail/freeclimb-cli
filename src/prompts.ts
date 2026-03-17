@@ -1,7 +1,10 @@
-import { confirm as inquirerConfirm, password as inquirerPassword } from "@inquirer/prompts"
-
 export const prompts = {
-    confirm: (message: string, defaultValue = false) =>
-        inquirerConfirm({ message, default: defaultValue }),
-    password: (message: string) => inquirerPassword({ message }),
+    confirm: async (message: string, defaultValue = false) => {
+        const { confirm } = await import("@inquirer/prompts")
+        return confirm({ message, default: defaultValue })
+    },
+    password: async (message: string) => {
+        const { password } = await import("@inquirer/prompts")
+        return password({ message })
+    },
 }

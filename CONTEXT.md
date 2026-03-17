@@ -28,6 +28,16 @@ export FREECLIMB_OUTPUT_FORMAT=json  # Force JSON output globally
 | `accounts` | View and manage account settings |
 | `logs` | Search and filter API logs |
 
+### Utility Commands
+
+| Command | Description |
+|---------|-------------|
+| `api` | Make authenticated raw API requests with full JSON payloads |
+| `describe` | Machine-readable command schema introspection (JSON) |
+| `diagnose` | System diagnostics and connectivity check |
+| `status` | Account status overview |
+| `mcp:start` | Start MCP server for AI agent integration (JSON-RPC over stdio) |
+
 ### Important Invariants
 
 1. **Phone numbers must be in E.164 format**: `+12223334444`
@@ -35,7 +45,7 @@ export FREECLIMB_OUTPUT_FORMAT=json  # Force JSON output globally
 3. **Always use `--dry-run` for mutating operations** (create, update, delete) before executing
 4. **Always confirm with the user** before executing write/delete commands
 5. **Use `freeclimb describe <command>`** to introspect command schemas at runtime instead of parsing --help
-6. **Output is auto-JSON in non-TTY** - no need to pass `--json` when piping or in scripts
+6. **Output is auto-JSON** when `FREECLIMB_OUTPUT_FORMAT=json` is set
 
 ### Response Size Warning
 
@@ -51,7 +61,7 @@ freeclimb calls:list --fields callId,status,from,to,dateCreated
 
 ### Error Handling
 
-Errors include structured codes and suggestions. In JSON mode, errors are returned as:
+Errors include structured codes and suggestions:
 
 ```json
 {
@@ -59,7 +69,9 @@ Errors include structured codes and suggestions. In JSON mode, errors are return
   "error": {
     "code": 3,
     "message": "...",
-    "suggestion": "..."
+    "suggestion": "...",
+    "tryCommands": ["freeclimb ..."],
+    "docUrl": "https://..."
   }
 }
 ```
@@ -71,3 +83,12 @@ Use `freeclimb describe` instead of `--help` for machine-readable command schema
 ```bash
 freeclimb describe --all  # Get full schema for all commands
 ```
+
+### Technology Stack
+
+- **Runtime**: Node.js >= 18
+- **Framework**: oclif v4 (`@oclif/core ^4`)
+- **Language**: TypeScript 5
+- **Credentials**: @napi-rs/keyring (OS keychain)
+- **HTTP**: axios
+- **Testing**: Mocha + Chai + Nock

@@ -1,4 +1,3 @@
-import { select as inquirerSelect, confirm as inquirerConfirm, input as inquirerInput, password as inquirerPassword, checkbox as inquirerCheckbox } from "@inquirer/prompts"
 import chalk from "chalk"
 import { BrandColors, isTTY } from "./theme"
 
@@ -37,6 +36,7 @@ export async function select<T = string>(
         }
     })
 
+    const { select: inquirerSelect } = await import("@inquirer/prompts")
     return inquirerSelect({
         message: chalk.hex(BrandColors.orange)(message),
         choices: normalizedChoices,
@@ -68,6 +68,7 @@ export async function multiSelect<T = string>(
         }
     })
 
+    const { checkbox: inquirerCheckbox } = await import("@inquirer/prompts")
     return inquirerCheckbox({
         message: chalk.hex(BrandColors.orange)(message),
         choices: normalizedChoices,
@@ -84,6 +85,7 @@ export async function confirm(
         throw new Error("Interactive confirmation requires a TTY. Use --yes flag for non-interactive mode.")
     }
 
+    const { confirm: inquirerConfirm } = await import("@inquirer/prompts")
     return inquirerConfirm({
         message: chalk.hex(BrandColors.orange)(message),
         default: defaultValue,
@@ -103,6 +105,7 @@ export async function input(
     }
 
     if (options.mask) {
+        const { password: inquirerPassword } = await import("@inquirer/prompts")
         return inquirerPassword({
             message: chalk.hex(BrandColors.orange)(message),
             mask: options.mask,
@@ -110,6 +113,7 @@ export async function input(
         })
     }
 
+    const { input: inquirerInput } = await import("@inquirer/prompts")
     return inquirerInput({
         message: chalk.hex(BrandColors.orange)(message),
         default: options.default,
@@ -144,6 +148,7 @@ export async function numberedSelect<T = string>(
         }
     })
 
+    const { select: inquirerSelect } = await import("@inquirer/prompts")
     return inquirerSelect({
         message: chalk.hex(BrandColors.orange)(message),
         choices: normalizedChoices,

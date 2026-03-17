@@ -22,7 +22,6 @@ All JSON output follows a consistent envelope:
 {
   "success": true,
   "data": { ... },
-  "pagination": { "page": 1, "nextCursor": "..." },
   "metadata": { "timestamp": "...", "command": "..." }
 }
 ```
@@ -98,7 +97,7 @@ export FREECLIMB_API_KEY=your_api_key
 The CLI exposes an MCP server for structured JSON-RPC invocation:
 
 ```bash
-freeclimb mcp:server
+freeclimb mcp:start
 ```
 
 This eliminates shell escaping and argument parsing ambiguity.
@@ -122,3 +121,16 @@ freeclimb applications:create --alias "Test" --voiceUrl "https://example.com"
 freeclimb calls:list --fields callId,status
 freeclimb sms:list --fields messageId,from,to,status
 ```
+
+## Development
+
+Built with oclif v4 (`@oclif/core ^4`), TypeScript 5, and Node.js >= 18.
+
+### Skills for AI Agents Working on This Codebase
+
+| Skill | Location | Purpose |
+|-------|----------|---------|
+| `freeclimb-cli` | `.claude/skills/freeclimb-cli/` | Using the CLI to interact with FreeClimb APIs |
+| `freeclimb-cli-dev` | `.claude/skills/freeclimb-cli-dev/` | Contributing to/modifying the CLI source code |
+| `freeclimb-command-gen` | `.claude/skills/freeclimb-command-gen/` | Working with the command code generation system |
+| `agent-tui` | `.claude/skills/agent-tui/` | Terminal UI automation and testing |

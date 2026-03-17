@@ -1,23 +1,21 @@
 # Commands Directory
 
-## ⚠️ Auto-Generated Code
-Most files here are auto-generated from `generation/commands/`.
-To modify command behavior, edit the templates there.
+## Auto-Generated Code
+Most files here are auto-generated from `generation/commands/main.js`.
+To modify command behavior, edit the generation templates there.
 
-## Command Structure
+Manual (non-generated) commands: `api.ts`, `describe.ts`, `diagnose.ts`, `login.ts`, `logout.ts`, `status.ts`, `mcp/*.ts`
+
+## Command Structure (oclif v4)
 Each command file:
-- Extends oclif Command
-- Exports static description, flags, args
-- Implements async run() method
-- Uses this.parse() for argument parsing
-- Calls FreeClimbApi for API operations
+- Imports `{ Args, Command, Flags } from "@oclif/core"`
+- Uses `Flags.boolean()`, `Flags.string()`, `Args.string()` for definitions
+- Uses `await this.parse(ClassName)` for argument parsing
+- Includes `--json`, `--fields`, `--dry-run` (mutating only) flags
+- Validates inputs via `validateResourceId()`, `rejectControlChars()`
 
 ## Adding a New Command
-1. Create template in generation/commands/[topic]/
-2. Run generation script
-3. Add tests in test/commands/[topic]/
-
-## Common Patterns
-- Use spinner.start()/stop() for loading states
-- Use output.ts formatters for consistent display
-- Handle errors with FreeClimbError subclasses
+1. Add endpoint to `generation/schema/generated-api-schema.json`
+2. Run `node generation/commands/main.js`
+3. Verify: `npx tsc --noEmit`
+4. Add tests in `test/commands/`

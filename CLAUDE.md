@@ -1,77 +1,98 @@
 # FreeClimb CLI
 
-TypeScript CLI for the FreeClimb voice/SMS communications API, built with oclif.
+TypeScript CLI for the FreeClimb voice/SMS communications API, built with oclif v4.
 
 ## Quick Start
 
-npm test              # Run tests with coverage
-npm run lint          # Check code style
-npm run lint-write    # Fix lint issues + format
-npm run prepack       # Build for distribution
+npm install --ignore-scripts
+npx tsc --noEmit       # Type check
+npm test               # Run tests with coverage
+npm run lint           # Check code style
+npm run lint-write     # Fix lint issues + format
+npm run prepack        # Build for distribution
 
 ## Directory Structure
 
 src/
-├── commands/         # oclif command implementations (auto-generated)
-│   ├── accounts/     # Account management
-│   ├── applications/ # App CRUD operations
-│   ├── calls/        # Call management
-│   ├── sms/          # SMS messaging
-│   ├── conferences/  # Conference calls
-│   ├── call-queues/  # Queue management
-│   ├── recordings/   # Recording access
-│   ├── logs/         # Log searching
-│   └── mcp/          # MCP server command
-├── mcp/              # MCP server implementation
-├── ui/               # Terminal UI components
-├── freeclimb.ts      # API client wrapper
-├── credentials.ts    # Secure credential storage (keytar)
-├── environment.ts    # Env var configuration
-└── errors.ts         # Error hierarchy
+├── commands/          # oclif v4 command implementations (mostly auto-generated)
+│   ├── accounts/      # Account management
+│   ├── applications/  # App CRUD operations
+│   ├── calls/         # Call management
+│   ├── sms/           # SMS messaging
+│   ├── conferences/   # Conference calls
+│   ├── call-queues/   # Queue management
+│   ├── recordings/    # Recording access
+│   ├── logs/          # Log searching
+│   └── mcp/           # MCP server command
+├── mcp/               # MCP JSON-RPC server (server.ts, tools.ts)
+├── ui/                # Terminal UI components (banner, format, theme, chars, spinner, select)
+├── agent-config.ts    # Output format detection (human/json/raw)
+├── credentials.ts     # Secure credential storage (@napi-rs/keyring)
+├── environment.ts     # Env var configuration
+├── errors.ts          # Error class hierarchy
+├── error-messages.ts  # Error code → suggestion mappings
+├── freeclimb.ts       # API client wrapper (axios)
+├── output.ts          # Output/pagination manager
+└── validation.ts      # Input validation (control chars, IDs, phones, URLs)
 
-test/                 # Mocha/Chai tests with nock mocking
-generation/           # Command code generation templates
-docs/                 # Auto-generated command docs
+generation/            # Command code generation (schema → TypeScript)
+test/                  # Mocha/Chai tests with nock mocking
+docs/                  # Auto-generated command docs
 
 ## Architecture
 
-### Command Pattern
-Commands follow oclif conventions:
-- Located at `src/commands/[topic]/[action].ts`
-- Extend `Command` base class
-- Static `description`, `flags`, `args` properties
-- Async `run()` method
+### Command Pattern (oclif v4)
+Commands use `@oclif/core`:
+- `import { Args, Command, Flags } from "@oclif/core"`
+- Static `description`, `flags` (using `Flags.*`), `args` (using `Args.*` object format)
+- Async `run()` with `await this.parse(ClassName)`
 
 ### Auto-Generated Code
-⚠️ Most command files are AUTO-GENERATED from `generation/` templates.
+Most command files in `src/commands/` are auto-generated from `generation/commands/main.js`.
 Edit templates in `generation/commands/`, not the generated files.
+Manual commands: `api.ts`, `describe.ts`, `diagnose.ts`, `login.ts`, `logout.ts`, `status.ts`, `mcp/*.ts`
+
+### Agent-DX Features
+- `--json` flag for JSON output (auto-enabled via `FREECLIMB_OUTPUT_FORMAT=json`)
+- `--fields` flag to limit response fields (context window protection)
+- `--dry-run` flag for mutating operations (create/update/delete)
+- `freeclimb describe` for machine-readable schema introspection
+- Input validation: control chars, path traversal, query injection rejected
 
 ### Credential Management
 Priority order:
-1. keytar (OS keychain) via `freeclimb login`
-2. Environment variables: FREECLIMB_ACCOUNT_ID, FREECLIMB_API_KEY
+1. Environment variables: FREECLIMB_ACCOUNT_ID, FREECLIMB_API_KEY
+2. OS keychain via @napi-rs/keyring (`freeclimb login`)
 3. .env file (dotenv)
 
 ### Error Handling
 Hierarchy: FreeClimbError → ParseError, APIError, DefaultFatalError
-Use chalk colors for severity levels in output.
+Structured error suggestions with codes, messages, CLI commands, and doc URLs.
 
 ### Output Formatting
 - Topic-specific formatters in `src/ui/format.ts`
-- --json flag for scripted usage
-- Pagination with --next cursor
+- JSON envelope via `wrapJsonOutput()` with `success`, `data`, `metadata`
+- Pagination with `--next` cursor
 
 ## Testing
 
 Framework: Mocha + Chai + Nock (HTTP mocking)
 Coverage: nyc
+Runner: `@oclif/test` v4 `runCommand()` API
 
 Run specific test:
-npx mocha test/commands/sms/send.test.ts
+npx mocha test/commands/sms-send.test.ts
 
 ## MCP Integration
 
 Built-in MCP server exposes 15+ tools for AI agents:
-freeclimb mcp:server
+freeclimb mcp:start
 
 Tools: calls, sms, numbers, applications, conferences, queues
+
+## Skills
+
+.claude/skills/freeclimb-cli/       # Using the CLI (for agents)
+.claude/skills/freeclimb-cli-dev/   # Developing the CLI (for contributors)
+.claude/skills/freeclimb-command-gen/ # Working with the code generation system
+.claude/skills/agent-tui/           # Terminal UI automation testing
