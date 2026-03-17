@@ -12,34 +12,29 @@ Use `./bin/run` from the repo root to run the CLI in development mode (instead o
 
 ### Key commands
 
-| Task         | Command                                             |
+| Task | Command |
 | ------------ | --------------------------------------------------- |
-| Install deps | `yarn install --frozen-lockfile --production=false` |
-| Build        | `npx tsc -b`                                        |
-| Lint         | `yarn lint`                                         |
-| Test         | `yarn test`                                         |
-| Run CLI      | `./bin/run [COMMAND]`                               |
+| Install deps | `npm install` |
+| Build | `npx tsc -b` |
+| Lint | `npx eslint src/ --ext .ts --config .eslintrc.json` |
+| Test | `npm test` |
+| Run CLI | `./bin/run [COMMAND]` |
 
 ### gnome-keyring setup (required for tests and CLI)
 
-The `keytar` native module requires a running gnome-keyring daemon. Before running tests or the CLI, you must start dbus and gnome-keyring:
+The `@napi-rs/keyring` native module requires a running gnome-keyring daemon. Before running tests or the CLI, you must start dbus and gnome-keyring:
 
 ```bash
-export $(dbus-launch)
-echo "" | gnome-keyring-daemon --unlock
-export $(echo "" | /usr/bin/gnome-keyring-daemon -r -d --unlock)
+eval "$(dbus-launch --sh-syntax)"
+eval "$(echo "" | gnome-keyring-daemon -r -d --unlock 2>/dev/null)"
 ```
 
-Without this, any command that touches the OS keychain (login/logout, and most tests) will fail.
+Without this, any command that touches the OS keychain (login/logout, and most tests) will fail or hang.
 
 ### Node version
 
-The project requires Node.js 14.x (`.nvmrc` says `14.15.0`, but 14.17+ is needed for the eslint plugins). Use `nvm use 14` to activate.
+The project requires Node.js 18+ (`.nvmrc` says `18.20.0`). Use `nvm use 22` or any Node 18+ version.
 
 ### Known lint issues
 
-The repo has 1 pre-existing lint error in `src/error-messages.ts` (extra blank line) and ~275 warnings. These are not introduced by agent changes.
-
-### `.npmrc` caveat
-
-The `.npmrc` references an internal `@vail` registry that is unreachable externally. This does not affect `yarn install` since no `@vail`-scoped packages are in the dependency tree.
+The repo has 4 pre-existing lint warnings (`no-await-in-loop` in logs filter/list commands). These are not introduced by agent changes.
