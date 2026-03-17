@@ -51,17 +51,15 @@ export default class FreeClimbHelpClass extends Help {
             "recordings",
             "available-numbers",
         ]
+        const integrationTopics = ["mcp"]
+        const allKnown = [...coreTopics, ...accountTopics, ...advancedTopics, ...integrationTopics]
 
         const categorizedTopics = {
             "Core Commands": topics.filter((t) => coreTopics.includes(t.name)),
             "Account & Logs": topics.filter((t) => accountTopics.includes(t.name)),
             "Advanced Features": topics.filter((t) => advancedTopics.includes(t.name)),
-            Other: topics.filter(
-                (t) =>
-                    !coreTopics.includes(t.name) &&
-                    !accountTopics.includes(t.name) &&
-                    !advancedTopics.includes(t.name)
-            ),
+            Integrations: topics.filter((t) => integrationTopics.includes(t.name)),
+            Other: topics.filter((t) => !allKnown.includes(t.name)),
         }
 
         let output = ""

@@ -16,7 +16,7 @@ export class conferencesUpdate extends Command {
 		playBeep: Flags.string({            char: "b",            description: "Controls when a beep is played. Valid values: always, never, entryOnly, exitOnly.",             required: false,             }),
 		status: Flags.string({            char: "S",            description: "New status of the conference. Valid values: empty or terminated.",             required: false,             }),
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),

@@ -20,7 +20,7 @@ export class callsMake extends Command {
 		timeout: Flags.integer({            char: "t",            description: "Number of seconds that FreeClimb should allow the phone to ring before assuming there is no answer. Default is 30 seconds. Maximum allowed ring-time is determined by the target phone's provider. Note that most providers limit ring-time to 120 seconds.",             required: false,             }),
 		privacyMode: Flags.string({            char: "p",            description: "Indicates if the request contains sensitive information which should be hidden. When set to true, the contents of the sendDigits field will be replaced with the string XXXXX in the logs.",             required: false,             options: ["true", "false"]}),
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),

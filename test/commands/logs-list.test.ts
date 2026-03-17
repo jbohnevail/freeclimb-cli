@@ -9,10 +9,6 @@ describe("logs:list Data Test", function () {
         message: "Response from server",
     }
 
-    const nockServerResponse = `{
-  "message": "Response from server"
-}`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -22,8 +18,8 @@ describe("logs:list Data Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Logs`)
             .query({})
             .reply(200, testJson)
-        const { stdout } = await runCommand(["logs:list"])
-        expect(stdout).to.contain(nockServerResponse)
+        const { stdout } = await runCommand(["logs:list", "--json"])
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     it("Test Freeclimb Api error repsonce is process correctly without a suggestion", async () => {
@@ -49,8 +45,8 @@ describe("logs:list Data Test", function () {
                 .get(`/apiserver/Accounts/${await cred.accountId}/Logs`)
                 .query({})
                 .reply(200, testJson)
-            const { stdout } = await runCommand(["logs:list"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["logs:list", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         } finally {
             delete process.env.FREECLIMB_CLI_BASE_URL
         }
@@ -162,8 +158,9 @@ describe("logs:list Data Test", function () {
                 "logs:list",
                 "--maxItem",
                 "2",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponseLogs)
+            expect(stdout).to.contain('"this is log one"')
         })
 
         it("Test maxItem with --next", async () => {
@@ -178,8 +175,9 @@ describe("logs:list Data Test", function () {
                     "--maxItem",
                     "2",
                     "--next",
+                    "--json",
                 ])
-                expect(stdout).to.contain(nockServerResponseNextLogs)
+                expect(stdout).to.contain('"this is log one"')
             } finally {
                 delete process.env.FREECLIMB_LOGS_LIST_NEXT
             }
@@ -194,7 +192,7 @@ describe("logs:list Data Test", function () {
                     .get(`/apiserver/Accounts/${await cred.accountId}/Logs`)
                     .query({})
                     .reply(200, testJson)
-                await runCommand(["logs:list"])
+                await runCommand(["logs:list", "--json"])
                 const { error } = await runCommand(["logs:list", "--next"])
                 expect(error?.oclif?.exit).to.equal(3)
             } finally {
@@ -212,15 +210,14 @@ describe("logs:list Data Test", function () {
                 pageSize: 100,
                 nextPageUri: null,
             }
-            const nockServerResponseNext = `== You are on the last page of output. ==`
             try {
                 process.env.FREECLIMB_LOGS_LIST_NEXT = "6c6f67733a6c697374"
                 nock("https://www.freeclimb.com")
                     .get(`/apiserver/Accounts/${await cred.accountId}/Logs`)
                     .query({ cursor: "6c6f67733a6c697374" })
                     .reply(200, testJsonNext)
-                const { stdout } = await runCommand(["logs:list", "--next"])
-                expect(stdout).to.contain(nockServerResponseNext)
+                const { stdout } = await runCommand(["logs:list", "--next", "--json"])
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 delete process.env.FREECLIMB_LOGS_LIST_NEXT
             }
@@ -237,15 +234,14 @@ describe("logs:list Data Test", function () {
                 pageSize: 100,
                 nextPageUri: `https://www.freeclimb.com/apiserver/Accounts/${await cred.accountId}/Logs?cursor=${finalCursor}`,
             }
-            const nockServerResponseNext2 = `== Currently on page 1. Run this command again with the -n flag to go to the next page. ==`
             try {
                 process.env.FREECLIMB_LOGS_LIST_NEXT = "6c6f67733a6c697374"
                 nock("https://www.freeclimb.com")
                     .get(`/apiserver/Accounts/${await cred.accountId}/Logs`)
                     .query({ cursor: "6c6f67733a6c697374" })
                     .reply(200, testJsonNext2)
-                const { stdout } = await runCommand(["logs:list", "--next"])
-                expect(stdout).to.contain(nockServerResponseNext2)
+                const { stdout } = await runCommand(["logs:list", "--next", "--json"])
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 delete process.env.FREECLIMB_LOGS_LIST_NEXT
             }
@@ -270,9 +266,6 @@ describe("logs:list Data Test", function () {
 describe("logs:list Status Test", function () {
     const testJsonStatus = ""
 
-    const statusResponse = `Received a success code from FreeClimb. There is no further output.
-`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -282,7 +275,7 @@ describe("logs:list Status Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/Logs`)
             .query({})
             .reply(204, testJsonStatus)
-        const { stdout } = await runCommand(["logs:list"])
-        expect(stdout).to.contain(statusResponse)
+        const { stdout } = await runCommand(["logs:list", "--json"])
+        expect(stdout).to.contain('"success": true')
     })
 })

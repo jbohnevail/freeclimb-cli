@@ -153,9 +153,12 @@ Useful for troubleshooting authentication or connectivity issues.
                 return
             }
 
-            // Check source of credentials
-            const envAccountId = Environment.getString("ACCOUNT_ID")
-            const envApiKey = Environment.getString("API_KEY")
+            const envAccountId =
+                Environment.getString("FREECLIMB_ACCOUNT_ID") ||
+                Environment.getString("ACCOUNT_ID")
+            const envApiKey =
+                Environment.getString("FREECLIMB_API_KEY") ||
+                Environment.getString("API_KEY")
 
             let source = "keytar (secure storage)"
             if (envAccountId && envApiKey) {

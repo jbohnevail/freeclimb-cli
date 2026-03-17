@@ -202,13 +202,15 @@ export function formatTableWithBorders(
             : col.header.padEnd(colWidths[i])
         return header
     })
-    lines.push(`${chars.vertical} ${headerCells.join(" ${chars.vertical} ")} ${chars.vertical}`)
+    const headerJoinSep = ` ${chars.vertical} `
+    lines.push(`${chars.vertical} ${headerCells.join(headerJoinSep)} ${chars.vertical}`)
 
     // Header separator
     const headerSepParts = colWidths.map((w) => chars.horizontal.repeat(w + 2))
     lines.push(`${chars.teeRight}${headerSepParts.join(chars.cross)}${chars.teeLeft}`)
 
     // Data rows
+    const cellJoinSep = ` ${chars.vertical} `
     for (const row of data) {
         const cells = columns.map((col, i) => {
             const val = String(row[col.key] || "")
@@ -230,7 +232,7 @@ export function formatTableWithBorders(
 
             return cell
         })
-        lines.push(`${chars.vertical} ${cells.join(" ${chars.vertical} ")} ${chars.vertical}`)
+        lines.push(`${chars.vertical} ${cells.join(cellJoinSep)} ${chars.vertical}`)
     }
 
     // Bottom border

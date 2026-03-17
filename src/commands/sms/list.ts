@@ -18,7 +18,7 @@ export class smsList extends Command {
 		endTime: Flags.string({            char: "e",            description: "Only show messages sent at or before this time (GMT), given as YYYY-MM-DD hh:mm.",             required: false,             }),
 		direction: Flags.string({            char: "d",            description: "Either inbound or outbound. Only show Messages that were either sent from or received by FreeClimb.",             required: false,             }),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		help: Flags.help({char: 'h'}),
 	}

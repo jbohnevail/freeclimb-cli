@@ -21,7 +21,7 @@ export class logsFilter extends Command {
 		sleep: Flags.integer({ char: "q", description: "Determines time waited between request for tail command. Defaults at 1 second.", default: 1000}),
 		since: Flags.string({ char: "Q", description: "Determines time frame of logs to be printed out before starting tail. Ex.2h9m", dependsOn:['tail']}),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),

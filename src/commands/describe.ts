@@ -4,7 +4,6 @@ import { getOutputFormat } from "../agent-config"
 interface CommandSchema {
     command: string
     description: string
-    method?: string
     flags: Record<
         string,
         {
@@ -13,6 +12,7 @@ interface CommandSchema {
             description: string
             options?: string[]
             char?: string
+            default?: unknown
         }
     >
     args: Array<{
@@ -146,6 +146,9 @@ Examples:
                 }
                 if (f.char) {
                     schema.flags[name].char = f.char
+                }
+                if (f.default !== undefined) {
+                    schema.flags[name].default = f.default
                 }
             }
         }

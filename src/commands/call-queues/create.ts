@@ -15,7 +15,7 @@ export class callQueuesCreate extends Command {
 		alias: Flags.string({            char: "a",            description: "A description for this Queue. Max length is 64 characters.",             required: false,             }),
 		maxSize: Flags.integer({            char: "M",            description: "Maximum number of Calls this queue can hold. Default is 1000. Maximum is 1000.",             required: false,             }),
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),

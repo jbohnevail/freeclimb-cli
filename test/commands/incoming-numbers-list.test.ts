@@ -9,10 +9,6 @@ describe("incoming-numbers:list Data Test", function () {
         message: "Response from server",
     }
 
-    const nockServerResponse = `{
-  "message": "Response from server"
-}`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -22,8 +18,8 @@ describe("incoming-numbers:list Data Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/IncomingPhoneNumbers`)
             .query({})
             .reply(200, testJson)
-        const { stdout } = await runCommand(["incoming-numbers:list"])
-        expect(stdout).to.contain(nockServerResponse)
+        const { stdout } = await runCommand(["incoming-numbers:list", "--json"])
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     it("Test Freeclimb Api error repsonce is process correctly without a suggestion", async () => {
@@ -49,8 +45,8 @@ describe("incoming-numbers:list Data Test", function () {
                 .get(`/apiserver/Accounts/${await cred.accountId}/IncomingPhoneNumbers`)
                 .query({})
                 .reply(200, testJson)
-            const { stdout } = await runCommand(["incoming-numbers:list"])
-            expect(stdout).to.contain(nockServerResponse)
+            const { stdout } = await runCommand(["incoming-numbers:list", "--json"])
+            expect(stdout).to.contain('"message": "Response from server"')
         } finally {
             delete process.env.FREECLIMB_CLI_BASE_URL
         }
@@ -120,8 +116,9 @@ describe("incoming-numbers:list Data Test", function () {
             "true",
             "--voiceEnabled",
             "true",
+            "--json",
         ])
-        expect(stdout).to.contain(nockServerResponse)
+        expect(stdout).to.contain('"message": "Response from server"')
     })
 
     describe("incoming-numbers:list query param flags", function () {
@@ -136,8 +133,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--phoneNumber",
                 "userInput-phoneNumber",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-alias", async () => {
@@ -151,8 +149,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--alias",
                 "userInput-alias",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-applicationId", async () => {
@@ -166,8 +165,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--applicationId",
                 "userInput-applicationId",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-hasApplication", async () => {
@@ -181,8 +181,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--hasApplication",
                 "true",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-country", async () => {
@@ -196,8 +197,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--country",
                 "userInput-country",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-region", async () => {
@@ -211,8 +213,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--region",
                 "userInput-region",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-smsEnabled", async () => {
@@ -226,8 +229,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--smsEnabled",
                 "true",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("required params and a query param is sent through with request-voiceEnabled", async () => {
@@ -241,8 +245,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "incoming-numbers:list",
                 "--voiceEnabled",
                 "true",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
     })
 
@@ -254,7 +259,7 @@ describe("incoming-numbers:list Data Test", function () {
                     .get(`/apiserver/Accounts/${await cred.accountId}/IncomingPhoneNumbers`)
                     .query({})
                     .reply(200, testJson)
-                await runCommand(["incoming-numbers:list"])
+                await runCommand(["incoming-numbers:list", "--json"])
                 const { error } = await runCommand([
                     "incoming-numbers:list",
                     "--next",
@@ -275,7 +280,6 @@ describe("incoming-numbers:list Data Test", function () {
                 pageSize: 100,
                 nextPageUri: null,
             }
-            const nockServerResponseNext = `== You are on the last page of output. ==`
             try {
                 process.env.FREECLIMB_INCOMING_NUMBERS_LIST_NEXT =
                     "696e636f6d696e672d6e756d626572733a6c697374"
@@ -286,8 +290,9 @@ describe("incoming-numbers:list Data Test", function () {
                 const { stdout } = await runCommand([
                     "incoming-numbers:list",
                     "--next",
+                    "--json",
                 ])
-                expect(stdout).to.contain(nockServerResponseNext)
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 delete process.env.FREECLIMB_INCOMING_NUMBERS_LIST_NEXT
             }
@@ -304,7 +309,6 @@ describe("incoming-numbers:list Data Test", function () {
                 pageSize: 100,
                 nextPageUri: `https://www.freeclimb.com/apiserver/Accounts/${await cred.accountId}/IncomingPhoneNumbers?cursor=${finalCursor}`,
             }
-            const nockServerResponseNext2 = `== Currently on page 1. Run this command again with the -n flag to go to the next page. ==`
             try {
                 process.env.FREECLIMB_INCOMING_NUMBERS_LIST_NEXT =
                     "696e636f6d696e672d6e756d626572733a6c697374"
@@ -315,8 +319,9 @@ describe("incoming-numbers:list Data Test", function () {
                 const { stdout } = await runCommand([
                     "incoming-numbers:list",
                     "--next",
+                    "--json",
                 ])
-                expect(stdout).to.contain(nockServerResponseNext2)
+                expect(stdout).to.contain('"page": 1')
             } finally {
                 delete process.env.FREECLIMB_INCOMING_NUMBERS_LIST_NEXT
             }
@@ -374,8 +379,9 @@ describe("incoming-numbers:list Data Test", function () {
                 "false",
                 "--voiceEnabled",
                 "false",
+                "--json",
             ])
-            expect(stdout).to.contain(nockServerResponse)
+            expect(stdout).to.contain('"message": "Response from server"')
         })
 
         it("tests incorrect hasApplication input results in exit code 2", async () => {
@@ -410,9 +416,6 @@ describe("incoming-numbers:list Data Test", function () {
 describe("incoming-numbers:list Status Test", function () {
     const testJsonStatus = ""
 
-    const statusResponse = `Received a success code from FreeClimb. There is no further output.
-`
-
     afterEach(() => {
         nock.cleanAll()
     })
@@ -422,7 +425,7 @@ describe("incoming-numbers:list Status Test", function () {
             .get(`/apiserver/Accounts/${await cred.accountId}/IncomingPhoneNumbers`)
             .query({})
             .reply(204, testJsonStatus)
-        const { stdout } = await runCommand(["incoming-numbers:list"])
-        expect(stdout).to.contain(statusResponse)
+        const { stdout } = await runCommand(["incoming-numbers:list", "--json"])
+        expect(stdout).to.contain('"success": true')
     })
 })

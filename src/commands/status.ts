@@ -16,8 +16,6 @@ interface AccountStatus {
     balance?: string
     numbersCount?: number
     applicationsCount?: number
-    callsToday?: number
-    smsToday?: number
 }
 
 export class Status extends Command {
@@ -73,7 +71,7 @@ Use --json for machine-readable output.
 
             // Fetch account info and resources in parallel
             const [accountRes, numbersRes, applicationsRes] = await Promise.all([
-                client.get(`/Accounts/${accountId}`).catch(() => null),
+                client.get("").catch(() => null),
                 client.get("/IncomingPhoneNumbers").catch(() => null),
                 client.get("/Applications").catch(() => null),
             ])

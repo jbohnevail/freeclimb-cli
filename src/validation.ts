@@ -140,8 +140,6 @@ export function filterFieldsDeep(data: unknown, fields: string[]): unknown {
                 result[key] = filterFieldsDeep(value, fields)
             } else if (fields.includes(key)) {
                 result[key] = value
-            } else {
-                result[key] = value
             }
         }
         return result

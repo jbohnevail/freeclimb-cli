@@ -15,7 +15,7 @@ export class conferenceParticipantsUpdate extends Command {
 		talk: Flags.string({            char: "L",            description: "(Optional) Default is true. Setting to false mutes the Participant. FreeClimb returns an error and ignores any other value.",             required: false,             options: ["true", "false"]}),
 		listen: Flags.string({            char: "l",            description: "(Optional) Default is true. Setting to false silences the Conference for this Participant. FreeClimb returns an error and ignores any other value.",             required: false,             options: ["true", "false"]}),
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),
