@@ -11,10 +11,14 @@ Remove your saved FreeClimb Account ID and API Key from this computer's keychain
 
 ```
 USAGE
-  $ freeclimb logout
+  $ freeclimb logout [-h]
 
-OPTIONS
-  -h, --help  show CLI help
+FLAGS
+  -h, --help  Show CLI help.
+
+DESCRIPTION
+  Remove your saved FreeClimb Account ID and API Key from this computer's keychain. This will not remove them from
+  environment variables or config files that you have manually edited.
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.5.4/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/logout.ts)_

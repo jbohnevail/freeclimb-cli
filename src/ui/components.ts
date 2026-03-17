@@ -1,7 +1,12 @@
 import chalk from "chalk"
-import stripAnsi from "strip-ansi"
-import { BrandColors, supportsColor, isTTY, getTerminalWidth, truncate } from "./theme"
-import { box, getBoxChars, icons, horizontalRule } from "./chars"
+import { BrandColors, supportsColor, getTerminalWidth } from "./theme"
+import { getBoxChars, icons, horizontalRule } from "./chars"
+
+// Inline ANSI stripping (strip-ansi v7+ is ESM-only, incompatible with CommonJS)
+function stripAnsi(text: string): string {
+    // eslint-disable-next-line no-control-regex
+    return text.replace(/\u001B\[[0-9;]*m/g, "")
+}
 
 // Create a bordered section header
 export function sectionHeader(title: string, width?: number): string {
@@ -82,18 +87,22 @@ export function keyValue(pairs: KeyValuePair[], keyWidth?: number): string[] {
 
         if (supportsColor() && pair.valueColor) {
             switch (pair.valueColor) {
-                case "success":
+                case "success": {
                     formattedValue = chalk.hex(BrandColors.lime)(pair.value)
                     break
-                case "warning":
+                }
+                case "warning": {
                     formattedValue = chalk.hex(BrandColors.orange)(pair.value)
                     break
-                case "error":
+                }
+                case "error": {
                     formattedValue = chalk.red(pair.value)
                     break
-                case "info":
+                }
+                case "info": {
                     formattedValue = chalk.hex(BrandColors.darkTeal)(pair.value)
                     break
+                }
             }
         }
 
@@ -106,7 +115,15 @@ export function keyValue(pairs: KeyValuePair[], keyWidth?: number): string[] {
 }
 
 // Status badge component
-export type StatusType = "active" | "pending" | "failed" | "suspended" | "closed" | "trial" | "full" | "unknown"
+export type StatusType =
+    | "active"
+    | "pending"
+    | "failed"
+    | "suspended"
+    | "closed"
+    | "trial"
+    | "full"
+    | "unknown"
 
 export function statusBadge(status: string): string {
     const normalizedStatus = status.toLowerCase() as StatusType
@@ -117,18 +134,23 @@ export function statusBadge(status: string): string {
 
     switch (normalizedStatus) {
         case "active":
-        case "full":
+        case "full": {
             return `${icons.active()} ${chalk.hex(BrandColors.lime).bold(status.toUpperCase())}`
-        case "pending":
+        }
+        case "pending": {
             return `${icons.pending()} ${chalk.hex(BrandColors.orange)(status.toUpperCase())}`
-        case "trial":
+        }
+        case "trial": {
             return chalk.hex(BrandColors.orange).bold(status.toUpperCase())
+        }
         case "failed":
         case "suspended":
-        case "closed":
+        case "closed": {
             return `${icons.error()} ${chalk.red.bold(status.toUpperCase())}`
-        default:
+        }
+        default: {
             return status.toUpperCase()
+        }
     }
 }
 
@@ -165,7 +187,9 @@ export function progressBar(current: number, total: number, width = 20): string 
     let bar = filledChar.repeat(filled) + emptyChar.repeat(empty)
 
     if (supportsColor()) {
-        bar = chalk.hex(BrandColors.lime)(filledChar.repeat(filled)) + chalk.dim(emptyChar.repeat(empty))
+        bar =
+            chalk.hex(BrandColors.lime)(filledChar.repeat(filled)) +
+            chalk.dim(emptyChar.repeat(empty))
     }
 
     const percentText = `${Math.round(percentage * 100)}%`
@@ -184,9 +208,7 @@ export function quickActions(actions: Array<{ command: string; description: stri
     }
 
     for (const action of actions) {
-        const cmd = supportsColor()
-            ? chalk.hex(BrandColors.orange)(action.command)
-            : action.command
+        const cmd = supportsColor() ? chalk.hex(BrandColors.orange)(action.command) : action.command
         const desc = supportsColor() ? chalk.dim(action.description) : action.description
         lines.push(`  ${cmd}  ${desc}`)
     }
@@ -201,14 +223,12 @@ export function emptyState(message: string, suggestion?: string): string {
     if (supportsColor()) {
         lines.push(chalk.dim(message))
         if (suggestion) {
-            lines.push("")
-            lines.push(chalk.dim(`Try: ${chalk.hex(BrandColors.orange)(suggestion)}`))
+            lines.push("", chalk.dim(`Try: ${chalk.hex(BrandColors.orange)(suggestion)}`))
         }
     } else {
         lines.push(message)
         if (suggestion) {
-            lines.push("")
-            lines.push(`Try: ${suggestion}`)
+            lines.push("", `Try: ${suggestion}`)
         }
     }
 

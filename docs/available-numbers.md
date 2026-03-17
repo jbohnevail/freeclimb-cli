@@ -11,21 +11,29 @@ Search for phone numbers that are available for purchase. To purchase an availab
 
 ```
 USAGE
-  $ freeclimb available-numbers:list
+  $ freeclimb available-numbers:list [-a <value>] [-C <value>] [-r <value>] [-E true|false] [-o true|false] [-p <value>]
+    [-n] [--json] [--fields <value>] [-h]
 
-OPTIONS
-  -C, --country=country          Filters numbers by two character ISO country code.
-  -E, --smsEnabled=true|false    Filters numbers based on SMS capability.
-  -a, --alias=alias              Filter on numbers based on the formatted string of the phone number.
-  -h, --help                     show CLI help
-  -n, --next                     Displays the next page of output.
-  -o, --voiceEnabled=true|false  Filters numbers based on voice capability.
+FLAGS
+  -C, --country=<value>        Filters numbers by two character ISO country code.
+  -E, --smsEnabled=<option>    Filters numbers based on SMS capability.
+                               <options: true|false>
+  -a, --alias=<value>          Filter on numbers based on the formatted string of the phone number.
+  -h, --help                   Show CLI help.
+  -n, --next                   Displays the next page of output.
+  -o, --voiceEnabled=<option>  Filters numbers based on voice capability.
+                               <options: true|false>
+  -p, --phoneNumber=<value>    PCRE-compatible regular expression to filter against phoneNumber field, which is in E.164
+                               format.
+  -r, --region=<value>         Filters numbers by two letter state abbreviation. This flag is only available for US
+                               numbers.
+      --fields=<value>         Comma-separated list of fields to include in the response. Limits output to protect
+                               context windows when used by agents.
+      --json                   Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
 
-  -p, --phoneNumber=phoneNumber  PCRE-compatible regular expression to filter against phoneNumber field, which is in
-                                 E.164 format.
-
-  -r, --region=region            Filters numbers by two letter state abbreviation. This flag is only available for US
-                                 numbers.
+DESCRIPTION
+  Search for phone numbers that are available for purchase. To purchase an available phone number, the number should be
+  submitted via POST to the /IncomingPhoneNumbers endpoint.
 ```
 
-_See code: [src/commands/available-numbers/list.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.5.4/src/commands/available-numbers/list.ts)_
+_See code: [src/commands/available-numbers/list.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/available-numbers/list.ts)_

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^8.3.2",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@napi-rs/keyring": "^1",
     "@oclif/core": "^4",
     "@oclif/plugin-autocomplete": "^3",
@@ -68,13 +69,17 @@
     "macos": {
       "identifier": "com.freeclimb.cli"
     },
+    "hooks": {
+      "init": "./lib/hooks/init/version-check"
+    },
     "update": {
       "s3": {
         "bucket": "vail-freeclimb-cli"
       }
     },
     "plugins": [
-      "@oclif/plugin-help"
+      "@oclif/plugin-help",
+      "@oclif/plugin-autocomplete"
     ],
     "topics": {
       "sms": {
@@ -129,7 +134,7 @@
     "prepack": "rm -rf lib; rm -f tsconfig.tsbuildinfo; tsc -b && oclif manifest && oclif readme --multi",
     "test": "nyc --extension .ts mocha --require ts-node/register --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif readme --multi && git add README.md docs/",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "types": "lib/index.d.ts",
   "lint-staged": {

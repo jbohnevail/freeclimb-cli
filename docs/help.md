@@ -1,23 +1,26 @@
 `freeclimb help`
 ================
 
-display help for freeclimb
+Display help for freeclimb.
 
 * [`freeclimb help [COMMAND]`](#freeclimb-help-command)
 
 ## `freeclimb help [COMMAND]`
 
-display help for freeclimb
+Display help for freeclimb.
 
 ```
 USAGE
-  $ freeclimb help [COMMAND]
+  $ freeclimb help [COMMAND...] [-n]
 
 ARGUMENTS
-  COMMAND  command to show help for
+  [COMMAND...]  Command to show help for.
 
-OPTIONS
-  --all  see all commands in CLI
+FLAGS
+  -n, --nested-commands  Include all nested commands in the output.
+
+DESCRIPTION
+  Display help for freeclimb.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.3.1/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/6.2.38/src/commands/help.ts)_
