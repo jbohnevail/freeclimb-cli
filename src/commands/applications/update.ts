@@ -6,11 +6,14 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class applicationsUpdate extends Command {
     static description = ` Update the properties of the specified application.`
-    
+    static examples = [
+        "<%= config.bin %> applications:update AP1234567890abcdef1234567890abcdef12345678 --alias \"Updated App\"",
+        "<%= config.bin %> applications:update AP1234567890abcdef1234567890abcdef12345678 --voiceUrl https://example.com/new-voice --dry-run",
+    ]
     static flags = {
 		alias: Flags.string({            char: "a",            description: "A human readable description of the application, with maximum length 64 characters.",             required: false,             }),
 		voiceUrl: Flags.string({            char: "v",            description: "The URL that FreeClimb will request when an inbound call arrives on a phone number assigned to this application. Used only for inbound calls.",             required: false,             }),
@@ -20,14 +23,15 @@ export class applicationsUpdate extends Command {
 		smsUrl: Flags.string({            char: "u",            description: "The URL that FreeClimb will request when a phone number assigned to this application receives an incoming SMS message. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",             required: false,             }),
 		smsFallbackUrl: Flags.string({            char: "F",            description: "The URL that FreeClimb will request if it times out waiting for a response from the smsUrl. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",             required: false,             }),
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),
 	}
     
 	static args = {
-		applicationId: Args.string({description: "A string that uniquely identifies this application resource.", required: false}),
+		applicationId: Args.string({description: "A string that uniquely identifies this application resource.", required: true}),
 	}
 
     async run() {
@@ -77,12 +81,18 @@ export class applicationsUpdate extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:update" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "applicationId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
@@ -93,6 +103,7 @@ export class applicationsUpdate extends Command {
             
         }
         if(Object.entries(flags).length === 0) { this.warn(chalk.yellow("Nothing Has Been Updated: Please enter a parameter to update ('freeclimb applications:update -h' for a list of parameters to be updated)"))}
+        
         
         await fcApi.apiCall("POST", {data: {
 				alias: flags.alias,

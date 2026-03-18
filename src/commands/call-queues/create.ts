@@ -6,16 +6,20 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class callQueuesCreate extends Command {
     static description = ` Create a Queue within the specified account.`
-    
+    static examples = [
+        "<%= config.bin %> call-queues:create --alias \"Support Queue\"",
+        "<%= config.bin %> call-queues:create --alias \"Support Queue\" --maxSize 100 --dry-run",
+    ]
     static flags = {
 		alias: Flags.string({            char: "a",            description: "A description for this Queue. Max length is 64 characters.",             required: false,             }),
 		maxSize: Flags.integer({            char: "M",            description: "Maximum number of Calls this queue can hold. Default is 1000. Maximum is 1000.",             required: false,             }),
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),
@@ -56,12 +60,18 @@ export class callQueuesCreate extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "call-queues:create" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "queueId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
@@ -75,6 +85,7 @@ export class callQueuesCreate extends Command {
 const aboveRangeError = new Errors.OutOfRange("maxSize", 1000, "less")
 if(flags.maxSize && flags.maxSize < 0) { this.error(belowRangeError.message, {exit: belowRangeError.code}) }
 if(flags.maxSize && flags.maxSize > 1000) { this.error(aboveRangeError.message, {exit: aboveRangeError.code}) }
+        
         
         await fcApi.apiCall("POST", {data: {
 				alias: flags.alias,

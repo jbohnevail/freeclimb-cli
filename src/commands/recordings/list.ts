@@ -6,17 +6,22 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class recordingsList extends Command {
     static description = ` Retrieve a list of metadata for recordings associated with the specified account, sorted from latest created to oldest.`
-    
+    static examples = [
+        "<%= config.bin %> recordings:list",
+        "<%= config.bin %> recordings:list --json",
+        "<%= config.bin %> recordings:list --quiet",
+    ]
     static flags = {
 		callId: Flags.string({            char: "c",            description: "Show only Recordings made during the Call with this ID.",             required: false,             }),
 		conferenceId: Flags.string({            char: "C",            description: "Show only Recordings made during the conference with this ID.",             required: false,             }),
 		dateCreated: Flags.string({            char: "d",            description: "Only show Recordings created on this date, formatted as YYYY-MM-DD.",             required: false,             }),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		help: Flags.help({char: 'h'}),
 	}
@@ -40,20 +45,31 @@ export class recordingsList extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "recordings:list" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "recordingId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                out.out(formatOutput(response.data))
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "recordingId")
+                    if (ids) { out.out(ids) }
+                } else {
+                    out.out(formatOutput(response.data))
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }
@@ -69,6 +85,8 @@ export class recordingsList extends Command {
             }
             return
         }
+        
+        
         
         await fcApi.apiCall("GET", {params: {
 				callId: flags.callId,

@@ -6,11 +6,15 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class incomingNumbersList extends Command {
     static description = ` Retrieve a list of Incoming Phone Numbers associated with the specified account, sorted from newest to oldest.`
-    
+    static examples = [
+        "<%= config.bin %> incoming-numbers:list",
+        "<%= config.bin %> incoming-numbers:list --json",
+        "<%= config.bin %> incoming-numbers:list --quiet",
+    ]
     static flags = {
 		phoneNumber: Flags.string({            char: "p",            description: "Only show incoming phone number resources that match this PCRE-compatible regular expression.",             required: false,             }),
 		alias: Flags.string({            char: "a",            description: "Only show incoming phone numbers with aliases that exactly match this value.",             required: false,             }),
@@ -21,7 +25,8 @@ export class incomingNumbersList extends Command {
 		smsEnabled: Flags.string({            char: "E",            description: "Filters numbers based on SMS capability.",             required: false,             options: ["true", "false"]}),
 		voiceEnabled: Flags.string({            char: "o",            description: "Filters numbers based on voice capability.",             required: false,             options: ["true", "false"]}),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		help: Flags.help({char: 'h'}),
 	}
@@ -47,20 +52,31 @@ export class incomingNumbersList extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "incoming-numbers:list" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "phoneNumberId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                out.out(formatOutput(response.data))
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "phoneNumberId")
+                    if (ids) { out.out(ids) }
+                } else {
+                    out.out(formatOutput(response.data))
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }

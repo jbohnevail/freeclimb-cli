@@ -6,11 +6,16 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class smsList extends Command {
     static description = ` Retrieve a list of SMS Messages made to and from the specified Account, sorted from latest created to oldest.`
-    
+    static examples = [
+        "<%= config.bin %> sms:list",
+        "<%= config.bin %> sms:list --json",
+        "<%= config.bin %> sms:list --quiet",
+        "<%= config.bin %> sms:list --fields messageId,from,to,status",
+    ]
     static flags = {
 		to: Flags.string({            char: "T",            description: "Only show Messages to this phone number.",             required: false,             }),
 		from: Flags.string({            char: "f",            description: "Only show Messages from this phone number.",             required: false,             }),
@@ -18,7 +23,8 @@ export class smsList extends Command {
 		endTime: Flags.string({            char: "e",            description: "Only show messages sent at or before this time (GMT), given as YYYY-MM-DD hh:mm.",             required: false,             }),
 		direction: Flags.string({            char: "d",            description: "Either inbound or outbound. Only show Messages that were either sent from or received by FreeClimb.",             required: false,             }),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		help: Flags.help({char: 'h'}),
 	}
@@ -44,20 +50,31 @@ export class smsList extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "sms:list" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "messageId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                out.out(formatOutput(response.data))
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "messageId")
+                    if (ids) { out.out(ids) }
+                } else {
+                    out.out(formatOutput(response.data))
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }
@@ -73,6 +90,8 @@ export class smsList extends Command {
             }
             return
         }
+        
+        
         
         await fcApi.apiCall("GET", {params: {
 				to: flags.to,

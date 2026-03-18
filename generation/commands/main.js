@@ -12,6 +12,8 @@ const { isEmpty } = require("lodash")
 const apiInfo = require("../schema/generated-api-schema.json")
 const descriptionOverrides = require("../schema/description-overrides.json")
 const localFlags = require("../schema/local-flags.json")
+const topicIdFields = require("../schema/topic-id-fields.json")
+const commandExamples = require("../schema/examples.json")
 const ApiCommand = require("./api-command.js")
 const mapChars = require("./character-mapping")
 
@@ -125,7 +127,7 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 ${
     tail
         ? `import { sleep, calculateSinceTimestamp } from "../../tail"\n\nlet lastTime: number\nlet tailMax: number\n`
@@ -133,7 +135,7 @@ ${
 }
 export class ${command.className} extends Command {
     static description = \`${command.description}\`
-    
+    ${getExamples(command.topic, command.name)}
     static flags = {${getAxiosFlags(command.flags)}${getAdditionalFlags(
         command.topic,
         tail,
@@ -158,12 +160,18 @@ export class ${command.className} extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "${command.topic}:${command.name}" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "${topicIdFields[command.topic] || "id"}")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 ${command.topic === "logs" ? `const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
                 out.out(formatOutput(processedData))` : `out.out(formatOutput(response.data))`}
             } else { throw new Errors.UndefinedResponseError() }
@@ -172,10 +180,15 @@ export class ${command.className} extends Command {
             ? `
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                ${command.topic === "logs" ? `const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
-                out.out(formatOutput(processedData))` : `out.out(formatOutput(response.data))`}
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "${topicIdFields[command.topic] || "id"}")
+                    if (ids) { out.out(ids) }
+                } else {
+                    ${command.topic === "logs" ? `const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
+                    out.out(formatOutput(processedData))` : `out.out(formatOutput(response.data))`}
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }
@@ -260,6 +273,7 @@ function getAdditionalFlags(topicName, tail, pagination, isMutating) {
     }
 
     data += `\n\t\tjson: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),`
+    data += `\n\t\tquiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),`
     data += `\n\t\tfields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),`
 
     if (isMutating) {
@@ -428,6 +442,17 @@ function getAxiosParams(bodyParams, queryParams) {
     return data
 }
 
+
+function getExamples(topic, commandName) {
+    const key = `${topic}:${commandName}`
+    const examples = commandExamples[key]
+    if (!examples || examples.length === 0) return ""
+    const items = examples.map((ex) => {
+        const escaped = ex.replace("freeclimb ", "").replace(/"/g, '\\"')
+        return `"<%= config.bin %> ${escaped}"`
+    }).join(",\n        ")
+    return `static examples = [\n        ${items},\n    ]`
+}
 
 function accessSpecifier(param) {
     return param.required ? "args" : "flags"

@@ -23,8 +23,7 @@ describe("queue-members:dequeue Data Test", function () {
     it("Test all required paramaters", async () => {
         nock("https://www.freeclimb.com")
             .post(
-                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`,
-                {}
+                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`
             )
             .query({})
             .reply(200, testJson)
@@ -45,8 +44,7 @@ describe("queue-members:dequeue Data Test", function () {
         }
         nock("https://www.freeclimb.com")
             .post(
-                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`,
-                {}
+                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`
             )
             .query({})
             .reply(500, testJsonErrorNoSuggestion)
@@ -64,8 +62,7 @@ describe("queue-members:dequeue Data Test", function () {
                 "https://user-custom-domain.example.com/apiserver"
             nock("https://user-custom-domain.example.com")
                 .post(
-                    `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`,
-                    {}
+                    `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`
                 )
                 .query({})
                 .reply(200, testJson)
@@ -89,8 +86,7 @@ describe("queue-members:dequeue Data Test", function () {
         }
         nock("https://www.freeclimb.com")
             .post(
-                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`,
-                {}
+                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`
             )
             .query({})
             .reply(500, testJsonErrorWithSuggestion)
@@ -115,8 +111,7 @@ describe("queue-members:dequeue Data Test", function () {
     it("Test error resulting in an unreadable response", async () => {
         nock("https://www.freeclimb.com")
             .post(
-                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`,
-                {}
+                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`
             )
             .query({})
             .reply(200, undefined)
@@ -134,8 +129,7 @@ describe("queue-members:dequeue Data Test", function () {
                 delete process.env.FREECLIMB_QUEUE_MEMBERS_DEQUEUE_NEXT
                 nock("https://www.freeclimb.com")
                     .post(
-                        `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`,
-                        {}
+                        `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`
                     )
                     .query({})
                     .reply(200, testJson)
@@ -171,8 +165,7 @@ describe("queue-members:dequeue Status Test", function () {
     it("Test all required paramaters", async () => {
         nock("https://www.freeclimb.com")
             .post(
-                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`,
-                {}
+                `/apiserver/Accounts/${await cred.accountId}/Queues/${queueId}/Members/${callId}`
             )
             .query({})
             .reply(204, testJsonStatus)

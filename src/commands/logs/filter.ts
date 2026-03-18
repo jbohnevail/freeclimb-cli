@@ -6,7 +6,7 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 import { sleep, calculateSinceTimestamp } from "../../tail"
 
 let lastTime: number
@@ -14,21 +14,26 @@ let tailMax: number
 
 export class logsFilter extends Command {
     static description = ` Returns the first page of Logs associated with the specified account.`
-    
+    static examples = [
+        "<%= config.bin %> logs:filter \"level = 'ERROR'\"",
+        "<%= config.bin %> logs:filter \"level = 'WARNING'\" --json",
+        "<%= config.bin %> logs:filter \"level = 'INFO'\" --tail",
+    ]
     static flags = {
 		maxItem: Flags.integer({ char: "m", description: "Show only a certain number of the most recent logs on this page."}),
 		tail: Flags.boolean({char: 't', description: 'Polls the FreeClimb API to retrieve and display new logs as they occur.',default : false}),
 		sleep: Flags.integer({ char: "q", description: "Determines time waited between request for tail command. Defaults at 1 second.", default: 1000}),
 		since: Flags.string({ char: "Q", description: "Determines time frame of logs to be printed out before starting tail. Ex.2h9m", dependsOn:['tail']}),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),
 	}
     
 	static args = {
-		pql: Args.string({description: "The filter query for retrieving logs.", required: false}),
+		pql: Args.string({description: "The filter query for retrieving logs.", required: true}),
 	}
 
     async run() {
@@ -65,12 +70,18 @@ export class logsFilter extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "logs:filter" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "requestId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
                 out.out(formatOutput(processedData))
             } else { throw new Errors.UndefinedResponseError() }
@@ -85,10 +96,15 @@ export class logsFilter extends Command {
     
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
-                out.out(formatOutput(processedData))
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "requestId")
+                    if (ids) { out.out(ids) }
+                } else {
+                    const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
+                    out.out(formatOutput(processedData))
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }
@@ -104,11 +120,12 @@ export class logsFilter extends Command {
             }
             return
         }
-        if(args.pql!.includes("'")) { this.warn(chalk.yellow("A single quote has been detected in your pql. Keep in mind that all strings must be encapsulated by double quotes for the pql to be valid. If this was a mistake, please rerun the command with your rewritten pql. The command will now run."))}
+        if(args.pql.includes("'")) { this.warn(chalk.yellow("A single quote has been detected in your pql. Keep in mind that all strings must be encapsulated by double quotes for the pql to be valid. If this was a mistake, please rerun the command with your rewritten pql. The command will now run."))}
+        
         
     if (flags.tail) {
         lastTime = 0
-        if (args.pql!.includes("timestamp")) {
+        if (args.pql.includes("timestamp")) {
         const err = new Errors.NoTimestamp()
         this.error(err.message, { exit: err.code })
     }

@@ -119,6 +119,37 @@ export function filterFields<T extends Record<string, unknown>>(
     return result as Partial<T>
 }
 
+export function extractQuietIds(data: unknown, idField: string): string {
+    if (Array.isArray(data)) {
+        return data
+            .map((item) => {
+                if (typeof item === "object" && item !== null && idField in item) {
+                    return String((item as Record<string, unknown>)[idField])
+                }
+                return ""
+            })
+            .filter(Boolean)
+            .join("\n")
+    }
+
+    if (typeof data === "object" && data !== null) {
+        const record = data as Record<string, unknown>
+        // Check for nested arrays (e.g., response.calls, response.messages)
+        for (const value of Object.values(record)) {
+            if (Array.isArray(value)) {
+                const result = extractQuietIds(value, idField)
+                if (result) return result
+            }
+        }
+        // Single resource — return its ID
+        if (idField in record) {
+            return String(record[idField])
+        }
+    }
+
+    return ""
+}
+
 export function filterFieldsDeep(data: unknown, fields: string[]): unknown {
     if (fields.length === 0) return data
 

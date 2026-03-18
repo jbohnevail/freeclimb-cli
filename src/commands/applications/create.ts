@@ -6,11 +6,15 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class applicationsCreate extends Command {
     static description = ` Create a new Application within the specified account.`
-    
+    static examples = [
+        "<%= config.bin %> applications:create --alias \"My App\" --voiceUrl https://example.com/voice",
+        "<%= config.bin %> applications:create --json",
+        "<%= config.bin %> applications:create --dry-run --alias test",
+    ]
     static flags = {
 		alias: Flags.string({            char: "a",            description: "Description of the new application (maximum 64 characters).",             required: false,             }),
 		voiceUrl: Flags.string({            char: "v",            description: "URL that FreeClimb should request when an inbound call arrives on a phone number assigned to this application. Used only for inbound calls. Note: A PerCL response is expected to control the inbound call.",             required: false,             }),
@@ -20,7 +24,8 @@ export class applicationsCreate extends Command {
 		smsUrl: Flags.string({            char: "u",            description: "URL that FreeClimb will request when a phone number assigned to this application receives an incoming SMS message. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",             required: false,             }),
 		smsFallbackUrl: Flags.string({            char: "F",            description: "URL that FreeClimb will request if it times out waiting for a response from the smsUrl. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",             required: false,             }),
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),
@@ -72,12 +77,18 @@ export class applicationsCreate extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:create" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "applicationId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
@@ -87,6 +98,8 @@ export class applicationsCreate extends Command {
                 this.error(error.message, { exit: error.code});
             
         }
+        
+        
         
         await fcApi.apiCall("POST", {data: {
 				alias: flags.alias,

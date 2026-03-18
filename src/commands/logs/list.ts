@@ -6,7 +6,7 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 import { sleep, calculateSinceTimestamp } from "../../tail"
 
 let lastTime: number
@@ -14,24 +14,31 @@ let tailMax: number
 
 export class logsList extends Command {
     static description = ` Returns all Logs associated with the specified account or a specific page of Logs as indicated by the URI in the request.`
-    
+    static examples = [
+        "<%= config.bin %> logs:list",
+        "<%= config.bin %> logs:list --json",
+        "<%= config.bin %> logs:list --tail",
+    ]
     static flags = {
 		maxItem: Flags.integer({ char: "m", description: "Show only a certain number of the most recent logs on this page."}),
 		tail: Flags.boolean({char: 't', description: 'Polls the FreeClimb API to retrieve and display new logs as they occur.',default : false}),
 		sleep: Flags.integer({ char: "q", description: "Determines time waited between request for tail command. Defaults at 1 second.", default: 1000}),
 		since: Flags.string({ char: "Q", description: "Determines time frame of logs to be printed out before starting tail. Ex.2h9m", dependsOn:['tail']}),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		help: Flags.help({char: 'h'}),
 	}
     
-	static args = {}
+	static args = {
+	}
 
     async run() {
         const out = new Output(this)
         const {flags} = await this.parse(logsList)
         const outputFormat = getOutputFormat(flags.json)
+        
         
         const fcApi = new FreeClimbApi(`Logs`, true, this)
         const formatOutput = (data: any) => {
@@ -44,12 +51,18 @@ export class logsList extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "logs:list" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "requestId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
                 out.out(formatOutput(processedData))
             } else { throw new Errors.UndefinedResponseError() }
@@ -64,10 +77,15 @@ export class logsList extends Command {
     
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
-                out.out(formatOutput(processedData))
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "requestId")
+                    if (ids) { out.out(ids) }
+                } else {
+                    const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
+                    out.out(formatOutput(processedData))
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }
@@ -83,6 +101,8 @@ export class logsList extends Command {
             }
             return
         }
+        
+        
         
     if (flags.tail) {
         lastTime = 0

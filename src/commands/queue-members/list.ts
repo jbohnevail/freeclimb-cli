@@ -6,20 +6,24 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class queueMembersList extends Command {
     static description = ` Retrieve a list of Members in the specified Queue.`
-    
+    static examples = [
+        "<%= config.bin %> queue-members:list QU1234567890abcdef",
+        "<%= config.bin %> queue-members:list QU1234567890abcdef --json",
+    ]
     static flags = {
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		help: Flags.help({char: 'h'}),
 	}
     
 	static args = {
-		queueId: Args.string({description: "String that uniquely identifies the Queue that the Member belongs to.", required: false}),
+		queueId: Args.string({description: "String that uniquely identifies the Queue that the Member belongs to.", required: true}),
 	}
 
     async run() {
@@ -39,20 +43,31 @@ export class queueMembersList extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "queue-members:list" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "callId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                out.out(formatOutput(response.data))
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "callId")
+                    if (ids) { out.out(ids) }
+                } else {
+                    out.out(formatOutput(response.data))
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }
@@ -68,6 +83,8 @@ export class queueMembersList extends Command {
             }
             return
         }
+        
+        
         
         await fcApi.apiCall("GET", {}, normalResponse)
     

@@ -54,10 +54,13 @@ Manual commands: `api.ts`, `describe.ts`, `diagnose.ts`, `login.ts`, `logout.ts`
 
 ### Agent-DX Features
 - `--json` flag for JSON output (auto-enabled via `FREECLIMB_OUTPUT_FORMAT=json`)
+- `--quiet` flag for bare ID output (one per line, pipe-friendly)
 - `--fields` flag to limit response fields (context window protection)
 - `--dry-run` flag for mutating operations (create/update/delete)
+- `--yes` flag on `login` for non-interactive authentication (with `--accountId` and `--apiKey`)
 - `freeclimb describe` for machine-readable schema introspection
 - Input validation: control chars, path traversal, query injection rejected
+- `static examples` on all generated commands (visible via `--help`)
 
 ### Credential Management
 Priority order:
@@ -79,9 +82,10 @@ Structured error suggestions with codes, messages, CLI commands, and doc URLs.
 Framework: Mocha + Chai + Nock (HTTP mocking)
 Coverage: nyc
 Runner: `@oclif/test` v4 `runCommand()` API
+Setup: `test/setup.ts` sets test credentials and disables HTTP retries
 
 Run specific test:
-npx mocha test/commands/sms-send.test.ts
+npx mocha --require ts-node/register --require test/setup.ts test/commands/sms-send.test.ts
 
 ## MCP Integration
 
