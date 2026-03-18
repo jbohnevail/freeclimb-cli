@@ -1,14 +1,14 @@
 ---
 name: freeclimb-cli-dev
 description: >
-  Develop, test, build, and contribute to the FreeClimb CLI codebase.
-  Use when: modifying CLI source code, adding commands, fixing bugs, running tests,
-  building the project, understanding the architecture, or reviewing CLI code.
-  Also use when: the user asks about CLI internals, the generation system,
-  oclif patterns, the UI component library, MCP server implementation,
-  or validation/error handling subsystems.
-  Do NOT use for: simply using the CLI to interact with FreeClimb APIs
-  (use freeclimb-cli skill instead).
+    Develop, test, build, and contribute to the FreeClimb CLI codebase.
+    Use when: modifying CLI source code, adding commands, fixing bugs, running tests,
+    building the project, understanding the architecture, or reviewing CLI code.
+    Also use when: the user asks about CLI internals, the generation system,
+    oclif patterns, the UI component library, MCP server implementation,
+    or validation/error handling subsystems.
+    Do NOT use for: simply using the CLI to interact with FreeClimb APIs
+    (use freeclimb-cli skill instead).
 ---
 
 # FreeClimb CLI Development
@@ -23,6 +23,17 @@ npm run lint           # Check code style
 npm run lint-write     # Fix lint + format
 npm run prepack        # Build for distribution
 ```
+
+## Gotchas
+
+These will waste your time if you don't know them upfront:
+
+1. **Running `node generation/commands/main.js` overwrites ALL generated files** — uncommitted changes to generated command files are destroyed. Always commit or stash first.
+2. **`npm install --ignore-scripts` — the `--ignore-scripts` is critical** — without it, postinstall tries to build native deps (`@napi-rs/keyring`) which fails without a Rust toolchain.
+3. **Nock mocks are global — `afterEach(() => nock.cleanAll())` is mandatory** — or mocks leak between tests causing cryptic failures in unrelated test files.
+4. **`@napi-rs/keyring` import fails in CI (no keychain)** — tests that touch credentials must mock the keyring module or they'll throw at import time.
+5. **`oclif manifest` must run after `tsc -b`** — stale manifest causes "command not found" at runtime even though the .ts files are correct.
+6. **Adding a new flag to the schema requires regenerating BOTH commands AND tests** — running only the command generator leaves tests out of sync.
 
 ## Architecture
 
@@ -123,6 +134,7 @@ npx mocha test/commands/sms-send.test.ts    # Single test
 **Coverage**: nyc
 
 Test files follow this pattern:
+
 ```typescript
 import { runCommand } from "@oclif/test"
 import { expect } from "chai"
@@ -133,7 +145,9 @@ describe("sms:send", () => {
     it("sends an SMS", async () => {
         nock("https://www.freeclimb.com")
             .post(/Messages/)
-            .reply(200, { /* response */ })
+            .reply(200, {
+                /* response */
+            })
         const { stdout } = await runCommand(["sms:send", "+1FROM", "+1TO", "Hello"])
         expect(stdout).to.contain("expected output")
     })

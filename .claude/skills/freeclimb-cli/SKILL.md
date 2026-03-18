@@ -19,13 +19,21 @@ export FREECLIMB_API_KEY=<api_key>
 export FREECLIMB_OUTPUT_FORMAT=json
 ```
 
-## Safety Rules
+## Gotchas
 
-1. **Always** `--dry-run` before mutating operations (create/update/delete)
-2. **Always** confirm with the user before executing writes or deletes
-3. **Always** `--fields` on list commands to limit response size
-4. **Always** `freeclimb describe` for schema introspection (not `--help`)
-5. Phone numbers in E.164 format: `+12223334444`
+1. **`--dry-run` on GET commands is a no-op** — it only works on POST/PUT/DELETE. Don't assume it validates reads.
+2. **`--fields` with a typo silently returns the field as empty, not an error** — verify field names with `freeclimb describe <command>`.
+3. **`--next` pagination resets if you change any filter parameter between pages** — keep filters identical across pages.
+4. **`freeclimb describe` returns the CLI schema, NOT the API schema** — they can differ on optional fields and naming.
+5. **`incoming-numbers:buy` is immediate and non-reversible** — there's no undo. Always `--dry-run` first.
+6. **`api` command with `--raw` bypasses all validation** — agent inputs are NOT sanitized in raw mode.
+7. **Always `--dry-run` before mutating operations** (create/update/delete) and confirm with the user before executing.
+8. **Always `--fields` on list commands** to limit response size and protect context windows.
+9. **Phone numbers must be E.164 format**: `+12223334444`
+
+## On-Demand Hook
+
+When this skill is active, a PreToolUse hook warns when running mutating CLI commands without `--dry-run`. See `.claude/skills/freeclimb-cli/hooks.json`.
 
 ## Schema Discovery
 
@@ -140,16 +148,14 @@ The CLI rejects:
 
 ## Companion Skills
 
-| Skill                  | Trigger Phrases                                  | Use For                              |
-| ---------------------- | ------------------------------------------------ | ------------------------------------ |
-| `freeclimb-percl`      | PerCL, call scripting, voice commands, TTS, DTMF | PerCL command reference and examples |
-| `freeclimb-voice-apps` | IVR, call center, webhook server, phone menu     | Building complete voice applications |
-| `freeclimb-dashboards` | dashboard, monitoring, analytics, metrics        | Monitoring and analytics dashboards  |
-| `freeclimb-cli-dev`    | CLI source code, tests, generation               | Developing/modifying the CLI itself  |
+| Skill                  | Use For                              |
+| ---------------------- | ------------------------------------ |
+| `freeclimb-percl`      | PerCL command reference and examples |
+| `freeclimb-voice-apps` | Building complete voice applications |
+| `freeclimb-dashboards` | Monitoring and analytics dashboards  |
+| `freeclimb-cli-dev`    | Developing/modifying the CLI itself  |
 
 ## Quick Provisioning Workflow
-
-Set up a new voice app end-to-end:
 
 ```bash
 # 1. Create the application

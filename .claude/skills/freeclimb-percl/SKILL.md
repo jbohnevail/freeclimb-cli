@@ -12,33 +12,29 @@ description: >
 
 # FreeClimb PerCL Reference
 
-## What is PerCL?
+## Mental Model
 
-PerCL (Performance Command Language) is FreeClimb's JSON scripting language for controlling live phone calls. Your webhook server receives HTTP POST requests from FreeClimb and responds with a JSON array of PerCL commands.
+PerCL is a **sequential instruction tape** — no conditionals, no loops, no variables. FreeClimb reads your JSON array top to bottom and executes each command in order. When the tape ends, the call hangs up.
 
-```json
-[
-    { "Say": { "text": "Welcome to our service." } },
-    { "Pause": { "length": 500 } },
-    {
-        "GetDigits": {
-            "actionUrl": "https://example.com/menu",
-            "prompts": [{ "Say": { "text": "Press 1 for sales, 2 for support." } }],
-            "maxDigits": 1,
-            "minDigits": 1,
-            "flushBuffer": true
-        }
-    }
-]
+All branching happens **server-side**: commands like `GetDigits` and `GetSpeech` POST user input to your `actionUrl`, and your server returns a new tape. `Redirect` sends execution to a new URL unconditionally. Your webhook server is the state machine; PerCL is just the output.
+
+```
+Caller → FreeClimb → POST voiceUrl → Your Server → [PerCL tape] → FreeClimb executes → (repeat via actionUrl/Redirect)
 ```
 
-## Execution Model
+## Gotchas
 
-- Commands execute **sequentially** from first to last
-- The call **auto-hangs-up** when the array is exhausted (unless redirected)
-- `Redirect` sends execution to a new URL, enabling multi-step flows
-- `GetDigits` and `GetSpeech` pause execution waiting for input, then POST results to `actionUrl`
-- Nested commands (like `prompts` inside `GetDigits`) execute inline
+These are the non-obvious footguns that will cost you debugging time:
+
+1. **`GetDigits` with no `actionUrl` silently drops input** — the digits are collected and thrown away. Always set `actionUrl`.
+2. **`Redirect` to a URL that returns non-200 hangs the call** — FreeClimb retries, then the call sits in limbo. Ensure your redirect targets are healthy.
+3. **`OutDial` without `callConnectUrl` means you can't control the connected call** — you'll hear audio but have no way to bridge, record, or conference the B-leg.
+4. **`Say` with invalid SSML doesn't error — it reads the raw XML tags aloud** — the caller hears "less-than speak greater-than" literally.
+5. **`Pause` takes milliseconds, not seconds** — `{ "Pause": { "length": 3 } }` is 3ms (imperceptible), not 3 seconds. Use `3000` for 3s.
+6. **`Enqueue` to a full queue silently drops the caller** — always handle queue overflow with a fallback action.
+7. **`privacyMode` only prevents logging — it doesn't encrypt** — PCI compliance requires additional measures beyond this flag.
+8. **Empty `digits` from `GetDigits` means timeout, not error** — always handle the empty-string case in your `actionUrl` handler.
+9. **Commands after `Redirect`, `Hangup`, or `Reject` are never executed** — they're dead code on the tape.
 
 ## Quick Reference — All 24 Commands
 
@@ -49,7 +45,7 @@ PerCL (Performance Command Language) is FreeClimb's JSON scripting language for 
 | `Say`            | Text-to-speech (standard, neural, or ElevenLabs engines) |
 | `Play`           | Play an audio file from URL                              |
 | `PlayEarlyMedia` | Play audio before call connects                          |
-| `Pause`          | Pause execution (milliseconds)                           |
+| `Pause`          | Pause execution (milliseconds — not seconds!)            |
 | `GetDigits`      | Collect DTMF keypad input                                |
 | `GetSpeech`      | Speech recognition input                                 |
 | `SendDigits`     | Send DTMF tones into the call                            |
@@ -86,22 +82,7 @@ PerCL (Performance Command Language) is FreeClimb's JSON scripting language for 
 | `Enqueue` | Place a call into a queue  |
 | `Dequeue` | Remove a call from a queue |
 
-## Top 5 Commands — Full Examples
-
-### Say
-
-```json
-{
-    "Say": {
-        "text": "Hello, thank you for calling.",
-        "language": "en-US",
-        "loop": 1,
-        "privacyMode": false
-    }
-}
-```
-
-Supports SSML: `"text": "<speak><prosody rate='slow'>Welcome</prosody></speak>"`
+## Complex Commands — Full Examples
 
 ### GetDigits
 
@@ -120,47 +101,35 @@ Supports SSML: `"text": "<speak><prosody rate='slow'>Welcome</prosody></speak>"`
 }
 ```
 
-FreeClimb POSTs `digits` field to `actionUrl`.
+FreeClimb POSTs `digits` field to `actionUrl`. Empty string means timeout — handle it.
 
-### Play
+### OutDial
 
 ```json
 {
-    "Play": {
-        "file": "https://example.com/audio/greeting.wav",
-        "loop": 1,
-        "privacyMode": false
+    "OutDial": {
+        "destination": "+15551234567",
+        "callingNumber": "+15559876543",
+        "callConnectUrl": "https://example.com/connected",
+        "actionUrl": "https://example.com/outdial-done",
+        "ifMachine": "redirect",
+        "ifMachineUrl": "https://example.com/voicemail",
+        "timeout": 30
     }
 }
 ```
 
-### Redirect
+`callConnectUrl` fires when the B-leg answers — this is where you bridge, record, or conference. Without it, you hear audio but can't control the connected call.
 
-```json
-{
-    "Redirect": {
-        "actionUrl": "https://example.com/next-step"
-    }
-}
+## Validation Script
+
+Validate PerCL JSON before testing against live calls:
+
+```bash
+npx tsx .claude/skills/freeclimb-percl/scripts/validate-percl.ts '[{"Say":{"text":"Hello"}},{"GetDigits":{"maxDigits":1}}]'
 ```
 
-### Hangup
-
-```json
-{
-    "Hangup": {
-        "reason": "Call complete"
-    }
-}
-```
-
-## Safety Rules
-
-1. **Never hardcode credentials** in PerCL responses — use environment variables
-2. **Validate DTMF input** — check `digits` value before acting on it
-3. **Use `privacyMode: true`** for sensitive data (account numbers, SSN, payment info)
-4. **Always provide fallback** — handle empty/invalid input with retry or default action
-5. **Set reasonable timeouts** — `digitTimeoutMs` and `initialTimeoutMs` prevent hung calls
+Catches: invalid command names, missing required fields, Pause in seconds instead of ms, missing `actionUrl` on input commands.
 
 ## Progressive Disclosure
 

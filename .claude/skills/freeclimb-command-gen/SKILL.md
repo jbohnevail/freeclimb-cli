@@ -1,14 +1,24 @@
 ---
 name: freeclimb-command-gen
 description: >
-  Work with the FreeClimb CLI command code generation system.
-  Use when: adding new API commands, modifying generated command templates,
-  updating the API schema, changing flag definitions, or regenerating command files.
-  Also use when: the user asks about how commands are auto-generated,
-  wants to add a new endpoint, or needs to modify the generation pipeline.
+    Work with the FreeClimb CLI command code generation system.
+    Use when: adding new API commands, modifying generated command templates,
+    updating the API schema, changing flag definitions, or regenerating command files.
+    Also use when: the user asks about how commands are auto-generated,
+    wants to add a new endpoint, or needs to modify the generation pipeline.
 ---
 
 # FreeClimb Command Generation
+
+## Gotchas
+
+These fail silently and waste time:
+
+1. **The generator output contains oclif v2 syntax that must be manually patched to v4** — `this.parse` → `await this.parse`, static `args` array → object format, etc. Always verify with `npx tsc --noEmit` after generating.
+2. **`character-mapping.js` short flags are global** — two commands can't share the same short char for different flags. Adding `-n` to a new command may break an existing one.
+3. **`local-flags.json` flags are injected AFTER API flags** — name collisions silently overwrite the API flag definition.
+4. **`description-overrides.json` is matched by exact `topic:command` key** — typos fail silently (the override is never applied).
+5. **Running the test generator after modifying test templates regenerates ALL test files** — review the full diff carefully, not just the files you intended to change.
 
 ## Overview
 
@@ -76,6 +86,7 @@ Each topic in `generated-api-schema.json`:
 ## oclif v4 Compatibility
 
 The generator outputs oclif v4 code:
+
 - `import { Args, Command, Flags } from "@oclif/core"`
 - `Flags.boolean(`, `Flags.string(`, `Args.string(`
 - `await this.parse(ClassName)`
@@ -85,26 +96,26 @@ The generator outputs oclif v4 code:
 
 Each generated command includes:
 
-| Feature | Implementation |
-|---------|---------------|
-| `--json` flag | `getOutputFormat(flags.json)` → JSON envelope |
-| `--fields` flag | `filterFieldsDeep(data, fields)` |
-| `--dry-run` flag | Shows payload without API call (mutating only) |
-| Input validation | `validateResourceId()` for IDs, `rejectControlChars()` for strings |
-| Output formatting | Topic formatter or JSON via `wrapJsonOutput()` |
-| Pagination | `--next` flag with cursor-based paging |
+| Feature           | Implementation                                                     |
+| ----------------- | ------------------------------------------------------------------ |
+| `--json` flag     | `getOutputFormat(flags.json)` → JSON envelope                      |
+| `--fields` flag   | `filterFieldsDeep(data, fields)`                                   |
+| `--dry-run` flag  | Shows payload without API call (mutating only)                     |
+| Input validation  | `validateResourceId()` for IDs, `rejectControlChars()` for strings |
+| Output formatting | Topic formatter or JSON via `wrapJsonOutput()`                     |
+| Pagination        | `--next` flag with cursor-based paging                             |
 
 ## Key Functions in main.js
 
-| Function | Purpose |
-|----------|---------|
-| `getFileContents(command)` | Renders complete TypeScript file |
-| `getAxiosFlags(flags)` | Generates flag definitions from schema |
-| `getAdditionalFlags(topic, tail, pagination, isMutating)` | Adds json/fields/dry-run/next flags |
-| `getAxiosArgs(args, tail)` | Generates arg definitions |
-| `getInputValidation(command)` | Generates validation calls |
-| `getDryRunCheck(command)` | Generates dry-run short-circuit |
-| `isMutatingMethod(method)` | POST/PUT/DELETE/PATCH check |
+| Function                                                  | Purpose                                |
+| --------------------------------------------------------- | -------------------------------------- |
+| `getFileContents(command)`                                | Renders complete TypeScript file       |
+| `getAxiosFlags(flags)`                                    | Generates flag definitions from schema |
+| `getAdditionalFlags(topic, tail, pagination, isMutating)` | Adds json/fields/dry-run/next flags    |
+| `getAxiosArgs(args, tail)`                                | Generates arg definitions              |
+| `getInputValidation(command)`                             | Generates validation calls             |
+| `getDryRunCheck(command)`                                 | Generates dry-run short-circuit        |
+| `isMutatingMethod(method)`                                | POST/PUT/DELETE/PATCH check            |
 
 ## Manual (Non-Generated) Commands
 

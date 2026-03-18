@@ -11,6 +11,17 @@ description: >
 
 # FreeClimb Monitoring & Analytics
 
+## Gotchas
+
+These will trip you up when building dashboards:
+
+1. **`calls:list` returns max 100 per page** — for "total calls today" you must paginate with `--next` or you'll undercount.
+2. **`--status inProgress` is a point-in-time snapshot, not a stream** — calls can start/end between polls. Don't treat poll results as exact.
+3. **Queue `currentSize` can be 0 even when callers are waiting** — briefly, during a dequeue race condition. Don't use a single poll as a health check.
+4. **`logs:filter` PQL string values MUST be double-quoted** — `level = "ERROR"` works, `level = ERROR` silently returns nothing.
+5. **API rate limits are per-account, not per-tool** — a dashboard polling 5 endpoints every 10s eats 30 req/min. Coordinate your polling intervals.
+6. **`--fields` doesn't error on invalid field names** — it silently returns empty values. Always verify field names with `freeclimb describe`.
+
 ## Data Sources
 
 All dashboard data comes from the FreeClimb API via CLI commands:
@@ -25,6 +36,18 @@ All dashboard data comes from the FreeClimb API via CLI commands:
 | Recordings   | `freeclimb recordings:list --json`                | recordingId, callId, duration       |
 | Logs         | `freeclimb logs:filter --pql "..." --json`        | level, message, timestamp           |
 | Account      | `freeclimb accounts:get --json`                   | status, type, balance               |
+
+## Metrics Script
+
+Source composable bash functions for quick metrics:
+
+```bash
+source .claude/skills/freeclimb-dashboards/scripts/fc-metrics.sh
+fc_active_calls     # Count of in-progress calls
+fc_queue_depth      # Queue sizes across all queues
+fc_error_rate       # Error count from recent logs
+fc_call_volume      # Total calls in last 100 results by status
+```
 
 ## CLI Quick Reports
 
@@ -52,19 +75,13 @@ freeclimb call-queues:list --fields queueId,alias,currentSize --json
 freeclimb logs:filter --pql 'level = "ERROR"' --json | jq '.data | group_by(.message) | map({message: .[0].message, count: length}) | sort_by(-.count)'
 ```
 
-### Recent Errors with Details
-
-```bash
-freeclimb logs:filter --pql 'level = "ERROR"' --maxItems 20 --json
-```
-
 ## Dashboard Patterns
 
 ### Polling vs Real-Time
 
 **Polling** (simplest, recommended starting point):
 
-- Call `freeclimb calls:list` every 10–30 seconds
+- Call `freeclimb calls:list` every 10-30 seconds
 - Use `--fields` to minimize response size
 - Cache results client-side to show trends
 
@@ -85,13 +102,6 @@ freeclimb calls:list --json
 # Do this (only what you need):
 freeclimb calls:list --fields callId,status,from,to,dateCreated,duration --json
 ```
-
-## API Rate Limits
-
-- FreeClimb API has rate limits per account
-- For dashboards, poll no more frequently than every 10 seconds
-- Cache responses and show stale data with a timestamp
-- Use `--fields` to minimize payload size per request
 
 ## Reference Files
 
