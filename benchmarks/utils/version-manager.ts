@@ -162,7 +162,7 @@ function getInstallCommand(pm: "npm" | "pnpm" | "yarn"): string {
         }
 
         case "npm": {
-            return "npm ci"
+            return "npm install"
         }
     }
 }

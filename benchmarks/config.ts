@@ -54,7 +54,7 @@ export const DEFAULT_CONFIG: BenchmarkConfig = {
     newLabel: "v0.6.0 (oclif v4)",
     newRef: "work/main",
     oldLabel: "v0.5.4 (oclif v1)",
-    oldRef: "main",
+    oldRef: "v0.5.4",
     regressionThreshold: 10, // percentage — flag if new is >10% slower
     resultsDir: path.join(__dirname, "results"),
 }
