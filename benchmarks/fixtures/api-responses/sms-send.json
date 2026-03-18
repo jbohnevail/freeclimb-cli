@@ -1,0 +1,13 @@
+{
+  "uri": "/apiserver/Accounts/ACtest1234567890/Messages/SM0000000000000000000000000000001",
+  "revision": 1,
+  "dateCreated": "Mon, 15 Jan 2024 10:00:00 GMT",
+  "dateUpdated": "Mon, 15 Jan 2024 10:00:00 GMT",
+  "messageId": "SM0000000000000000000000000000001",
+  "accountId": "ACtest1234567890",
+  "from": "+15551234567",
+  "to": "+15559876543",
+  "text": "test",
+  "direction": "outbound",
+  "status": "queued"
+}

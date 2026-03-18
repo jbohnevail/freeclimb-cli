@@ -1,0 +1,41 @@
+{
+  "total": 2,
+  "start": 0,
+  "end": 1,
+  "page": 0,
+  "numPages": 1,
+  "pageSize": 100,
+  "nextPageUri": null,
+  "incomingPhoneNumbers": [
+    {
+      "uri": "/apiserver/Accounts/ACtest1234567890/IncomingPhoneNumbers/PN0000000000000000000000000000001",
+      "dateCreated": "Mon, 01 Jan 2024 00:00:00 GMT",
+      "dateUpdated": "Mon, 01 Jan 2024 00:00:00 GMT",
+      "revision": 1,
+      "phoneNumberId": "PN0000000000000000000000000000001",
+      "accountId": "ACtest1234567890",
+      "applicationId": "AP0000000000000000000000000000001",
+      "phoneNumber": "+15551234567",
+      "alias": "Main Line",
+      "region": "US",
+      "country": "US",
+      "voiceEnabled": true,
+      "smsEnabled": true
+    },
+    {
+      "uri": "/apiserver/Accounts/ACtest1234567890/IncomingPhoneNumbers/PN0000000000000000000000000000002",
+      "dateCreated": "Tue, 02 Jan 2024 00:00:00 GMT",
+      "dateUpdated": "Tue, 02 Jan 2024 00:00:00 GMT",
+      "revision": 1,
+      "phoneNumberId": "PN0000000000000000000000000000002",
+      "accountId": "ACtest1234567890",
+      "applicationId": "AP0000000000000000000000000000001",
+      "phoneNumber": "+15559876543",
+      "alias": "Secondary",
+      "region": "US",
+      "country": "US",
+      "voiceEnabled": true,
+      "smsEnabled": true
+    }
+  ]
+}

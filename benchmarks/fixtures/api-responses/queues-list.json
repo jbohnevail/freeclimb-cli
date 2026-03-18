@@ -1,0 +1,22 @@
+{
+  "total": 1,
+  "start": 0,
+  "end": 0,
+  "page": 0,
+  "numPages": 1,
+  "pageSize": 100,
+  "nextPageUri": null,
+  "queues": [
+    {
+      "uri": "/apiserver/Accounts/ACtest1234567890/Queues/QU0000000000000000000000000000001",
+      "dateCreated": "Mon, 01 Jan 2024 00:00:00 GMT",
+      "dateUpdated": "Mon, 01 Jan 2024 00:00:00 GMT",
+      "revision": 1,
+      "queueId": "QU0000000000000000000000000000001",
+      "alias": "Support Queue",
+      "currentSize": 3,
+      "maxSize": 50,
+      "averageQueueRemovalTime": 45
+    }
+  ]
+}

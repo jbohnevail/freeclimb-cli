@@ -1,0 +1,21 @@
+{
+  "uri": "/apiserver/Accounts/ACtest1234567890",
+  "revision": 1,
+  "dateCreated": "Mon, 01 Jan 2024 00:00:00 GMT",
+  "dateUpdated": "Mon, 01 Jan 2024 00:00:00 GMT",
+  "accountId": "ACtest1234567890",
+  "apiKey": "testkey1234567890",
+  "alias": "Test Account",
+  "label": "benchmarks",
+  "type": "trial",
+  "status": "active",
+  "subresourceUris": {
+    "applications": "/apiserver/Accounts/ACtest1234567890/Applications",
+    "calls": "/apiserver/Accounts/ACtest1234567890/Calls",
+    "availablePhoneNumbers": "/apiserver/Accounts/ACtest1234567890/AvailablePhoneNumbers",
+    "incomingPhoneNumbers": "/apiserver/Accounts/ACtest1234567890/IncomingPhoneNumbers",
+    "conferences": "/apiserver/Accounts/ACtest1234567890/Conferences",
+    "queues": "/apiserver/Accounts/ACtest1234567890/Queues",
+    "recordings": "/apiserver/Accounts/ACtest1234567890/Recordings"
+  }
+}

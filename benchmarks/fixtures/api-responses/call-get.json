@@ -1,0 +1,24 @@
+{
+  "uri": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000001",
+  "revision": 1,
+  "dateCreated": "Mon, 15 Jan 2024 10:00:00 GMT",
+  "dateUpdated": "Mon, 15 Jan 2024 10:05:00 GMT",
+  "callId": "CA0000000000000000000000000000001",
+  "parentCallId": null,
+  "accountId": "ACtest1234567890",
+  "to": "+15559876543",
+  "from": "+15551234567",
+  "phoneNumberId": "PN0000000000000000000000000000001",
+  "callStatus": "completed",
+  "startTime": "Mon, 15 Jan 2024 10:00:05 GMT",
+  "connectTime": "Mon, 15 Jan 2024 10:00:10 GMT",
+  "endTime": "Mon, 15 Jan 2024 10:05:00 GMT",
+  "duration": 295,
+  "direction": "outboundAPI",
+  "answeredBy": "human",
+  "callerName": null,
+  "subresourceUris": {
+    "logs": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000001/Logs",
+    "recordings": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000001/Recordings"
+  }
+}

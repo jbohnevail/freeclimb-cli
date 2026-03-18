@@ -136,7 +136,10 @@
     "test": "nyc --extension .ts mocha --require ts-node/register --require test/setup.ts --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif readme --multi && git add README.md docs/",
     "prepare": "husky",
-    "setup": "bash scripts/setup.sh"
+    "setup": "bash scripts/setup.sh",
+    "benchmark": "cd benchmarks && npx tsx runner.ts",
+    "benchmark:startup": "cd benchmarks && npx tsx runner.ts --suite startup",
+    "benchmark:quick": "cd benchmarks && npx tsx runner.ts --iterations 0.2"
   },
   "types": "lib/index.d.ts",
   "lint-staged": {

@@ -1,0 +1,19 @@
+{
+  "name": "freeclimb-cli-benchmarks",
+  "private": true,
+  "scripts": {
+    "bench": "tsx runner.ts",
+    "bench:startup": "tsx runner.ts --suite startup",
+    "bench:commands": "tsx runner.ts --suite command-execution",
+    "bench:memory": "tsx runner.ts --suite memory",
+    "bench:mcp": "tsx runner.ts --suite mcp-server",
+    "bench:tokens": "tsx runner.ts --suite token-consumption",
+    "bench:devex": "tsx runner.ts --suite devex"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "tiktoken": "^1.0.18",
+    "tinybench": "^2.9.0",
+    "tsx": "^4.19.0"
+  }
+}
