@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "command": "bash -c \"input=$(cat); cmd=$(echo \\\"$input\\\" | jq -r '.tool_input.command // empty'); if echo \\\"$cmd\\\" | grep -qE 'freeclimb\\s+(sms:send|calls:make|applications:create|applications:update|applications:delete|incoming-numbers:buy|incoming-numbers:update|incoming-numbers:delete|call-queues:create|call-queues:update|call-queues:delete|conferences:create|api\\s+.*--method\\s+(POST|PUT|DELETE|PATCH))' && ! echo \\\"$cmd\\\" | grep -q '\\-\\-dry-run'; then echo '{\\\"decision\\\": \\\"block\\\", \\\"reason\\\": \\\"Mutating FreeClimb command without --dry-run. Add --dry-run first to preview the operation, then run without it after confirming.\\\"}'; else echo '{\\\"decision\\\": \\\"approve\\\"}'; fi\""
+    }
+  ]
+}

@@ -28,6 +28,8 @@ FreeClimb uses a **webhook-based** architecture:
 Caller → FreeClimb → POST to voiceUrl → Your Server → PerCL JSON → FreeClimb → Caller hears TTS/audio
 ```
 
+The pattern works with any HTTP framework — you just return a JSON array from a POST handler. The examples below use Express.js but Fastify, Hono, Next.js API routes, etc. all work identically.
+
 ### The 4 Key URLs
 
 | URL                 | Purpose                               | Set on                 |
@@ -37,50 +39,60 @@ Caller → FreeClimb → POST to voiceUrl → Your Server → PerCL JSON → Fre
 | `callConnectUrl`    | Called when an OutDial callee answers | OutDial command        |
 | `statusCallbackUrl` | Called on call status changes         | Application or command |
 
-## Development Setup
+## Gotchas
 
-### 1. Create a webhook server
+These will burn you in production:
 
-Use Express.js (TypeScript) — see `references/webhook-server-templates.md` for full templates.
+1. **FreeClimb retries failed webhooks — your handler MUST be idempotent** — or you'll process calls twice. Use `callId` as a deduplication key.
+2. **Response must be `Content-Type: application/json`** — forgetting this returns HTML error pages that FreeClimb can't parse, hanging the call silently.
+3. **`voiceFallbackUrl` is only called on 5xx/timeout, NOT on invalid PerCL** — bad JSON silently drops the call. Validate your PerCL output.
+4. **ngrok free tier URLs change every restart** — update your application config each time or use a stable subdomain.
+5. **`req.body` is empty if you forget `express.json()` middleware** — your PerCL handlers then fail silently with undefined fields.
+6. **`statusCallbackUrl` fires for EVERY status change** (queued→ringing→inProgress→completed) — filter by `callStatus` or you'll flood your logs.
+7. **`dateCreated` is UTC** — business hours logic must account for timezone conversion.
+8. **Webhook timeout is ~5 seconds** — if your handler does slow work (DB queries, external APIs), the call hangs. Return PerCL fast, do async work separately.
 
-Minimal server:
+## Setup
 
-```typescript
-import express from "express"
-const app = express()
-app.use(express.json())
+If `.claude/skills/freeclimb-voice-apps/config.json` exists, use its values for base URL, phone number, and application ID. If it doesn't exist, ask the user for:
 
-app.post("/voice", (req, res) => {
-    res.json([{ Say: { text: "Hello from FreeClimb!" } }, { Hangup: {} }])
-})
+- **Base URL** — ngrok URL or production domain
+- **FreeClimb phone number** — E.164 format
+- **Application ID** — starts with `AP`
 
-app.listen(3000)
+Save to `.claude/skills/freeclimb-voice-apps/config.json`:
+
+```json
+{
+    "baseUrl": "https://abc123.ngrok.io",
+    "freeclimbNumber": "+15551234567",
+    "applicationId": "AP..."
+}
 ```
+
+## Development Workflow
+
+### 1. Scaffold a webhook server
+
+```bash
+bash .claude/skills/freeclimb-voice-apps/scripts/scaffold-server.sh my-ivr
+```
+
+Creates: `package.json`, `tsconfig.json`, `src/server.ts`, `.env.example`. Or see `references/webhook-server-templates.md` for copy-paste templates.
 
 ### 2. Expose locally with ngrok
 
 ```bash
 ngrok http 3000
-# Copy the HTTPS URL, e.g., https://abc123.ngrok.io
+# Copy the HTTPS URL
 ```
 
 ### 3. Provision via CLI
 
 ```bash
-# Create an application pointing to your webhook
-freeclimb applications:create \
-  --alias "My IVR" \
-  --voiceUrl "https://abc123.ngrok.io/voice" \
-  --voiceFallbackUrl "https://abc123.ngrok.io/fallback" \
-  --statusCallbackUrl "https://abc123.ngrok.io/status" \
-  --dry-run
+freeclimb applications:create --alias "My IVR" --voiceUrl "https://abc123.ngrok.io/voice" --dry-run
+freeclimb applications:create --alias "My IVR" --voiceUrl "https://abc123.ngrok.io/voice"
 
-# Execute after confirming
-freeclimb applications:create \
-  --alias "My IVR" \
-  --voiceUrl "https://abc123.ngrok.io/voice"
-
-# Find and buy a phone number
 freeclimb available-numbers:list --fields phoneNumber,region --json
 freeclimb incoming-numbers:buy --phoneNumber "+15551234567" --applicationId "AP..." --dry-run
 freeclimb incoming-numbers:buy --phoneNumber "+15551234567" --applicationId "AP..."
@@ -102,66 +114,11 @@ Every webhook POST from FreeClimb includes:
     "to": "+15559876543",
     "callStatus": "inProgress",
     "direction": "inbound",
-    "requestType": "inboundCall",
-    "conferenceId": null,
-    "queueId": null,
-    "parentCallId": null
+    "requestType": "inboundCall"
 }
 ```
 
-**`requestType` values:**
-
-- `inboundCall` — new inbound call
-- `outboundCall` — outbound call you initiated
-- `getDigits` — response from GetDigits (includes `digits` field)
-- `getSpeech` — response from GetSpeech (includes `recognitionResult` field)
-- `record` — recording completed (includes `recordingId`, `recordingUrl`)
-- `conferenceStatus` — conference state change
-- `queueWait` — caller waiting in queue (return hold music PerCL)
-- `machineDetected` — answering machine detected on OutDial
-
-## Quick-Start Template
-
-A complete Express server that answers with a greeting:
-
-```typescript
-import express from "express"
-
-const app = express()
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-
-// Inbound call handler
-app.post("/voice", (req, res) => {
-    console.log(`Call from ${req.body.from} to ${req.body.to}`)
-    res.json([{ Say: { text: "Welcome to our service. Goodbye." } }, { Hangup: {} }])
-})
-
-// Fallback handler
-app.post("/fallback", (req, res) => {
-    res.json([
-        { Say: { text: "We are experiencing technical difficulties. Please try again later." } },
-        { Hangup: {} },
-    ])
-})
-
-// Status callback
-app.post("/status", (req, res) => {
-    console.log(`Call ${req.body.callId} status: ${req.body.callStatus}`)
-    res.sendStatus(200)
-})
-
-app.listen(3000, () => console.log("Webhook server on port 3000"))
-```
-
-## Safety Rules
-
-1. **Rate-limit webhooks** — FreeClimb retries on failure; use middleware to prevent duplicate processing
-2. **Validate DTMF input** — never trust `digits` without checking expected values
-3. **Always set `voiceFallbackUrl`** — gracefully handle server errors
-4. **Log all requests** — webhook debugging is hard without logs
-5. **Use HTTPS** — FreeClimb requires HTTPS for production webhook URLs
-6. **Never expose credentials** — use environment variables for account ID and API key
+**`requestType` values:** `inboundCall`, `outboundCall`, `getDigits` (includes `digits`), `getSpeech` (includes `recognitionResult`), `record` (includes `recordingId`, `recordingUrl`), `conferenceStatus`, `queueWait`, `machineDetected`
 
 ## Reference Files
 
