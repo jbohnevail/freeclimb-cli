@@ -1,0 +1,7 @@
+{
+  "status": 500,
+  "code": 2,
+  "message": "Internal Server Error",
+  "url": "https://docs.freeclimb.com/reference/error-and-warning-dictionary#2",
+  "details": {}
+}

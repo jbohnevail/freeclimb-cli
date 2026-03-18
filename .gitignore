@@ -10,3 +10,6 @@ node_modules
 .env
 tsconfig.tsbuildinfo
 .DS_Store
+benchmarks/results/
+benchmarks/node_modules/
+benchmarks/dist/

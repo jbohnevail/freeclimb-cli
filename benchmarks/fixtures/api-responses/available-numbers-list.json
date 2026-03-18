@@ -1,0 +1,51 @@
+{
+  "total": 5,
+  "start": 0,
+  "end": 4,
+  "page": 0,
+  "numPages": 1,
+  "pageSize": 100,
+  "nextPageUri": null,
+  "availablePhoneNumbers": [
+    {
+      "phoneNumber": "+15550001111",
+      "alias": "",
+      "region": "IL",
+      "country": "US",
+      "voiceEnabled": true,
+      "smsEnabled": true
+    },
+    {
+      "phoneNumber": "+15550002222",
+      "alias": "",
+      "region": "IL",
+      "country": "US",
+      "voiceEnabled": true,
+      "smsEnabled": true
+    },
+    {
+      "phoneNumber": "+15550003333",
+      "alias": "",
+      "region": "CA",
+      "country": "US",
+      "voiceEnabled": true,
+      "smsEnabled": true
+    },
+    {
+      "phoneNumber": "+15550004444",
+      "alias": "",
+      "region": "NY",
+      "country": "US",
+      "voiceEnabled": true,
+      "smsEnabled": true
+    },
+    {
+      "phoneNumber": "+15550005555",
+      "alias": "",
+      "region": "TX",
+      "country": "US",
+      "voiceEnabled": true,
+      "smsEnabled": false
+    }
+  ]
+}

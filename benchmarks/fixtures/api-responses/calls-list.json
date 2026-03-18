@@ -1,0 +1,83 @@
+{
+  "total": 3,
+  "start": 0,
+  "end": 2,
+  "page": 0,
+  "numPages": 1,
+  "pageSize": 100,
+  "nextPageUri": null,
+  "calls": [
+    {
+      "uri": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000001",
+      "revision": 1,
+      "dateCreated": "Mon, 15 Jan 2024 10:00:00 GMT",
+      "dateUpdated": "Mon, 15 Jan 2024 10:05:00 GMT",
+      "callId": "CA0000000000000000000000000000001",
+      "parentCallId": null,
+      "accountId": "ACtest1234567890",
+      "to": "+15559876543",
+      "from": "+15551234567",
+      "phoneNumberId": "PN0000000000000000000000000000001",
+      "callStatus": "completed",
+      "startTime": "Mon, 15 Jan 2024 10:00:05 GMT",
+      "connectTime": "Mon, 15 Jan 2024 10:00:10 GMT",
+      "endTime": "Mon, 15 Jan 2024 10:05:00 GMT",
+      "duration": 295,
+      "direction": "outboundAPI",
+      "answeredBy": "human",
+      "callerName": null,
+      "subresourceUris": {
+        "logs": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000001/Logs",
+        "recordings": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000001/Recordings"
+      }
+    },
+    {
+      "uri": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000002",
+      "revision": 1,
+      "dateCreated": "Mon, 15 Jan 2024 11:00:00 GMT",
+      "dateUpdated": "Mon, 15 Jan 2024 11:03:00 GMT",
+      "callId": "CA0000000000000000000000000000002",
+      "parentCallId": null,
+      "accountId": "ACtest1234567890",
+      "to": "+15551111111",
+      "from": "+15552222222",
+      "phoneNumberId": "PN0000000000000000000000000000002",
+      "callStatus": "completed",
+      "startTime": "Mon, 15 Jan 2024 11:00:02 GMT",
+      "connectTime": "Mon, 15 Jan 2024 11:00:08 GMT",
+      "endTime": "Mon, 15 Jan 2024 11:03:00 GMT",
+      "duration": 178,
+      "direction": "inbound",
+      "answeredBy": "human",
+      "callerName": "Test Caller",
+      "subresourceUris": {
+        "logs": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000002/Logs",
+        "recordings": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000002/Recordings"
+      }
+    },
+    {
+      "uri": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000003",
+      "revision": 1,
+      "dateCreated": "Mon, 15 Jan 2024 12:00:00 GMT",
+      "dateUpdated": "Mon, 15 Jan 2024 12:00:30 GMT",
+      "callId": "CA0000000000000000000000000000003",
+      "parentCallId": "CA0000000000000000000000000000001",
+      "accountId": "ACtest1234567890",
+      "to": "+15553333333",
+      "from": "+15554444444",
+      "phoneNumberId": "PN0000000000000000000000000000003",
+      "callStatus": "noAnswer",
+      "startTime": "Mon, 15 Jan 2024 12:00:02 GMT",
+      "connectTime": null,
+      "endTime": "Mon, 15 Jan 2024 12:00:30 GMT",
+      "duration": 28,
+      "direction": "outboundAPI",
+      "answeredBy": null,
+      "callerName": null,
+      "subresourceUris": {
+        "logs": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000003/Logs",
+        "recordings": "/apiserver/Accounts/ACtest1234567890/Calls/CA0000000000000000000000000000003/Recordings"
+      }
+    }
+  ]
+}
