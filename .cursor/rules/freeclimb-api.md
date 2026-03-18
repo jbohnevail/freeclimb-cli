@@ -1,14 +1,3 @@
----
-name: freeclimb-cli
-description: >
-    Interact with the FreeClimb voice/SMS communications API via the CLI.
-    Use when: making calls, sending SMS, managing phone numbers, applications,
-    conferences, queues, recordings, or account settings through the FreeClimb CLI.
-    Also use when: the user mentions FreeClimb, needs to interact with FreeClimb APIs,
-    asks about available CLI commands, or wants to automate telephony workflows.
-    Do NOT use for: modifying the CLI source code (use freeclimb-cli-dev instead).
----
-
 # FreeClimb CLI
 
 ## Setup
@@ -38,12 +27,12 @@ freeclimb describe --all        # Every command's schema
 
 ## Key Flags
 
-| Flag             | Effect                              |
-| ---------------- | ----------------------------------- |
-| `--json`         | Force JSON output                   |
-| `--fields f1,f2` | Limit response fields               |
-| `--dry-run`      | Validate without executing          |
-| `--raw`          | Raw API response (api command only) |
+| Flag | Effect |
+|------|--------|
+| `--json` | Force JSON output |
+| `--fields f1,f2` | Limit response fields |
+| `--dry-run` | Validate without executing |
+| `--raw` | Raw API response (api command only) |
 
 ## Common Workflows
 
@@ -108,7 +97,7 @@ For structured JSON-RPC invocation (eliminates shell escaping):
 
 ```bash
 freeclimb mcp:start
-freeclimb mcp:config  # Print Claude Desktop config
+freeclimb mcp:config  # Print MCP client config
 ```
 
 ## Pagination
@@ -121,49 +110,17 @@ freeclimb calls:list --next --json   # Next page
 ## Error Handling
 
 JSON-mode errors include structured suggestions:
-
 ```json
 {
-    "success": false,
-    "error": { "code": 3, "message": "...", "suggestion": "..." }
+  "success": false,
+  "error": {"code": 3, "message": "...", "suggestion": "..."}
 }
 ```
 
 ## Input Validation
 
 The CLI rejects:
-
 - Control characters (below ASCII 0x20) in string inputs
 - Path traversal (`../`) in resource IDs
 - Query parameters (`?`, `#`) embedded in IDs
 - Pre-URL-encoded values (`%`) in IDs
-
-## Companion Skills
-
-| Skill                  | Trigger Phrases                                  | Use For                              |
-| ---------------------- | ------------------------------------------------ | ------------------------------------ |
-| `freeclimb-percl`      | PerCL, call scripting, voice commands, TTS, DTMF | PerCL command reference and examples |
-| `freeclimb-voice-apps` | IVR, call center, webhook server, phone menu     | Building complete voice applications |
-| `freeclimb-dashboards` | dashboard, monitoring, analytics, metrics        | Monitoring and analytics dashboards  |
-| `freeclimb-cli-dev`    | CLI source code, tests, generation               | Developing/modifying the CLI itself  |
-
-## Quick Provisioning Workflow
-
-Set up a new voice app end-to-end:
-
-```bash
-# 1. Create the application
-freeclimb applications:create --alias "My App" --voiceUrl "https://your-server.com/voice" --dry-run
-freeclimb applications:create --alias "My App" --voiceUrl "https://your-server.com/voice"
-
-# 2. Find an available number
-freeclimb available-numbers:list --fields phoneNumber,region --json
-
-# 3. Buy and assign it
-freeclimb incoming-numbers:buy --phoneNumber "+15551234567" --applicationId "AP..." --dry-run
-freeclimb incoming-numbers:buy --phoneNumber "+15551234567" --applicationId "AP..."
-
-# 4. Verify
-freeclimb applications:list --fields applicationId,alias,voiceUrl --json
-freeclimb incoming-numbers:list --fields phoneNumber,applicationId --json
-```

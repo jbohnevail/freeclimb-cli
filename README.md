@@ -153,12 +153,22 @@ freeclimb incoming-numbers:buy --phoneNumber "+15551234567" --dry-run
 ```sh
 git clone https://github.com/FreeClimbAPI/freeclimb-cli.git
 cd freeclimb-cli
+npm run setup             # Install, build, and verify (recommended)
+```
+
+Or manually:
+
+```sh
 npm install --ignore-scripts
 npx tsc --noEmit          # Type check
 npm test                  # Run tests
 npm run lint-write        # Lint and format
 npm run prepack           # Build for distribution
 ```
+
+### AI Agent Integration
+
+MCP server configs are auto-discovered by Claude Code (`.mcp.json`), Cursor (`.cursor/mcp.json`), and VS Code Copilot (`.vscode/mcp.json`). After `npm run setup`, set `FREECLIMB_ACCOUNT_ID` and `FREECLIMB_API_KEY` in the config files or your environment. See [AGENTS.md](AGENTS.md) for details.
 
 ## Contributing
 

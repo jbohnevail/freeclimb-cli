@@ -4,13 +4,14 @@
  * These tools expose FreeClimb API functionality to AI agents via MCP protocol.
  */
 
+/* eslint-disable camelcase */
+
 // Tool definitions
 export const tools = {
     // Call management
     make_call: {
         name: "make_call",
-        description:
-            "Make an outbound phone call from a FreeClimb number to a destination number",
+        description: "Make an outbound phone call from a FreeClimb number to a destination number",
         inputSchema: {
             type: "object" as const,
             properties: {
@@ -308,6 +309,61 @@ export const tools = {
             type: "object" as const,
             properties: {},
             required: [],
+        },
+    },
+
+    // Call update (hang up or redirect active calls)
+    update_call: {
+        name: "update_call",
+        description:
+            "Update an active call — hang up or redirect to a new URL. Use to end calls or change call flow mid-call.",
+        inputSchema: {
+            type: "object" as const,
+            properties: {
+                callId: {
+                    type: "string",
+                    description: "The call ID to update",
+                },
+                status: {
+                    type: "string",
+                    description: "Set to 'completed' to hang up the call",
+                    enum: ["completed", "canceled"],
+                },
+            },
+            required: ["callId", "status"],
+        },
+    },
+
+    // PerCL generation
+    generate_percl: {
+        name: "generate_percl",
+        description:
+            "Generate valid PerCL JSON for common call flow patterns. Returns a PerCL command array ready to use in webhook responses.",
+        inputSchema: {
+            type: "object" as const,
+            properties: {
+                pattern: {
+                    type: "string",
+                    description: "The call flow pattern to generate",
+                    enum: ["greeting", "menu", "voicemail", "transfer", "queue", "record"],
+                },
+                text: {
+                    type: "string",
+                    description:
+                        "Text for Say commands (greeting text, menu prompt, voicemail greeting)",
+                },
+                actionUrl: {
+                    type: "string",
+                    description:
+                        "Webhook URL for callbacks (menu selection handler, recording handler, etc.)",
+                },
+                options: {
+                    type: "object",
+                    description:
+                        "Pattern-specific options: { destination, callingNumber, queueId, waitUrl, maxDigits, finishOnKey, maxLengthSec }",
+                },
+            },
+            required: ["pattern"],
         },
     },
 }
