@@ -1,0 +1,3831 @@
+{
+  "commands": {
+    "api": {
+      "aliases": [],
+      "args": {
+        "endpoint": {
+          "description": "API endpoint path (e.g., /Calls, /Messages)",
+          "name": "endpoint",
+          "required": false
+        }
+      },
+      "description": "Make authenticated API requests to FreeClimb.\n\nThis command allows you to make raw API requests with automatic\nauthentication. Useful for accessing endpoints not covered by\nother CLI commands. Accepts the full API payload via --data as JSON.\n\nThe endpoint can be:\n  - A path starting with / (e.g., /Calls) - recommended\n  - A full FreeClimb URL (e.g., https://www.freeclimb.com/apiserver/Accounts/.../Calls)\n\nFor account-scoped endpoints, the account ID is automatically included.\nFull URLs are restricted to FreeClimb domains for credential safety.\n",
+      "examples": [
+        "$ freeclimb api /Calls",
+        "$ freeclimb api /Calls --method GET",
+        "$ freeclimb api /Calls -p status=completed -p to=+15551234567",
+        "$ freeclimb api /Messages --method POST -d '{\"to\":\"+15551234567\",\"from\":\"+15559876543\",\"text\":\"Hello\"}'",
+        "$ freeclimb api /IncomingPhoneNumbers --json",
+        "$ freeclimb api /Calls --fields callId,status,from,to",
+        "$ freeclimb api /Messages --method POST --dry-run -d '{\"to\":\"+15551234567\"}'"
+      ],
+      "flags": {
+        "method": {
+          "char": "X",
+          "description": "HTTP method",
+          "name": "method",
+          "default": "GET",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE"
+          ],
+          "type": "option"
+        },
+        "data": {
+          "char": "d",
+          "description": "JSON data for POST/PUT requests (accepts full API payload)",
+          "name": "data",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "param": {
+          "char": "p",
+          "description": "Query parameter (format: key=value, can be repeated)",
+          "name": "param",
+          "hasDynamicHelp": false,
+          "multiple": true,
+          "type": "option"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "raw": {
+          "description": "Output raw response without wrapping",
+          "name": "raw",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "api",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "api.js"
+      ]
+    },
+    "data": {
+      "aliases": [],
+      "args": {},
+      "description": "Find your data directory. You can store your credentials here in a .env file, after setting permissions appropriately. See https://oclif.io/docs/config for how to change this location.",
+      "flags": {
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "data",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "data.js"
+      ]
+    },
+    "describe": {
+      "aliases": [],
+      "args": {
+        "command_or_topic": {
+          "description": "Command (e.g. calls:list) or topic (e.g. calls) to describe",
+          "name": "command_or_topic",
+          "required": false
+        }
+      },
+      "description": "Describe available commands, flags, and arguments as machine-readable JSON.\n\nUse this command for runtime schema introspection. AI agents can call this\nto discover what the CLI accepts without parsing --help output.\n\nExamples:\n  freeclimb describe                   # List all topics\n  freeclimb describe calls             # Show commands in the calls topic\n  freeclimb describe calls:list        # Full schema for calls:list\n  freeclimb describe --all             # Full schema for every command\n",
+      "flags": {
+        "all": {
+          "description": "Show full schema for all commands",
+          "name": "all",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "describe",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "describe.js"
+      ]
+    },
+    "diagnose": {
+      "aliases": [],
+      "args": {},
+      "description": "Run diagnostic checks on connectivity and authentication.\n\nPerforms the following checks:\n  - Credential configuration (env vars, keytar)\n  - API connectivity\n  - Authentication validity\n  - Account status\n\nUseful for troubleshooting authentication or connectivity issues.\n",
+      "flags": {
+        "json": {
+          "description": "Output as JSON (for scripting/agents)",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "diagnose",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "diagnose.js"
+      ]
+    },
+    "login": {
+      "aliases": [],
+      "args": {},
+      "description": "Log in to FreeClimb with your credentials. Alternatively you can set the ACCOUNT_ID and API_KEY environment variables. To learn how to put them in a file, run freeclimb data -h",
+      "flags": {
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "login",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "login.js"
+      ]
+    },
+    "logout": {
+      "aliases": [],
+      "args": {},
+      "description": "Remove your saved FreeClimb Account ID and API Key from this computer's keychain. This will not remove them from environment variables or config files that you have manually edited.",
+      "flags": {
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "logout",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "logout.js"
+      ]
+    },
+    "status": {
+      "aliases": [],
+      "args": {},
+      "description": "Display account overview and health status.\n\nShows a summary of your FreeClimb account including:\n  - Account type and status\n  - Current balance (if available)\n  - Number of phone numbers owned\n  - Number of applications\n  - Recent activity summary\n\nUse --json for machine-readable output.\n",
+      "flags": {
+        "json": {
+          "description": "Output as JSON (for scripting/agents)",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "status",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "status.js"
+      ]
+    },
+    "update": {
+      "aliases": [],
+      "args": {},
+      "description": "Check for newer versions of the FreeClimb CLI.\n\nQueries the npm registry and compares against the installed version.\nIf an update is available, shows installation instructions.\n",
+      "flags": {
+        "json": {
+          "description": "Output as JSON (for scripting/agents)",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "update",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "update.js"
+      ]
+    },
+    "accounts:get": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a representation of the specified Account.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "accounts:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "accounts",
+        "get.js"
+      ]
+    },
+    "accounts:manage": {
+      "aliases": [],
+      "args": {},
+      "description": "This command allows you to manage an account.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Description for this account.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "label": {
+          "char": "l",
+          "description": "Group to which this account belongs.",
+          "name": "label",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "accounts:manage",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "accounts",
+        "manage.js"
+      ]
+    },
+    "applications:create": {
+      "aliases": [],
+      "args": {},
+      "description": " Create a new Application within the specified account.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Description of the new application (maximum 64 characters).",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "voiceUrl": {
+          "char": "v",
+          "description": "URL that FreeClimb should request when an inbound call arrives on a phone number assigned to this application. Used only for inbound calls. Note: A PerCL response is expected to control the inbound call.",
+          "name": "voiceUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "voiceFallbackUrl": {
+          "char": "V",
+          "description": "URL that FreeClimb will request if it times out waiting for a response from the voiceUrl. Used for inbound calls only. Note: A PerCL response is expected to control the inbound call.",
+          "name": "voiceFallbackUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "callConnectUrl": {
+          "char": "c",
+          "description": "URL that FreeClimb will request when an outbound call request is complete. Used for outbound calls only. Note: A PerCL response is expected if the outbound call is connected (status=InProgress) to control the call.",
+          "name": "callConnectUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "statusCallbackUrl": {
+          "char": "s",
+          "description": "URL that FreeClimb will request to pass call status (such as call ended) to the application. Note: This is a notification only; any PerCL returned will be ignored.",
+          "name": "statusCallbackUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "smsUrl": {
+          "char": "u",
+          "description": "URL that FreeClimb will request when a phone number assigned to this application receives an incoming SMS message. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",
+          "name": "smsUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "smsFallbackUrl": {
+          "char": "F",
+          "description": "URL that FreeClimb will request if it times out waiting for a response from the smsUrl. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",
+          "name": "smsFallbackUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "applications:create",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "applications",
+        "create.js"
+      ]
+    },
+    "applications:delete": {
+      "aliases": [],
+      "args": {
+        "applicationId": {
+          "description": "String that uniquely identifies this application resource.",
+          "name": "applicationId",
+          "required": false
+        }
+      },
+      "description": " Delete the specified application. If this application's ID is assigned to any Incoming phone number, that relationship will be cleared.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "applications:delete",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "applications",
+        "delete.js"
+      ]
+    },
+    "applications:get": {
+      "aliases": [],
+      "args": {
+        "applicationId": {
+          "description": "A string that uniquely identifies this application resource.",
+          "name": "applicationId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified application.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "applications:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "applications",
+        "get.js"
+      ]
+    },
+    "applications:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a list of Applications associated with the specified account, sorted from latest created to oldest.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Return only applications with aliases that exactly match this value.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "applications:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "applications",
+        "list.js"
+      ]
+    },
+    "applications:update": {
+      "aliases": [],
+      "args": {
+        "applicationId": {
+          "description": "A string that uniquely identifies this application resource.",
+          "name": "applicationId",
+          "required": false
+        }
+      },
+      "description": " Update the properties of the specified application.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "A human readable description of the application, with maximum length 64 characters.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "voiceUrl": {
+          "char": "v",
+          "description": "The URL that FreeClimb will request when an inbound call arrives on a phone number assigned to this application. Used only for inbound calls.",
+          "name": "voiceUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "voiceFallbackUrl": {
+          "char": "V",
+          "description": "The URL that FreeClimb will request if it times out waiting for a response from the voiceUrl. Used for inbound calls only. Note: A PerCL response is expected to control the inbound call.",
+          "name": "voiceFallbackUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "callConnectUrl": {
+          "char": "c",
+          "description": "The URL that FreeClimb will request when an outbound call request is complete. Used for outbound calls only. Note: A PerCL response is expected if the outbound call is connected (status=InProgress) to control the call.",
+          "name": "callConnectUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "statusCallbackUrl": {
+          "char": "s",
+          "description": "The URL that FreeClimb will request to pass call status (such as call ended) to the application. Note: This is a notification only; any PerCL returned will be ignored.",
+          "name": "statusCallbackUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "smsUrl": {
+          "char": "u",
+          "description": "The URL that FreeClimb will request when a phone number assigned to this application receives an incoming SMS message. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",
+          "name": "smsUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "smsFallbackUrl": {
+          "char": "F",
+          "description": "The URL that FreeClimb will request if it times out waiting for a response from the smsUrl. Used for inbound SMS only. Note: Any PerCL returned will be ignored.",
+          "name": "smsFallbackUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "applications:update",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "applications",
+        "update.js"
+      ]
+    },
+    "autocomplete": {
+      "aliases": [],
+      "args": {},
+      "description": "Display autocomplete installation instructions",
+      "flags": {
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "autocomplete",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "autocomplete",
+        "index.js"
+      ]
+    },
+    "call-queues:create": {
+      "aliases": [],
+      "args": {},
+      "description": " Create a Queue within the specified account.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "A description for this Queue. Max length is 64 characters.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "maxSize": {
+          "char": "M",
+          "description": "Maximum number of Calls this queue can hold. Default is 1000. Maximum is 1000.",
+          "name": "maxSize",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "call-queues:create",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "call-queues",
+        "create.js"
+      ]
+    },
+    "call-queues:get": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "A string that uniquely identifies this queue resource.",
+          "name": "queueId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified Queue.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "call-queues:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "call-queues",
+        "get.js"
+      ]
+    },
+    "call-queues:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a list of active Queues associated with the specified account.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Return only the Queue resources with aliases that exactly match this name.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "call-queues:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "call-queues",
+        "list.js"
+      ]
+    },
+    "call-queues:update": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "A string that uniquely identifies this Queue resource.",
+          "name": "queueId",
+          "required": false
+        }
+      },
+      "description": " Update the properties of the specified queue.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Description for this Queue. Max length is 64 characters.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "maxSize": {
+          "char": "M",
+          "description": "Maximum number of calls this queue can hold. Default is 100. Maximum is 1000. Note: Reducing the maxSize of a Queue causes the Queue to reject incoming requests until it shrinks below the new value of maxSize.",
+          "name": "maxSize",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "call-queues:update",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "call-queues",
+        "update.js"
+      ]
+    },
+    "available-numbers:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Search for phone numbers that are available for purchase. To purchase an available phone number, the number should be submitted via POST to the /IncomingPhoneNumbers endpoint.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Filter on numbers based on the formatted string of the phone number.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "country": {
+          "char": "C",
+          "description": "Filters numbers by two character ISO country code.",
+          "name": "country",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "region": {
+          "char": "r",
+          "description": "Filters numbers by two letter state abbreviation. This flag is only available for US numbers.",
+          "name": "region",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "smsEnabled": {
+          "char": "E",
+          "description": "Filters numbers based on SMS capability.",
+          "name": "smsEnabled",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "voiceEnabled": {
+          "char": "o",
+          "description": "Filters numbers based on voice capability.",
+          "name": "voiceEnabled",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "phoneNumber": {
+          "char": "p",
+          "description": "PCRE-compatible regular expression to filter against phoneNumber field, which is in E.164 format.",
+          "name": "phoneNumber",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "available-numbers:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "available-numbers",
+        "list.js"
+      ]
+    },
+    "calls:get": {
+      "aliases": [],
+      "args": {
+        "callId": {
+          "description": "String that uniquely identifies this call resource.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified Call.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "calls:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "calls",
+        "get.js"
+      ]
+    },
+    "calls:list-call-logs": {
+      "aliases": [],
+      "args": {
+        "callId": {
+          "description": "String that uniquely identifies this call resource.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Retrieve all logs associated with the specified Call.",
+      "flags": {
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as JSON (for scripting/agents)",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "calls:list-call-logs",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "calls",
+        "list-call-logs.js"
+      ]
+    },
+    "calls:list-call": {
+      "aliases": [],
+      "args": {
+        "callId": {
+          "description": "String that uniquely identifies this call resource.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a list of recordings generated during the specified Call.",
+      "flags": {
+        "dateCreated": {
+          "char": "d",
+          "description": "Only show recordings created on the specified date, in the form YYYY-MM-DD.",
+          "name": "dateCreated",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as JSON (for scripting/agents)",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "calls:list-call",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "calls",
+        "list-call.js"
+      ]
+    },
+    "calls:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a list of phone Calls made to and from the specified account, sorted from date created, newest to oldest.",
+      "flags": {
+        "to": {
+          "char": "T",
+          "description": "Only show Calls to this phone number.",
+          "name": "to",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "from": {
+          "char": "f",
+          "description": "Only show Calls from this phone number.",
+          "name": "from",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "status": {
+          "char": "S",
+          "description": "Only show Calls currently in this status. May be queued, ringing, inProgress, canceled, completed, failed, busy, or noAnswer.",
+          "name": "status",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "startTime": {
+          "char": "s",
+          "description": "Only show Calls that started at or after this time, given as YYYY-MM-DD hh:mm:ss.",
+          "name": "startTime",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "endTime": {
+          "char": "e",
+          "description": "Only show Calls that ended at or before this time, given as YYYY-MM- DD hh:mm:ss.",
+          "name": "endTime",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "parentCallId": {
+          "char": "P",
+          "description": "Only show Calls generated by the call with this ID.",
+          "name": "parentCallId",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "active": {
+          "char": "a",
+          "description": "Flag defaults to false. Set true to list active calls.",
+          "name": "active",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "calls:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "calls",
+        "list.js"
+      ]
+    },
+    "calls:make": {
+      "aliases": [],
+      "args": {
+        "from": {
+          "description": "Phone number to use as the caller ID. This can be: (a) The To or From number provided in FreeClimb's initial request to your app or (b) Any incoming phone number you have purchased from FreeClimb.",
+          "name": "from",
+          "required": false
+        },
+        "to": {
+          "description": "Phone number to place the Call to. For trial accounts, this must be a Verified Number.",
+          "name": "to",
+          "required": false
+        },
+        "applicationId": {
+          "description": "ID of the application FreeClimb should use to handle this phone call. FreeClimb will use the callConnectUrl and statusCallbackUrl set on the application unless the callConnectUrl attribute is also provided with the request. In this case, the URL specified in that callConnectUrl attribute will be used as a replacement of the callConnectUrl originally assigned in the application. The application must have a callConnectUrl associated with it or an error will be returned. The application’s voiceUrl parameter is not used for outbound calls.",
+          "name": "applicationId",
+          "required": false
+        }
+      },
+      "description": " Making a Call may take time. A 202 status code is returned if the Call request was successfully queued by FreeClimb, otherwise, a 500 error is returned. The asynchronous callback for the result will occur after some time through the callConnectUrl.",
+      "flags": {
+        "callConnectUrl": {
+          "char": "c",
+          "description": "The URL that FreeClimb should use to handle this phone call. If an applicationId or parentCallId have already been provided, this callConnectUrl attribute will be used as a replacement of the callConnectUrl originally assigned in the application or parent call.",
+          "name": "callConnectUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "parentCallId": {
+          "char": "P",
+          "description": "Required if no applicationId or callConnecturl have been provided. The ID of the parent Call in the case that this new Call is meant to be treated as a child of an existing Call. This attribute should be included when possible to reduce latency when adding child calls to Conferences containing the parent Call. A call can only be used as a parent once the call is in progress or as an inbound call that is still ringing. An outbound call is considered to be in progress once the outdialConnect or outdialApiConnect webhook is invoked. An inbound call is ringing when the inbound webhook is invoked. If a callConnectUrl attribute is also included with the parentCallId in the request, this URL will be used as a replacement of the callConnectUrl originally assigned in the parent call.",
+          "name": "parentCallId",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "sendDigits": {
+          "char": "s",
+          "description": "String of digits to dial after connecting to the number. It can include digits 0-9, *, and #, and allows embedding a pause between the output of individual digits. The default pause is 500 milliseconds. So, a string such as 1234# will be played in 2 seconds because of the 4 standard pauses implied within the string. A custom pause is specified by including a positive integer wrapped in curly braces: {n}.",
+          "name": "sendDigits",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ifMachine": {
+          "char": "i",
+          "description": "Specifies how FreeClimb should handle this Call if an answering machine answers it.",
+          "name": "ifMachine",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ifMachineUrl": {
+          "char": "I",
+          "description": "This attribute specifies a URL to which FreeClimb will make a POST request when an answering machine or a fax machine is detected. This URL is required if the ifMachine flag is set to redirect. When ifMachine is set to hangup, ifMachineUrl must not be included in the request.",
+          "name": "ifMachineUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "timeout": {
+          "char": "t",
+          "description": "Number of seconds that FreeClimb should allow the phone to ring before assuming there is no answer. Default is 30 seconds. Maximum allowed ring-time is determined by the target phone's provider. Note that most providers limit ring-time to 120 seconds.",
+          "name": "timeout",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "privacyMode": {
+          "char": "p",
+          "description": "Indicates if the request contains sensitive information which should be hidden. When set to true, the contents of the sendDigits field will be replaced with the string XXXXX in the logs.",
+          "name": "privacyMode",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "calls:make",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "calls",
+        "make.js"
+      ]
+    },
+    "calls:update": {
+      "aliases": [],
+      "args": {
+        "callId": {
+          "description": "String that uniquely identifies this call resource.",
+          "name": "callId",
+          "required": false
+        },
+        "status": {
+          "description": "Either canceled or completed. Specifying canceled attempts to hang up calls that are queued without affecting calls already in progress. Specifying completed attempts to hang up a call already in progress.",
+          "name": "status",
+          "required": false
+        }
+      },
+      "description": " Call hang up may take time. A 202 status code is returned if the hangup request was successfully queued by FreeClimb. Otherwise, an error code is returned. If successfully queued, the asynchronous callback for the result will occur after some time through the statusCallbackUrl.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "calls:update",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "calls",
+        "update.js"
+      ]
+    },
+    "conference-participants:get": {
+      "aliases": [],
+      "args": {
+        "conferenceId": {
+          "description": "ID of the conference this participant is in.",
+          "name": "conferenceId",
+          "required": false
+        },
+        "callId": {
+          "description": "ID of the Call associated with this participant.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified Conference Participant.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conference-participants:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conference-participants",
+        "get.js"
+      ]
+    },
+    "conference-participants:list": {
+      "aliases": [],
+      "args": {
+        "conferenceId": {
+          "description": "ID of the conference this participant is in.",
+          "name": "conferenceId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a list of Participants in the specified Conference, sorted by date created, newest to oldest.",
+      "flags": {
+        "talk": {
+          "char": "L",
+          "description": "Only show Participants with the talk privilege.",
+          "name": "talk",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "listen": {
+          "char": "l",
+          "description": "Only show Participants with the listen privilege.",
+          "name": "listen",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conference-participants:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conference-participants",
+        "list.js"
+      ]
+    },
+    "conference-participants:remove": {
+      "aliases": [],
+      "args": {
+        "conferenceId": {
+          "description": "ID of the conference this participant is in.",
+          "name": "conferenceId",
+          "required": false
+        },
+        "callId": {
+          "description": "ID of the Call associated with this participant.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Remove the specified Participant from the Conference.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conference-participants:remove",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conference-participants",
+        "remove.js"
+      ]
+    },
+    "conference-participants:update": {
+      "aliases": [],
+      "args": {
+        "conferenceId": {
+          "description": "ID of the conference this participant is in.",
+          "name": "conferenceId",
+          "required": false
+        },
+        "callId": {
+          "description": "ID of the Call associated with this participant.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Update the properties of the specified conference participant.",
+      "flags": {
+        "talk": {
+          "char": "L",
+          "description": "(Optional) Default is true. Setting to false mutes the Participant. FreeClimb returns an error and ignores any other value.",
+          "name": "talk",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "listen": {
+          "char": "l",
+          "description": "(Optional) Default is true. Setting to false silences the Conference for this Participant. FreeClimb returns an error and ignores any other value.",
+          "name": "listen",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conference-participants:update",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conference-participants",
+        "update.js"
+      ]
+    },
+    "conferences:create": {
+      "aliases": [],
+      "args": {},
+      "description": " Create an empty Conference within the specified account.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "A description for this Conference. Maximum 64 characters.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "playBeep": {
+          "char": "b",
+          "description": "Controls when a beep is played. Valid values: always, never, entryOnly, exitOnly.",
+          "name": "playBeep",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "record": {
+          "char": "r",
+          "description": "Setting to true records the entire Conference.",
+          "name": "record",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "waitUrl": {
+          "char": "w",
+          "description": "If specified, a URL for the audio file that provides custom hold music for the Conference when it is in the populated state. Otherwise, FreeClimb uses a system default audio file. This is always fetched using HTTP GET and is fetched just once - when the Conference is created.",
+          "name": "waitUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "statusCallbackUrl": {
+          "char": "s",
+          "description": "This URL is invoked when the status of the Conference changes.",
+          "name": "statusCallbackUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conferences:create",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conferences",
+        "create.js"
+      ]
+    },
+    "conferences:get": {
+      "aliases": [],
+      "args": {
+        "conferenceId": {
+          "description": "A string that uniquely identifies this conference resource.",
+          "name": "conferenceId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified conference.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conferences:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conferences",
+        "get.js"
+      ]
+    },
+    "conferences:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a list of Conferences associated with the specified account, sorted by creation date, newest to oldest.",
+      "flags": {
+        "status": {
+          "char": "S",
+          "description": "Only show conferences that currently have the specified status. Valid values: empty, populated, inProgress, or terminated.",
+          "name": "status",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "alias": {
+          "char": "a",
+          "description": "List Conferences whose alias exactly matches this string.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dateCreated": {
+          "char": "d",
+          "description": "Only show Conferences that were created on the specified date, in the form YYYY-MM-DD.",
+          "name": "dateCreated",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dateUpdated": {
+          "char": "D",
+          "description": "Only show Conferences that were last updated on the specified date, in the form YYYY-MM-DD.",
+          "name": "dateUpdated",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conferences:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conferences",
+        "list.js"
+      ]
+    },
+    "conferences:update": {
+      "aliases": [],
+      "args": {
+        "conferenceId": {
+          "description": "String that uniquely identifies this conference resource.",
+          "name": "conferenceId",
+          "required": false
+        }
+      },
+      "description": " Update the properties of the specified conference.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Description for this conference. Maximum 64 characters.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "playBeep": {
+          "char": "b",
+          "description": "Controls when a beep is played. Valid values: always, never, entryOnly, exitOnly.",
+          "name": "playBeep",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "status": {
+          "char": "S",
+          "description": "New status of the conference. Valid values: empty or terminated.",
+          "name": "status",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "conferences:update",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "conferences",
+        "update.js"
+      ]
+    },
+    "incoming-numbers:buy": {
+      "aliases": [],
+      "args": {
+        "phoneNumber": {
+          "description": "Phone number to purchase in E.164 format (as returned in the list of Available Phone Numbers).",
+          "name": "phoneNumber",
+          "required": false
+        }
+      },
+      "description": " Purchase a new phone number for the specified account. If the specified phone number is available, FreeClimb will add it to the account. To find an available phone number, use the /AvailablePhoneNumbers endpoint.",
+      "flags": {
+        "alias": {
+          "char": "a",
+          "description": "Description for this new incoming phone number (max 64 characters).",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "applicationId": {
+          "char": "A",
+          "description": "ID of the application that should handle phone calls to the number.",
+          "name": "applicationId",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "incoming-numbers:buy",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "incoming-numbers",
+        "buy.js"
+      ]
+    },
+    "incoming-numbers:delete": {
+      "aliases": [],
+      "args": {
+        "phoneNumberId": {
+          "description": "String that uniquely identifies this phone number resource.",
+          "name": "phoneNumberId",
+          "required": false
+        }
+      },
+      "description": " Delete the specified incoming number. FreeClimb will no longer answer calls to the number.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "incoming-numbers:delete",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "incoming-numbers",
+        "delete.js"
+      ]
+    },
+    "incoming-numbers:get": {
+      "aliases": [],
+      "args": {
+        "phoneNumberId": {
+          "description": "String that uniquely identifies this phone number resource.",
+          "name": "phoneNumberId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified incoming phone number.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "incoming-numbers:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "incoming-numbers",
+        "get.js"
+      ]
+    },
+    "incoming-numbers:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a list of Incoming Phone Numbers associated with the specified account, sorted from newest to oldest.",
+      "flags": {
+        "phoneNumber": {
+          "char": "p",
+          "description": "Only show incoming phone number resources that match this PCRE-compatible regular expression.",
+          "name": "phoneNumber",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "alias": {
+          "char": "a",
+          "description": "Only show incoming phone numbers with aliases that exactly match this value.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "applicationId": {
+          "char": "A",
+          "description": "Filters numbers by application ID.",
+          "name": "applicationId",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "hasApplication": {
+          "char": "h",
+          "description": "Filters numbers by whether or not they are associated with an application.",
+          "name": "hasApplication",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "country": {
+          "char": "C",
+          "description": "Filters numbers by two character ISO country code.",
+          "name": "country",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "region": {
+          "char": "r",
+          "description": "Filters numbers by two letter state abbreviation. This flag is only available for US numbers.",
+          "name": "region",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "smsEnabled": {
+          "char": "E",
+          "description": "Filters numbers based on SMS capability.",
+          "name": "smsEnabled",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "voiceEnabled": {
+          "char": "o",
+          "description": "Filters numbers based on voice capability.",
+          "name": "voiceEnabled",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "true",
+            "false"
+          ],
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "incoming-numbers:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "incoming-numbers",
+        "list.js"
+      ]
+    },
+    "incoming-numbers:update": {
+      "aliases": [],
+      "args": {
+        "phoneNumberId": {
+          "description": "String that uniquely identifies this phone number resource.",
+          "name": "phoneNumberId",
+          "required": false
+        }
+      },
+      "description": " Update the properties of the specified incoming phone number.",
+      "flags": {
+        "applicationId": {
+          "char": "A",
+          "description": "ID of the Application that should handle calls to this number.",
+          "name": "applicationId",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "alias": {
+          "char": "a",
+          "description": "Description for this phone number.",
+          "name": "alias",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "incoming-numbers:update",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "incoming-numbers",
+        "update.js"
+      ]
+    },
+    "logs:filter": {
+      "aliases": [],
+      "args": {
+        "pql": {
+          "description": "The filter query for retrieving logs.",
+          "name": "pql",
+          "required": false
+        }
+      },
+      "description": " Returns the first page of Logs associated with the specified account.",
+      "flags": {
+        "maxItem": {
+          "char": "m",
+          "description": "Show only a certain number of the most recent logs on this page.",
+          "name": "maxItem",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "tail": {
+          "char": "t",
+          "description": "Polls the FreeClimb API to retrieve and display new logs as they occur.",
+          "name": "tail",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "sleep": {
+          "char": "q",
+          "description": "Determines time waited between request for tail command. Defaults at 1 second.",
+          "name": "sleep",
+          "default": 1000,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "since": {
+          "char": "Q",
+          "dependsOn": [
+            "tail"
+          ],
+          "description": "Determines time frame of logs to be printed out before starting tail. Ex.2h9m",
+          "name": "since",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "logs:filter",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "logs",
+        "filter.js"
+      ]
+    },
+    "logs:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Returns all Logs associated with the specified account or a specific page of Logs as indicated by the URI in the request.",
+      "flags": {
+        "maxItem": {
+          "char": "m",
+          "description": "Show only a certain number of the most recent logs on this page.",
+          "name": "maxItem",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "tail": {
+          "char": "t",
+          "description": "Polls the FreeClimb API to retrieve and display new logs as they occur.",
+          "name": "tail",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "sleep": {
+          "char": "q",
+          "description": "Determines time waited between request for tail command. Defaults at 1 second.",
+          "name": "sleep",
+          "default": 1000,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "since": {
+          "char": "Q",
+          "dependsOn": [
+            "tail"
+          ],
+          "description": "Determines time frame of logs to be printed out before starting tail. Ex.2h9m",
+          "name": "since",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "logs:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "logs",
+        "list.js"
+      ]
+    },
+    "mcp:config": {
+      "aliases": [],
+      "args": {},
+      "description": "Output MCP configuration for AI assistants like Claude Desktop.\n\nThis command generates the configuration needed to add FreeClimb\nto your AI assistant. Copy the output and add it to your\nclaude_desktop_config.json file.\n\nConfiguration file locations:\n  macOS: ~/Library/Application Support/Claude/claude_desktop_config.json\n  Windows: %APPDATA%\\Claude\\claude_desktop_config.json\n  Linux: ~/.config/Claude/claude_desktop_config.json\n\nAfter adding the configuration, restart Claude Desktop to enable\nthe FreeClimb integration.\n\nEnvironment variables:\n  Set FREECLIMB_ACCOUNT_ID and FREECLIMB_API_KEY in your environment\n  for the MCP server to authenticate with FreeClimb.\n",
+      "flags": {
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "raw": {
+          "description": "Output raw JSON without formatting or instructions",
+          "name": "raw",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "mcp:config",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "mcp",
+        "config.js"
+      ]
+    },
+    "mcp:start": {
+      "aliases": [],
+      "args": {},
+      "description": "Start the FreeClimb MCP server for AI agent integration.\n\nThe MCP (Model Context Protocol) server allows AI assistants like Claude\nto interact with FreeClimb directly. The server runs in stdio mode and\ncommunicates via JSON-RPC.\n\nAvailable tools exposed to AI agents:\n  - make_call: Make outbound phone calls\n  - send_sms: Send SMS messages\n  - list_calls, list_sms: View call/SMS history\n  - list_numbers: View owned phone numbers\n  - list_applications: View applications\n  - get_account: View account info\n  - And more...\n\nTo configure Claude Desktop to use this server:\n  1. Run: freeclimb mcp config\n  2. Copy the output to your claude_desktop_config.json\n  3. Restart Claude Desktop\n",
+      "flags": {
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "mcp:start",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "mcp",
+        "start.js"
+      ]
+    },
+    "recordings:delete": {
+      "aliases": [],
+      "args": {
+        "recordingId": {
+          "description": "String that uniquely identifies this recording resource.",
+          "name": "recordingId",
+          "required": false
+        }
+      },
+      "description": " Delete the specified recording. Both the audio file and the resource metadata are deleted.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "recordings:delete",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "recordings",
+        "delete.js"
+      ]
+    },
+    "recordings:download": {
+      "aliases": [],
+      "args": {
+        "recordingId": {
+          "description": "String that uniquely identifies this recording resource.",
+          "name": "recordingId",
+          "required": false
+        }
+      },
+      "description": " Download a Recording. Authentication is required to download a Recording, as with any other request made to the REST API.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "recordings:download",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "recordings",
+        "download.js"
+      ]
+    },
+    "recordings:get": {
+      "aliases": [],
+      "args": {
+        "recordingId": {
+          "description": "String that uniquely identifies this recording resource.",
+          "name": "recordingId",
+          "required": false
+        }
+      },
+      "description": " Retrieve metadata for a specific Recording.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "recordings:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "recordings",
+        "get.js"
+      ]
+    },
+    "recordings:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a list of metadata for recordings associated with the specified account, sorted from latest created to oldest.",
+      "flags": {
+        "callId": {
+          "char": "c",
+          "description": "Show only Recordings made during the Call with this ID.",
+          "name": "callId",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "conferenceId": {
+          "char": "C",
+          "description": "Show only Recordings made during the conference with this ID.",
+          "name": "conferenceId",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dateCreated": {
+          "char": "d",
+          "description": "Only show Recordings created on this date, formatted as YYYY-MM-DD.",
+          "name": "dateCreated",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "recordings:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "recordings",
+        "list.js"
+      ]
+    },
+    "recordings:stream": {
+      "aliases": [],
+      "args": {
+        "recordingId": {
+          "description": "String that uniquely identifies this recording resource.",
+          "name": "recordingId",
+          "required": false
+        }
+      },
+      "description": " Stream a Recording File. Authentication is required to stream a Recording, as with any other request made to the REST API.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "recordings:stream",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "recordings",
+        "stream.js"
+      ]
+    },
+    "queue-members:dequeue-head": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies this queue resource.",
+          "name": "queueId",
+          "required": false
+        }
+      },
+      "description": " Dequeue the Member at the head of the Queue. The Member's Call will begin executing the PerCL script returned from the callback specified in the actionUrl parameter when the Member was added.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:dequeue-head",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "dequeue-head.js"
+      ]
+    },
+    "queue-members:dequeue": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": false
+        },
+        "callId": {
+          "description": "ID if the Call that the Member belongs to.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Dequeue the specified Member. The Member's Call will begin executing the PerCL script returned from the callback specified in the actionUrl parameter when the Member was added.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:dequeue",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "dequeue.js"
+      ]
+    },
+    "queue-members:get-head": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the Queue Member currently at the head of the Queue.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:get-head",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "get-head.js"
+      ]
+    },
+    "queue-members:get": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": false
+        },
+        "callId": {
+          "description": "ID of the Call that the Member belongs to.",
+          "name": "callId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified Queue Member.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "get.js"
+      ]
+    },
+    "queue-members:list": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a list of Members in the specified Queue.",
+      "flags": {
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "list.js"
+      ]
+    },
+    "sms:get": {
+      "aliases": [],
+      "args": {
+        "messageId": {
+          "description": "String that uniquely identifies this Message resource.",
+          "name": "messageId",
+          "required": false
+        }
+      },
+      "description": " Retrieve a representation of the specified Message.",
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "sms:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "sms",
+        "get.js"
+      ]
+    },
+    "sms:list": {
+      "aliases": [],
+      "args": {},
+      "description": " Retrieve a list of SMS Messages made to and from the specified Account, sorted from latest created to oldest.",
+      "flags": {
+        "to": {
+          "char": "T",
+          "description": "Only show Messages to this phone number.",
+          "name": "to",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "from": {
+          "char": "f",
+          "description": "Only show Messages from this phone number.",
+          "name": "from",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "beginTime": {
+          "char": "b",
+          "description": "Only show Messages sent at or after this time (GMT), given as YYYY-MM-DD hh:mm:ss.",
+          "name": "beginTime",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "endTime": {
+          "char": "e",
+          "description": "Only show messages sent at or before this time (GMT), given as YYYY-MM-DD hh:mm.",
+          "name": "endTime",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "direction": {
+          "char": "d",
+          "description": "Either inbound or outbound. Only show Messages that were either sent from or received by FreeClimb.",
+          "name": "direction",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "sms:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "sms",
+        "list.js"
+      ]
+    },
+    "sms:send": {
+      "aliases": [],
+      "args": {
+        "from": {
+          "description": "Phone number to use as the sender. This must be an incoming phone number that you have purchased from FreeClimb.",
+          "name": "from",
+          "required": false
+        },
+        "to": {
+          "description": "Phone number to receive the message. Must be within FreeClimb's service area. For trial accounts, must be a Verified Number.",
+          "name": "to",
+          "required": false
+        },
+        "text": {
+          "description": "Text contained in the message.",
+          "name": "text",
+          "required": false
+        }
+      },
+      "description": "This command allows you to send a sms message.",
+      "flags": {
+        "notificationUrl": {
+          "char": "n",
+          "description": "When the Message changes status, this URL is invoked using HTTP POST with the messageStatus parameters. Note: This is a notification only; any PerCL returned is ignored.",
+          "name": "notificationUrl",
+          "required": false,
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "sms:send",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": false,
+      "relativePath": [
+        "lib",
+        "commands",
+        "sms",
+        "send.js"
+      ]
+    }
+  },
+  "version": "0.6.0"
+}
