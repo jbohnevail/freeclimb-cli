@@ -6,18 +6,23 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class conferencesList extends Command {
     static description = ` Retrieve a list of Conferences associated with the specified account, sorted by creation date, newest to oldest.`
-    
+    static examples = [
+        "<%= config.bin %> conferences:list",
+        "<%= config.bin %> conferences:list --status inProgress --json",
+        "<%= config.bin %> conferences:list --quiet",
+    ]
     static flags = {
 		status: Flags.string({            char: "S",            description: "Only show conferences that currently have the specified status. Valid values: empty, populated, inProgress, or terminated.",             required: false,             }),
 		alias: Flags.string({            char: "a",            description: "List Conferences whose alias exactly matches this string.",             required: false,             }),
 		dateCreated: Flags.string({            char: "d",            description: "Only show Conferences that were created on the specified date, in the form YYYY-MM-DD.",             required: false,             }),
 		dateUpdated: Flags.string({            char: "D",            description: "Only show Conferences that were last updated on the specified date, in the form YYYY-MM-DD.",             required: false,             }),
 		next: Flags.boolean({char: 'n', description: 'Displays the next page of output.'}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		help: Flags.help({char: 'h'}),
 	}
@@ -42,20 +47,31 @@ export class conferencesList extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "conferences:list" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "conferenceId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
         const nextResponse = (response: FreeClimbResponse) => {
             if (response.data) {
-                out.out(formatOutput(response.data))
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "conferenceId")
+                    if (ids) { out.out(ids) }
+                } else {
+                    out.out(formatOutput(response.data))
+                }
             } else { throw new Errors.UndefinedResponseError() }
-            if(out.next === null) {
+            if(out.next === null && !flags.quiet) {
                 out.out("== You are on the last page of output. ==")
             }
         }
@@ -71,6 +87,8 @@ export class conferencesList extends Command {
             }
             return
         }
+        
+        
         
         await fcApi.apiCall("GET", {params: {
 				status: flags.status,

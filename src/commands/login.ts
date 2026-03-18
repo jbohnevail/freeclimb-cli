@@ -8,11 +8,25 @@ import { FreeClimbApi, FreeClimbResponse, FreeClimbErrorResponse } from "../free
 export class login extends Command {
     static description = `Log in to FreeClimb with your credentials. Alternatively you can set the ACCOUNT_ID and API_KEY environment variables. To learn how to put them in a file, run freeclimb data -h`
 
+    static examples = [
+        "<%= config.bin %> login",
+        "<%= config.bin %> login --accountId AC1234567890abcdef --apiKey abc123def456 --yes",
+    ]
+
     static flags = {
         help: Flags.help({ char: "h" }),
+        accountId: Flags.string({ description: "FreeClimb Account ID (non-interactive login)" }),
+        apiKey: Flags.string({ description: "FreeClimb API Key (non-interactive login)" }),
+        yes: Flags.boolean({
+            char: "y",
+            description: "Skip confirmation prompt (required for non-interactive login)",
+            default: false,
+        }),
     }
 
     async run() {
+        const { flags } = await this.parse(login)
+
         const fcApi = new FreeClimbApi(``, true, this)
         const verifyResponse = (response: FreeClimbResponse) => {
             const resp =
@@ -25,7 +39,29 @@ export class login extends Command {
             this.log(chalk.red(respError))
         }
 
-        await this.parse(login)
+        // Non-interactive login path
+        if (flags.accountId && flags.apiKey) {
+            if (!flags.yes) {
+                this.error("Non-interactive login requires the --yes flag to confirm.", { exit: 2 })
+            }
+            await cred.removeCredentials()
+            try {
+                await cred.setCredentials(flags.accountId, flags.apiKey)
+            } catch (error: any) {
+                const err = new Errors.SetPasswordError(error.message)
+                this.error(err.message, { exit: err.code })
+            }
+            await fcApi.apiCall("GET", {}, verifyResponse, verifyErrorResponse)
+            return
+        }
+
+        if (flags.accountId || flags.apiKey) {
+            this.error("Both --accountId and --apiKey must be provided for non-interactive login.", {
+                exit: 2,
+            })
+        }
+
+        // Interactive login path
         this.log("You can find your Account ID and API Key at https://www.freeclimb.com/dashboard")
         const confirmation: boolean = await prompts.confirm(
             "If you are already logged in to the FreeClimb CLI on this computer, you will first be logged out of that account. Would you like to continue?"

@@ -6,21 +6,25 @@ import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
 import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
-import { filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
+import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
 export class queueMembersDequeueHead extends Command {
     static description = ` Dequeue the Member at the head of the Queue. The Member's Call will begin executing the PerCL script returned from the callback specified in the actionUrl parameter when the Member was added.`
-    
+    static examples = [
+        "<%= config.bin %> queue-members:dequeue-head QU1234567890abcdef",
+        "<%= config.bin %> queue-members:dequeue-head QU1234567890abcdef --dry-run",
+    ]
     static flags = {
 		next: Flags.boolean({hidden: true}),
-		json: Flags.boolean({description: 'Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.', default: false}),
+		json: Flags.boolean({description: 'Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.', default: false}),
+		quiet: Flags.boolean({description: 'Output only resource IDs, one per line. Useful for piping into other commands.', default: false}),
 		fields: Flags.string({description: 'Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.'}),
 		"dry-run": Flags.boolean({description: 'Validate the request without executing it. Shows what would be sent to the API.', default: false}),
 		help: Flags.help({char: 'h'}),
 	}
     
 	static args = {
-		queueId: Args.string({description: "String that uniquely identifies this queue resource.", required: false}),
+		queueId: Args.string({description: "String that uniquely identifies this queue resource.", required: true}),
 	}
 
     async run() {
@@ -33,6 +37,7 @@ export class queueMembersDequeueHead extends Command {
                 dryRun: true,
                 method: "POST",
                 endpoint: `Queues/${args.queueId}/Members/Front`,
+                
                 
             }
             if (outputFormat === "json") {
@@ -54,12 +59,18 @@ export class queueMembersDequeueHead extends Command {
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
+                if (flags.quiet) { return }
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "queue-members:dequeue-head" }), null, 2))
                 } else {
                     out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
                 }
             } else if (response.data) {
+                if (flags.quiet) {
+                    const ids = extractQuietIds(response.data, "callId")
+                    if (ids) { out.out(ids) }
+                    return
+                }
                 out.out(formatOutput(response.data))
             } else { throw new Errors.UndefinedResponseError() }
         }
@@ -69,6 +80,8 @@ export class queueMembersDequeueHead extends Command {
                 this.error(error.message, { exit: error.code});
             
         }
+        
+        
         
         await fcApi.apiCall("POST", {}, normalResponse)
     

@@ -1,0 +1,14 @@
+{
+  "accounts": "accountId",
+  "applications": "applicationId",
+  "available-numbers": "phoneNumber",
+  "call-queues": "queueId",
+  "calls": "callId",
+  "conference-participants": "callId",
+  "conferences": "conferenceId",
+  "incoming-numbers": "phoneNumberId",
+  "logs": "requestId",
+  "queue-members": "callId",
+  "recordings": "recordingId",
+  "sms": "messageId"
+}

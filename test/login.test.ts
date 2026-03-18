@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import nock from "nock"
 import sinon from "sinon"
-import { prompts } from "../src/prompts"
+import { prompts } from "../lib/prompts"
 import { runCommand } from "@oclif/test"
 
 describe("Test for login command", function () {

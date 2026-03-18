@@ -1,0 +1,197 @@
+{
+  "accounts:get": [
+    "freeclimb accounts:get",
+    "freeclimb accounts:get --json",
+    "freeclimb accounts:get --fields accountId,status"
+  ],
+  "accounts:manage": [
+    "freeclimb accounts:manage --alias \"My Account\"",
+    "freeclimb accounts:manage --alias \"My Account\" --json",
+    "freeclimb accounts:manage --dry-run --alias \"My Account\""
+  ],
+  "applications:create": [
+    "freeclimb applications:create --alias \"My App\" --voiceUrl https://example.com/voice",
+    "freeclimb applications:create --json",
+    "freeclimb applications:create --dry-run --alias test"
+  ],
+  "applications:delete": [
+    "freeclimb applications:delete AP1234567890abcdef1234567890abcdef12345678",
+    "freeclimb applications:delete AP1234567890abcdef1234567890abcdef12345678 --dry-run"
+  ],
+  "applications:get": [
+    "freeclimb applications:get AP1234567890abcdef1234567890abcdef12345678",
+    "freeclimb applications:get AP1234567890abcdef1234567890abcdef12345678 --json",
+    "freeclimb applications:get AP1234567890abcdef1234567890abcdef12345678 --fields applicationId,alias,voiceUrl"
+  ],
+  "applications:list": [
+    "freeclimb applications:list",
+    "freeclimb applications:list --json",
+    "freeclimb applications:list --quiet",
+    "freeclimb applications:list --fields applicationId,alias"
+  ],
+  "applications:update": [
+    "freeclimb applications:update AP1234567890abcdef1234567890abcdef12345678 --alias \"Updated App\"",
+    "freeclimb applications:update AP1234567890abcdef1234567890abcdef12345678 --voiceUrl https://example.com/new-voice --dry-run"
+  ],
+  "available-numbers:list": [
+    "freeclimb available-numbers:list",
+    "freeclimb available-numbers:list --alias 123-456-7890",
+    "freeclimb available-numbers:list --json"
+  ],
+  "call-queues:create": [
+    "freeclimb call-queues:create --alias \"Support Queue\"",
+    "freeclimb call-queues:create --alias \"Support Queue\" --maxSize 100 --dry-run"
+  ],
+  "call-queues:get": [
+    "freeclimb call-queues:get QU1234567890abcdef",
+    "freeclimb call-queues:get QU1234567890abcdef --json"
+  ],
+  "call-queues:list": [
+    "freeclimb call-queues:list",
+    "freeclimb call-queues:list --json",
+    "freeclimb call-queues:list --quiet"
+  ],
+  "call-queues:update": [
+    "freeclimb call-queues:update QU1234567890abcdef --alias \"Renamed Queue\"",
+    "freeclimb call-queues:update QU1234567890abcdef --maxSize 50 --dry-run"
+  ],
+  "calls:get": [
+    "freeclimb calls:get CA1234567890abcdef",
+    "freeclimb calls:get CA1234567890abcdef --json",
+    "freeclimb calls:get CA1234567890abcdef --fields callId,status,from,to"
+  ],
+  "calls:list": [
+    "freeclimb calls:list",
+    "freeclimb calls:list --status ringing --json",
+    "freeclimb calls:list --quiet",
+    "freeclimb calls:list --fields callId,status,from,to"
+  ],
+  "calls:make": [
+    "freeclimb calls:make +12223334444 +15556667777 AP1234567890abcdef1234567890abcdef12345678 https://example.com/voice",
+    "freeclimb calls:make +12223334444 +15556667777 AP1234567890abcdef1234567890abcdef12345678 https://example.com/voice --dry-run"
+  ],
+  "calls:update": [
+    "freeclimb calls:update CA1234567890abcdef --status completed",
+    "freeclimb calls:update CA1234567890abcdef --status completed --dry-run"
+  ],
+  "conference-participants:get": [
+    "freeclimb conference-participants:get CF1234567890abcdef CA1234567890abcdef",
+    "freeclimb conference-participants:get CF1234567890abcdef CA1234567890abcdef --json"
+  ],
+  "conference-participants:list": [
+    "freeclimb conference-participants:list CF1234567890abcdef",
+    "freeclimb conference-participants:list CF1234567890abcdef --json"
+  ],
+  "conference-participants:remove": [
+    "freeclimb conference-participants:remove CF1234567890abcdef CA1234567890abcdef",
+    "freeclimb conference-participants:remove CF1234567890abcdef CA1234567890abcdef --dry-run"
+  ],
+  "conference-participants:update": [
+    "freeclimb conference-participants:update CF1234567890abcdef CA1234567890abcdef --talk true",
+    "freeclimb conference-participants:update CF1234567890abcdef CA1234567890abcdef --listen false --dry-run"
+  ],
+  "conferences:create": [
+    "freeclimb conferences:create --alias \"Team Standup\"",
+    "freeclimb conferences:create --json --dry-run"
+  ],
+  "conferences:get": [
+    "freeclimb conferences:get CF1234567890abcdef",
+    "freeclimb conferences:get CF1234567890abcdef --json"
+  ],
+  "conferences:list": [
+    "freeclimb conferences:list",
+    "freeclimb conferences:list --status inProgress --json",
+    "freeclimb conferences:list --quiet"
+  ],
+  "conferences:update": [
+    "freeclimb conferences:update CF1234567890abcdef --status terminated",
+    "freeclimb conferences:update CF1234567890abcdef --status terminated --dry-run"
+  ],
+  "incoming-numbers:buy": [
+    "freeclimb incoming-numbers:buy --phoneNumber +12223334444",
+    "freeclimb incoming-numbers:buy --phoneNumber +12223334444 --applicationId AP1234567890abcdef1234567890abcdef12345678 --dry-run"
+  ],
+  "incoming-numbers:delete": [
+    "freeclimb incoming-numbers:delete PN1234567890abcdef",
+    "freeclimb incoming-numbers:delete PN1234567890abcdef --dry-run"
+  ],
+  "incoming-numbers:get": [
+    "freeclimb incoming-numbers:get PN1234567890abcdef",
+    "freeclimb incoming-numbers:get PN1234567890abcdef --json"
+  ],
+  "incoming-numbers:list": [
+    "freeclimb incoming-numbers:list",
+    "freeclimb incoming-numbers:list --json",
+    "freeclimb incoming-numbers:list --quiet"
+  ],
+  "incoming-numbers:update": [
+    "freeclimb incoming-numbers:update PN1234567890abcdef --applicationId AP1234567890abcdef1234567890abcdef12345678",
+    "freeclimb incoming-numbers:update PN1234567890abcdef --applicationId AP1234567890abcdef1234567890abcdef12345678 --dry-run"
+  ],
+  "logs:list": [
+    "freeclimb logs:list",
+    "freeclimb logs:list --json",
+    "freeclimb logs:list --tail"
+  ],
+  "logs:filter": [
+    "freeclimb logs:filter \"level = 'ERROR'\"",
+    "freeclimb logs:filter \"level = 'WARNING'\" --json",
+    "freeclimb logs:filter \"level = 'INFO'\" --tail"
+  ],
+  "queue-members:dequeue": [
+    "freeclimb queue-members:dequeue QU1234567890abcdef CA1234567890abcdef",
+    "freeclimb queue-members:dequeue QU1234567890abcdef CA1234567890abcdef --dry-run"
+  ],
+  "queue-members:dequeue-head": [
+    "freeclimb queue-members:dequeue-head QU1234567890abcdef",
+    "freeclimb queue-members:dequeue-head QU1234567890abcdef --dry-run"
+  ],
+  "queue-members:get": [
+    "freeclimb queue-members:get QU1234567890abcdef CA1234567890abcdef",
+    "freeclimb queue-members:get QU1234567890abcdef CA1234567890abcdef --json"
+  ],
+  "queue-members:get-head": [
+    "freeclimb queue-members:get-head QU1234567890abcdef",
+    "freeclimb queue-members:get-head QU1234567890abcdef --json"
+  ],
+  "queue-members:list": [
+    "freeclimb queue-members:list QU1234567890abcdef",
+    "freeclimb queue-members:list QU1234567890abcdef --json"
+  ],
+  "recordings:delete": [
+    "freeclimb recordings:delete RE1234567890abcdef",
+    "freeclimb recordings:delete RE1234567890abcdef --dry-run"
+  ],
+  "recordings:download": [
+    "freeclimb recordings:download RE1234567890abcdef",
+    "freeclimb recordings:download RE1234567890abcdef --json"
+  ],
+  "recordings:get": [
+    "freeclimb recordings:get RE1234567890abcdef",
+    "freeclimb recordings:get RE1234567890abcdef --json"
+  ],
+  "recordings:list": [
+    "freeclimb recordings:list",
+    "freeclimb recordings:list --json",
+    "freeclimb recordings:list --quiet"
+  ],
+  "recordings:stream": [
+    "freeclimb recordings:stream RE1234567890abcdef",
+    "freeclimb recordings:stream RE1234567890abcdef --json"
+  ],
+  "sms:get": [
+    "freeclimb sms:get SM1234567890abcdef",
+    "freeclimb sms:get SM1234567890abcdef --json"
+  ],
+  "sms:list": [
+    "freeclimb sms:list",
+    "freeclimb sms:list --json",
+    "freeclimb sms:list --quiet",
+    "freeclimb sms:list --fields messageId,from,to,status"
+  ],
+  "sms:send": [
+    "freeclimb sms:send +12223334444 +15556667777 \"Hello from FreeClimb!\"",
+    "freeclimb sms:send +12223334444 +15556667777 \"Hello!\" --json",
+    "freeclimb sms:send +12223334444 +15556667777 \"Test\" --dry-run"
+  ]
+}

@@ -254,7 +254,7 @@ describe("available-numbers:list Data Test", function () {
             try {
                 await runCommand(["available-numbers:list", "--json"])
                 const { error } = await runCommand(["available-numbers:list", "--next"])
-                expect(error?.oclif?.exit).to.equal(4)
+                expect(error?.oclif?.exit).to.equal(3)
             } finally {
                 if (orig !== undefined)
                     process.env.FREECLIMB_AVAILABLE_NUMBERS_LIST_NEXT = orig
