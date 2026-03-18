@@ -1,7 +1,8 @@
 *-debug.log
 *-error.log
 /.nyc_output
-/.vscode
+/.vscode/*
+!/.vscode/mcp.json
 /dist
 /lib
 /package-lock.json

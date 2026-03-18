@@ -1,0 +1,25 @@
+{
+  "name": "freeclimb-cli-video",
+  "version": "2.0.0",
+  "description": "Remotion demo videos for FreeClimb CLI",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render QuickStart out/quickstart.mp4 && remotion render StatusDashboard out/status-dashboard.mp4 && remotion render ApiWorkflow out/api-workflow.mp4 && remotion render AgentIntegration out/agent-integration.mp4",
+    "render": "remotion render",
+    "render:quickstart": "remotion render QuickStart out/quickstart.mp4",
+    "render:status": "remotion render StatusDashboard out/status-dashboard.mp4",
+    "render:api": "remotion render ApiWorkflow out/api-workflow.mp4",
+    "render:agent": "remotion render AgentIntegration out/agent-integration.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/transitions": "4.0.414",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

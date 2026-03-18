@@ -70,7 +70,7 @@ TestOutline.prototype.setParams = function (...newParams) {
  */
 TestOutline.prototype.body = function () {
     let data = ""
-    if (this.usedBody) {
+    if (this.usedBody && this.usedBody.length > 0) {
         data = ", {"
         this.usedBody.forEach((param) => {
             if (param.dataType === "int32") {

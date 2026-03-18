@@ -1,0 +1,127 @@
+---
+name: freeclimb-command-gen
+description: >
+  Work with the FreeClimb CLI command code generation system.
+  Use when: adding new API commands, modifying generated command templates,
+  updating the API schema, changing flag definitions, or regenerating command files.
+  Also use when: the user asks about how commands are auto-generated,
+  wants to add a new endpoint, or needs to modify the generation pipeline.
+---
+
+# FreeClimb Command Generation
+
+## Overview
+
+Most CLI commands in `src/commands/` are auto-generated from API schema definitions.
+The generation pipeline: **Schema JSON → ApiCommand objects → TypeScript files**
+
+## Pipeline
+
+```
+generation/
+├── schema/
+│   ├── generated-api-schema.json    # API endpoint definitions (source of truth)
+│   ├── description-overrides.json   # Custom command/flag descriptions
+│   └── local-flags.json             # CLI-only flags not from the API
+├── commands/
+│   ├── main.js                      # Orchestrator: reads schema, writes .ts files
+│   ├── api-command.js               # ApiCommand class: parses schema entries
+│   └── character-mapping.js         # Maps flag names → short chars (-n, -d, etc.)
+└── tests/
+    ├── main.js                      # Test file generator
+    └── cases.js                     # Test case templates
+```
+
+## Running Generation
+
+```bash
+node generation/commands/main.js
+```
+
+This overwrites files in `src/commands/<topic>/<action>.ts` and updates `package.json` topic descriptions.
+
+## Schema Format
+
+Each topic in `generated-api-schema.json`:
+
+```json
+{
+  "topic": "calls",
+  "description": "See past calls and make new calls",
+  "commands": [
+    {
+      "commandName": "list",
+      "description": "Retrieve a list of calls...",
+      "method": "GET",
+      "endpoint": "Calls",
+      "usesAuthentication": true,
+      "pagination": true,
+      "params": [...],
+      "args": [...]
+    }
+  ]
+}
+```
+
+## Adding a New Command
+
+1. Add the endpoint definition to `generation/schema/generated-api-schema.json`
+2. Optionally add description overrides in `description-overrides.json`
+3. Optionally add CLI-only flags in `local-flags.json`
+4. Run `node generation/commands/main.js`
+5. Run the v4 migration fix (see below)
+6. Verify: `npx tsc --noEmit`
+7. Add tests in `test/commands/`
+
+## oclif v4 Compatibility
+
+The generator outputs oclif v4 code:
+- `import { Args, Command, Flags } from "@oclif/core"`
+- `Flags.boolean(`, `Flags.string(`, `Args.string(`
+- `await this.parse(ClassName)`
+- Args use object format: `{ name: Args.string({...}) }`
+
+## What the Generator Produces
+
+Each generated command includes:
+
+| Feature | Implementation |
+|---------|---------------|
+| `--json` flag | `getOutputFormat(flags.json)` → JSON envelope |
+| `--fields` flag | `filterFieldsDeep(data, fields)` |
+| `--dry-run` flag | Shows payload without API call (mutating only) |
+| Input validation | `validateResourceId()` for IDs, `rejectControlChars()` for strings |
+| Output formatting | Topic formatter or JSON via `wrapJsonOutput()` |
+| Pagination | `--next` flag with cursor-based paging |
+
+## Key Functions in main.js
+
+| Function | Purpose |
+|----------|---------|
+| `getFileContents(command)` | Renders complete TypeScript file |
+| `getAxiosFlags(flags)` | Generates flag definitions from schema |
+| `getAdditionalFlags(topic, tail, pagination, isMutating)` | Adds json/fields/dry-run/next flags |
+| `getAxiosArgs(args, tail)` | Generates arg definitions |
+| `getInputValidation(command)` | Generates validation calls |
+| `getDryRunCheck(command)` | Generates dry-run short-circuit |
+| `isMutatingMethod(method)` | POST/PUT/DELETE/PATCH check |
+
+## Manual (Non-Generated) Commands
+
+These commands are hand-written and NOT touched by the generator:
+
+- `src/commands/api.ts` — Raw API access
+- `src/commands/describe.ts` — Schema introspection
+- `src/commands/diagnose.ts` — System diagnostics
+- `src/commands/login.ts` / `logout.ts` — Authentication
+- `src/commands/status.ts` — Account status
+- `src/commands/mcp/start.ts` / `config.ts` — MCP server
+
+## Test Generation
+
+```bash
+node generation/tests/main.js
+```
+
+Generates test files in `test/commands/`. Test templates cover:
+status codes, required params, boolean inputs, max-item flags, next-flag pagination.
