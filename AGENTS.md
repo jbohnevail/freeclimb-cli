@@ -1,5 +1,12 @@
 # FreeClimb CLI - Agent Guide
 
+## Git Remotes — READ THIS FIRST
+
+- `origin` = `FreeClimbAPI/freeclimb-cli` (upstream, READ-ONLY)
+- `work` = `jbohnevail/freeclimb-cli` (fork, push here)
+- **NEVER create PRs against FreeClimbAPI/freeclimb-cli**
+- Always: `git push work <branch>` and PRs target `jbohnevail/freeclimb-cli`
+
 This CLI is frequently invoked by AI/LLM agents. Always assume inputs can be adversarial.
 
 ## Agent-First Design Principles
@@ -28,12 +35,12 @@ All JSON output follows a consistent envelope:
 
 ## Key Flags for Agents
 
-| Flag | Description |
-|------|-------------|
-| `--json` | Force JSON output |
-| `--fields <list>` | Comma-separated fields to include (reduces response size) |
-| `--dry-run` | Validate mutating requests without executing (POST/PUT/DELETE) |
-| `--raw` | Raw API response without envelope (api command only) |
+| Flag              | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
+| `--json`          | Force JSON output                                              |
+| `--fields <list>` | Comma-separated fields to include (reduces response size)      |
+| `--dry-run`       | Validate mutating requests without executing (POST/PUT/DELETE) |
+| `--raw`           | Raw API response without envelope (api command only)           |
 
 ## Safety Rails
 
@@ -58,6 +65,7 @@ freeclimb applications:list --fields applicationId,alias
 ### Input Validation
 
 The CLI rejects:
+
 - Control characters (below ASCII 0x20) in all string inputs
 - Path traversal sequences (`../`) in resource IDs
 - Query parameters embedded in resource IDs (`?`, `#`)
@@ -102,35 +110,62 @@ freeclimb mcp:start
 
 This eliminates shell escaping and argument parsing ambiguity.
 
+## MCP Setup (Auto-Discovery)
+
+| Agent           | Config File                | Auto-discovered |
+| --------------- | -------------------------- | --------------- |
+| Claude Code     | `.mcp.json`                | Yes             |
+| Cursor          | `.cursor/mcp.json`         | Yes             |
+| VS Code Copilot | `.vscode/mcp.json`         | Yes             |
+| Claude Desktop  | Run `freeclimb mcp:config` | Manual          |
+
+Prerequisites: `npm run setup` + set `FREECLIMB_ACCOUNT_ID` and `FREECLIMB_API_KEY` env vars.
+
 ## Common Patterns
 
-### List with pagination
 ```bash
-freeclimb calls:list --json
-freeclimb calls:list --next --json
+freeclimb calls:list --json                                                             # List (JSON)
+freeclimb calls:list --next --json                                                      # Paginate
+freeclimb calls:list --fields callId,status                                             # Limit fields
+freeclimb applications:create --alias "Test" --voiceUrl "https://example.com" --dry-run # Validate first
+freeclimb applications:create --alias "Test" --voiceUrl "https://example.com"           # Then execute
 ```
 
-### Create with dry-run validation
-```bash
-freeclimb applications:create --alias "Test" --voiceUrl "https://example.com" --dry-run
-freeclimb applications:create --alias "Test" --voiceUrl "https://example.com"
-```
+## Voice Application Skills
 
-### Get specific fields
-```bash
-freeclimb calls:list --fields callId,status
-freeclimb sms:list --fields messageId,from,to,status
-```
+The CLI includes companion skills for building complete voice applications:
+
+| Skill                  | Location                               | Use For                                                                                                                            |
+| ---------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `freeclimb-percl`      | `.claude/skills/freeclimb-percl/`      | PerCL command reference — the JSON scripting language for controlling live calls (Say, GetDigits, Record, Conference, Queue, etc.) |
+| `freeclimb-voice-apps` | `.claude/skills/freeclimb-voice-apps/` | Building webhook servers, IVRs, call centers, voicemail, outbound campaigns — includes Express.js and Next.js templates            |
+| `freeclimb-dashboards` | `.claude/skills/freeclimb-dashboards/` | Monitoring dashboards, analytics, CLI-based reports — includes React + Shadcn UI template                                          |
+
+### Typical Voice App Workflow
+
+1. **Design the call flow** — load `freeclimb-percl` for PerCL command reference
+2. **Build the webhook server** — load `freeclimb-voice-apps` for templates and patterns
+3. **Provision resources** — use CLI commands (`applications:create`, `incoming-numbers:buy`)
+4. **Monitor** — load `freeclimb-dashboards` for reporting and real-time monitoring
+
+### MCP Tools for Agents
+
+The MCP server (`freeclimb mcp:start`) includes tools for agents without skill access:
+
+| Tool             | Purpose                                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------- |
+| `generate_percl` | Generate valid PerCL JSON for common patterns (greeting, menu, voicemail, transfer, queue, record) |
+| `update_call`    | Update an active call — hang up or redirect mid-call                                               |
 
 ## Development
 
-Built with oclif v4 (`@oclif/core ^4`), TypeScript 5, and Node.js >= 18.
+Built with oclif v4, TypeScript 5, Node.js >= 18.
 
-### Skills for AI Agents Working on This Codebase
+| Command                        | Purpose                 |
+| ------------------------------ | ----------------------- |
+| `npm install --ignore-scripts` | Install dependencies    |
+| `npx tsc --noEmit`             | Type check              |
+| `npm test`                     | Run tests with coverage |
+| `npm run prepack`              | Build for distribution  |
 
-| Skill | Location | Purpose |
-|-------|----------|---------|
-| `freeclimb-cli` | `.claude/skills/freeclimb-cli/` | Using the CLI to interact with FreeClimb APIs |
-| `freeclimb-cli-dev` | `.claude/skills/freeclimb-cli-dev/` | Contributing to/modifying the CLI source code |
-| `freeclimb-command-gen` | `.claude/skills/freeclimb-command-gen/` | Working with the command code generation system |
-| `agent-tui` | `.claude/skills/agent-tui/` | Terminal UI automation and testing |
+Most commands in `src/commands/` are auto-generated — edit templates in `generation/commands/`, not generated files.

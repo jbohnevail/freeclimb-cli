@@ -21,6 +21,111 @@ import { tools, ToolName } from "./tools"
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version: CLI_VERSION } = require("../../package.json")
 
+// Generate PerCL JSON for common call flow patterns
+function generatePerclPattern(
+    pattern: string,
+    text?: string,
+    actionUrl?: string,
+    options?: Record<string, unknown>,
+): unknown[] {
+    switch (pattern) {
+        case "greeting": {
+            return [{ Say: { text: text || "Thank you for calling. Goodbye." } }, { Hangup: {} }]
+        }
+
+        case "menu": {
+            return [
+                {
+                    GetDigits: {
+                        actionUrl: actionUrl || "https://example.com/menu-handler",
+                        prompts: [
+                            {
+                                Say: {
+                                    text:
+                                        text ||
+                                        "Press 1 for sales. Press 2 for support. Press 0 for an operator.",
+                                },
+                            },
+                        ],
+                        maxDigits: (options?.maxDigits as number) || 1,
+                        minDigits: 1,
+                        initialTimeoutMs: 8000,
+                        flushBuffer: true,
+                    },
+                },
+            ]
+        }
+
+        case "voicemail": {
+            return [
+                {
+                    Say: {
+                        text:
+                            text ||
+                            "Please leave a message after the beep. Press pound when finished.",
+                    },
+                },
+                {
+                    RecordUtterance: {
+                        actionUrl: actionUrl || "https://example.com/voicemail-saved",
+                        silenceTimeoutMs: 5000,
+                        maxLengthSec: (options?.maxLengthSec as number) || 120,
+                        finishOnKey: (options?.finishOnKey as string) || "#",
+                        playBeep: true,
+                    },
+                },
+            ]
+        }
+
+        case "transfer": {
+            return [
+                { Say: { text: text || "Transferring your call. Please hold." } },
+                {
+                    OutDial: {
+                        destination: (options?.destination as string) || "+15551234567",
+                        callingNumber: (options?.callingNumber as string) || "+15559876543",
+                        actionUrl: actionUrl || "https://example.com/transfer-status",
+                        callConnectUrl:
+                            (options?.callConnectUrl as string) || "https://example.com/connected",
+                        timeout: 30,
+                    },
+                },
+            ]
+        }
+
+        case "queue": {
+            return [
+                { Say: { text: text || "Please hold while we connect you with an agent." } },
+                {
+                    Enqueue: {
+                        queueId: (options?.queueId as string) || "QU...",
+                        waitUrl: (options?.waitUrl as string) || "https://example.com/hold-music",
+                        actionUrl: actionUrl || "https://example.com/dequeued",
+                    },
+                },
+            ]
+        }
+
+        case "record": {
+            return [
+                {
+                    Say: {
+                        text:
+                            text || "This call may be recorded for quality and training purposes.",
+                    },
+                },
+                { StartRecordCall: {} },
+            ]
+        }
+
+        default: {
+            throw new Error(
+                `Unknown pattern: ${pattern}. Supported: greeting, menu, voicemail, transfer, queue, record`,
+            )
+        }
+    }
+}
+
 // Tool handler
 async function handleToolCall(name: ToolName, args: Record<string, unknown>): Promise<unknown> {
     const client = await createApiAxios()
@@ -160,6 +265,25 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         // Queues
         case "list_queues": {
             return (await client.get("/Queues")).data
+        }
+
+        // Call update
+        case "update_call": {
+            return (
+                await client.put(`/Calls/${args.callId}`, {
+                    status: args.status,
+                })
+            ).data
+        }
+
+        // PerCL generation (local, no API call)
+        case "generate_percl": {
+            return generatePerclPattern(
+                args.pattern as string,
+                args.text as string | undefined,
+                args.actionUrl as string | undefined,
+                args.options as Record<string, unknown> | undefined,
+            )
         }
 
         default: {
