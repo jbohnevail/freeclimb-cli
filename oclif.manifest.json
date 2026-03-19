@@ -92,7 +92,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -120,7 +120,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -160,7 +160,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -194,7 +194,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -247,7 +247,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -275,7 +275,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -309,7 +309,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -343,7 +343,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -401,7 +401,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -484,7 +484,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -612,7 +612,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -682,7 +682,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -747,7 +747,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -817,7 +817,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -950,12 +950,41 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
         "applications",
         "update.js"
+      ]
+    },
+    "autocomplete": {
+      "aliases": [],
+      "args": {},
+      "description": "Display autocomplete installation instructions",
+      "flags": {
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "autocomplete",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "autocomplete",
+        "index.js"
       ]
     },
     "available-numbers:list": {
@@ -1072,41 +1101,12 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
         "available-numbers",
         "list.js"
-      ]
-    },
-    "autocomplete": {
-      "aliases": [],
-      "args": {},
-      "description": "Display autocomplete installation instructions",
-      "flags": {
-        "help": {
-          "char": "h",
-          "description": "Show CLI help.",
-          "name": "help",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "autocomplete",
-      "pluginAlias": "freeclimb-cli",
-      "pluginName": "freeclimb-cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": false,
-      "relativePath": [
-        "lib",
-        "commands",
-        "autocomplete",
-        "index.js"
       ]
     },
     "call-queues:create": {
@@ -1183,7 +1183,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1247,7 +1247,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1316,7 +1316,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1404,7 +1404,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1469,7 +1469,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1517,7 +1517,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1574,7 +1574,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1702,7 +1702,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1849,7 +1849,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1924,7 +1924,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -1993,7 +1993,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2084,7 +2084,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2159,7 +2159,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2260,7 +2260,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2373,7 +2373,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2437,7 +2437,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2533,7 +2533,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2630,7 +2630,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2718,7 +2718,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2788,7 +2788,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2852,7 +2852,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -2996,7 +2996,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3084,7 +3084,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3191,7 +3191,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3286,7 +3286,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3321,7 +3321,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3350,12 +3350,355 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
         "mcp",
         "start.js"
+      ]
+    },
+    "queue-members:dequeue-head": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies this queue resource.",
+          "name": "queueId",
+          "required": true
+        }
+      },
+      "description": " Dequeue the Member at the head of the Queue. The Member's Call will begin executing the PerCL script returned from the callback specified in the actionUrl parameter when the Member was added.",
+      "examples": [
+        "<%= config.bin %> queue-members:dequeue-head QU1234567890abcdef",
+        "<%= config.bin %> queue-members:dequeue-head QU1234567890abcdef --dry-run"
+      ],
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:dequeue-head",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "dequeue-head.js"
+      ]
+    },
+    "queue-members:dequeue": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": true
+        },
+        "callId": {
+          "description": "ID if the Call that the Member belongs to.",
+          "name": "callId",
+          "required": true
+        }
+      },
+      "description": " Dequeue the specified Member. The Member's Call will begin executing the PerCL script returned from the callback specified in the actionUrl parameter when the Member was added.",
+      "examples": [
+        "<%= config.bin %> queue-members:dequeue QU1234567890abcdef CA1234567890abcdef",
+        "<%= config.bin %> queue-members:dequeue QU1234567890abcdef CA1234567890abcdef --dry-run"
+      ],
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Validate the request without executing it. Shows what would be sent to the API.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:dequeue",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "dequeue.js"
+      ]
+    },
+    "queue-members:get-head": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": true
+        }
+      },
+      "description": " Retrieve a representation of the Queue Member currently at the head of the Queue.",
+      "examples": [
+        "<%= config.bin %> queue-members:get-head QU1234567890abcdef",
+        "<%= config.bin %> queue-members:get-head QU1234567890abcdef --json"
+      ],
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:get-head",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "get-head.js"
+      ]
+    },
+    "queue-members:get": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": true
+        },
+        "callId": {
+          "description": "ID of the Call that the Member belongs to.",
+          "name": "callId",
+          "required": true
+        }
+      },
+      "description": " Retrieve a representation of the specified Queue Member.",
+      "examples": [
+        "<%= config.bin %> queue-members:get QU1234567890abcdef CA1234567890abcdef",
+        "<%= config.bin %> queue-members:get QU1234567890abcdef CA1234567890abcdef --json"
+      ],
+      "flags": {
+        "next": {
+          "hidden": true,
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:get",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "get.js"
+      ]
+    },
+    "queue-members:list": {
+      "aliases": [],
+      "args": {
+        "queueId": {
+          "description": "String that uniquely identifies the Queue that the Member belongs to.",
+          "name": "queueId",
+          "required": true
+        }
+      },
+      "description": " Retrieve a list of Members in the specified Queue.",
+      "examples": [
+        "<%= config.bin %> queue-members:list QU1234567890abcdef",
+        "<%= config.bin %> queue-members:list QU1234567890abcdef --json"
+      ],
+      "flags": {
+        "next": {
+          "char": "n",
+          "description": "Displays the next page of output.",
+          "name": "next",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "json": {
+          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "fields": {
+          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
+          "name": "fields",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "help": {
+          "char": "h",
+          "description": "Show CLI help.",
+          "name": "help",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "queue-members:list",
+      "pluginAlias": "freeclimb-cli",
+      "pluginName": "freeclimb-cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "queue-members",
+        "list.js"
       ]
     },
     "recordings:delete": {
@@ -3420,7 +3763,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3484,7 +3827,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3548,7 +3891,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3635,7 +3978,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -3699,355 +4042,12 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
         "recordings",
         "stream.js"
-      ]
-    },
-    "queue-members:dequeue-head": {
-      "aliases": [],
-      "args": {
-        "queueId": {
-          "description": "String that uniquely identifies this queue resource.",
-          "name": "queueId",
-          "required": true
-        }
-      },
-      "description": " Dequeue the Member at the head of the Queue. The Member's Call will begin executing the PerCL script returned from the callback specified in the actionUrl parameter when the Member was added.",
-      "examples": [
-        "<%= config.bin %> queue-members:dequeue-head QU1234567890abcdef",
-        "<%= config.bin %> queue-members:dequeue-head QU1234567890abcdef --dry-run"
-      ],
-      "flags": {
-        "next": {
-          "hidden": true,
-          "name": "next",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "json": {
-          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "fields": {
-          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
-          "name": "fields",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "dry-run": {
-          "description": "Validate the request without executing it. Shows what would be sent to the API.",
-          "name": "dry-run",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "help": {
-          "char": "h",
-          "description": "Show CLI help.",
-          "name": "help",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "queue-members:dequeue-head",
-      "pluginAlias": "freeclimb-cli",
-      "pluginName": "freeclimb-cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": false,
-      "relativePath": [
-        "lib",
-        "commands",
-        "queue-members",
-        "dequeue-head.js"
-      ]
-    },
-    "queue-members:dequeue": {
-      "aliases": [],
-      "args": {
-        "queueId": {
-          "description": "String that uniquely identifies the Queue that the Member belongs to.",
-          "name": "queueId",
-          "required": true
-        },
-        "callId": {
-          "description": "ID if the Call that the Member belongs to.",
-          "name": "callId",
-          "required": true
-        }
-      },
-      "description": " Dequeue the specified Member. The Member's Call will begin executing the PerCL script returned from the callback specified in the actionUrl parameter when the Member was added.",
-      "examples": [
-        "<%= config.bin %> queue-members:dequeue QU1234567890abcdef CA1234567890abcdef",
-        "<%= config.bin %> queue-members:dequeue QU1234567890abcdef CA1234567890abcdef --dry-run"
-      ],
-      "flags": {
-        "next": {
-          "hidden": true,
-          "name": "next",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "json": {
-          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "fields": {
-          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
-          "name": "fields",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "dry-run": {
-          "description": "Validate the request without executing it. Shows what would be sent to the API.",
-          "name": "dry-run",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "help": {
-          "char": "h",
-          "description": "Show CLI help.",
-          "name": "help",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "queue-members:dequeue",
-      "pluginAlias": "freeclimb-cli",
-      "pluginName": "freeclimb-cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": false,
-      "relativePath": [
-        "lib",
-        "commands",
-        "queue-members",
-        "dequeue.js"
-      ]
-    },
-    "queue-members:get-head": {
-      "aliases": [],
-      "args": {
-        "queueId": {
-          "description": "String that uniquely identifies the Queue that the Member belongs to.",
-          "name": "queueId",
-          "required": true
-        }
-      },
-      "description": " Retrieve a representation of the Queue Member currently at the head of the Queue.",
-      "examples": [
-        "<%= config.bin %> queue-members:get-head QU1234567890abcdef",
-        "<%= config.bin %> queue-members:get-head QU1234567890abcdef --json"
-      ],
-      "flags": {
-        "next": {
-          "hidden": true,
-          "name": "next",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "json": {
-          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "fields": {
-          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
-          "name": "fields",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "help": {
-          "char": "h",
-          "description": "Show CLI help.",
-          "name": "help",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "queue-members:get-head",
-      "pluginAlias": "freeclimb-cli",
-      "pluginName": "freeclimb-cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": false,
-      "relativePath": [
-        "lib",
-        "commands",
-        "queue-members",
-        "get-head.js"
-      ]
-    },
-    "queue-members:get": {
-      "aliases": [],
-      "args": {
-        "queueId": {
-          "description": "String that uniquely identifies the Queue that the Member belongs to.",
-          "name": "queueId",
-          "required": true
-        },
-        "callId": {
-          "description": "ID of the Call that the Member belongs to.",
-          "name": "callId",
-          "required": true
-        }
-      },
-      "description": " Retrieve a representation of the specified Queue Member.",
-      "examples": [
-        "<%= config.bin %> queue-members:get QU1234567890abcdef CA1234567890abcdef",
-        "<%= config.bin %> queue-members:get QU1234567890abcdef CA1234567890abcdef --json"
-      ],
-      "flags": {
-        "next": {
-          "hidden": true,
-          "name": "next",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "json": {
-          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "fields": {
-          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
-          "name": "fields",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "help": {
-          "char": "h",
-          "description": "Show CLI help.",
-          "name": "help",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "queue-members:get",
-      "pluginAlias": "freeclimb-cli",
-      "pluginName": "freeclimb-cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": false,
-      "relativePath": [
-        "lib",
-        "commands",
-        "queue-members",
-        "get.js"
-      ]
-    },
-    "queue-members:list": {
-      "aliases": [],
-      "args": {
-        "queueId": {
-          "description": "String that uniquely identifies the Queue that the Member belongs to.",
-          "name": "queueId",
-          "required": true
-        }
-      },
-      "description": " Retrieve a list of Members in the specified Queue.",
-      "examples": [
-        "<%= config.bin %> queue-members:list QU1234567890abcdef",
-        "<%= config.bin %> queue-members:list QU1234567890abcdef --json"
-      ],
-      "flags": {
-        "next": {
-          "char": "n",
-          "description": "Displays the next page of output.",
-          "name": "next",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "json": {
-          "description": "Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "description": "Output only resource IDs, one per line. Useful for piping into other commands.",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "fields": {
-          "description": "Comma-separated list of fields to include in the response. Limits output to protect context windows when used by agents.",
-          "name": "fields",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "help": {
-          "char": "h",
-          "description": "Show CLI help.",
-          "name": "help",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "queue-members:list",
-      "pluginAlias": "freeclimb-cli",
-      "pluginName": "freeclimb-cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": false,
-      "relativePath": [
-        "lib",
-        "commands",
-        "queue-members",
-        "list.js"
       ]
     },
     "sms:get": {
@@ -4106,7 +4106,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -4212,7 +4212,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",
@@ -4302,7 +4302,7 @@
       "pluginType": "core",
       "strict": true,
       "enableJsonFlag": false,
-      "isESM": false,
+      "isESM": true,
       "relativePath": [
         "lib",
         "commands",

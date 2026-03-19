@@ -1,10 +1,10 @@
 import chalk from "chalk"
-import { Page, Next } from "./pages"
-import { Environment } from "./environment"
-import { isTTY } from "./ui/theme"
-import { getOutputFormat } from "./agent-config"
-import { renderData, RenderDataOptions } from "./ui/ink/renderer"
-import { getFormatterForTopic } from "./ui/format"
+import { Page, Next } from "./pages.js"
+import { Environment } from "./environment.js"
+import { isTTY } from "./ui/theme.js"
+import { getOutputFormat } from "./agent-config.js"
+import { renderData, RenderDataOptions } from "./ui/ink/renderer.js"
+import { getFormatterForTopic } from "./ui/format.js"
 
 type Log = { log(x: string): any }
 type DataStore = Log & { config: { dataDir: string } }

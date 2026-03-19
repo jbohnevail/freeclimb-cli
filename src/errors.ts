@@ -1,7 +1,7 @@
 import chalk from "chalk"
-import { errorWithSuggestions, returnFormat } from "./error-messages"
-import { parse } from "./parse-errors"
-import { isAgentMode } from "./agent-config"
+import { errorWithSuggestions, returnFormat } from "./error-messages.js"
+import { parse } from "./parse-errors.js"
+import { isAgentMode } from "./agent-config.js"
 
 export abstract class FreeClimbError {
     message: string

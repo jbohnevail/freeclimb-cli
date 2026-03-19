@@ -1,11 +1,11 @@
 import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import axios from "axios"
-import { cred } from "../credentials"
-import { Environment } from "../environment"
-import { wrapJsonOutput } from "../ui/format"
-import { getOutputFormat } from "../agent-config"
-import { rejectControlChars, filterFieldsDeep } from "../validation"
+import { cred } from "../credentials.js"
+import { Environment } from "../environment.js"
+import { wrapJsonOutput } from "../ui/format.js"
+import { getOutputFormat } from "../agent-config.js"
+import { rejectControlChars, filterFieldsDeep } from "../validation.js"
 
 export class Api extends Command {
     static description = `Make authenticated API requests to FreeClimb.

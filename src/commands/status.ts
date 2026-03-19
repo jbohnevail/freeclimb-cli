@@ -1,13 +1,13 @@
 import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import axios from "axios"
-import { cred } from "../credentials"
-import { Environment } from "../environment"
-import { wrapJsonOutput } from "../ui/format"
-import { createSpinner } from "../ui/spinner"
-import { borderedBox, keyValue, statusBadge, sectionSeparator, quickActions } from "../ui/components"
-import { BrandColors, supportsColor, isTTY } from "../ui/theme"
-import { icons, getBoxChars } from "../ui/chars"
+import { cred } from "../credentials.js"
+import { Environment } from "../environment.js"
+import { wrapJsonOutput } from "../ui/format.js"
+import { createSpinner } from "../ui/spinner.js"
+import { borderedBox, keyValue, statusBadge, sectionSeparator, quickActions } from "../ui/components.js"
+import { BrandColors, supportsColor, isTTY } from "../ui/theme.js"
+import { icons, getBoxChars } from "../ui/chars.js"
 
 interface AccountStatus {
     accountId: string

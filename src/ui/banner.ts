@@ -1,6 +1,6 @@
 import chalk from "chalk"
-import { BrandColors, supportsColor, typography } from "./theme"
-import { icons } from "./chars"
+import { BrandColors, supportsColor, typography } from "./theme.js"
+import { icons } from "./chars.js"
 
 // FreeClimb brand colors for banner
 const darkTeal = supportsColor() ? chalk.hex(BrandColors.darkTeal) : chalk

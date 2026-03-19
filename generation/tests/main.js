@@ -6,11 +6,12 @@
  * component for generating test files. Changes made to this file may affect
  * generated test files.
  */
-const fs = require("fs")
-const { exec } = require("child_process")
-const { parseCommandLine } = require("typescript")
-const apiInfo = require("../schema/generated-api-schema.json")
-const Tests = require("./cases")
+import fs from "node:fs"
+import { exec } from "node:child_process"
+import { readFileSync } from "node:fs"
+import Tests from "./cases.js"
+
+const apiInfo = JSON.parse(readFileSync(new URL("../schema/generated-api-schema.json", import.meta.url), "utf-8"))
 
 // Create src/commands if directory does not already exist
 fs.mkdirSync("./test/commands", { recursive: true })
@@ -52,7 +53,7 @@ function getData(topic, command) {
 import { expect } from "chai"
 import nock from "nock"
 import { runCommand } from "@oclif/test"
-import { cred } from "../../src/credentials"
+import { cred } from "../../src/credentials.js"
 
 ${tests(topic, command, commandName)}\n
 `

@@ -1,6 +1,6 @@
 import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
-import { startMcpServer } from "../../mcp/server"
+import { startMcpServer } from "../../mcp/server.js"
 
 export class McpStart extends Command {
     static description = `Start the FreeClimb MCP server for AI agent integration.

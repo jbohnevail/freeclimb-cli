@@ -1,6 +1,6 @@
-import React from "react"
+import type { ReactElement } from "react"
 import { Box, Text } from "ink"
-import { supportsColor } from "../theme"
+import { supportsColor } from "../theme.js"
 
 export interface ErrorBoxProps {
     code: number
@@ -16,7 +16,7 @@ export function ErrorBox({
     suggestion,
     tryCommands,
     url,
-}: ErrorBoxProps): React.ReactElement {
+}: ErrorBoxProps): ReactElement {
     const useColor = supportsColor()
 
     return (

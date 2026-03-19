@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import nock from "nock"
-import { FreeClimbApi } from "../src/freeclimb"
+import { FreeClimbApi } from "../src/freeclimb.js"
 
 describe("FreeClimbApi class", () => {
     const errorResponse = { errorCause: "intentional" }

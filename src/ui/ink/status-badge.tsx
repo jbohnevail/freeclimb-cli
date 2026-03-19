@@ -1,6 +1,6 @@
-import React from "react"
+import type { ReactElement } from "react"
 import { Text } from "ink"
-import { BrandColors, supportsColor } from "../theme"
+import { BrandColors, supportsColor } from "../theme.js"
 
 export interface StatusBadgeProps {
     status: string
@@ -44,7 +44,7 @@ const STATUS_ICONS: Record<string, string> = {
     cancelled: "\u2718",
 }
 
-export function StatusBadge({ status }: StatusBadgeProps): React.ReactElement {
+export function StatusBadge({ status }: StatusBadgeProps): ReactElement {
     const normalized = status.toLowerCase().replace(/[_\s]/g, "-")
     const color = STATUS_COLORS[normalized]
     const icon = STATUS_ICONS[normalized] || ""

@@ -1,6 +1,7 @@
 {
   "name": "freeclimb-cli",
   "version": "0.6.0",
+  "type": "module",
   "author": "dev@freeclimb.com",
   "bin": {
     "freeclimb": "./bin/run"
@@ -18,8 +19,8 @@
     "axios": "^1",
     "chalk": "^4",
     "dotenv": "^16",
-    "ink": "^3.2.0",
-    "react": "^17.0.2",
+    "ink": "^6.0.0",
+    "react": "^19.0.0",
     "tslib": "^2"
   },
   "devDependencies": {
@@ -27,7 +28,7 @@
     "@types/chai": "^4",
     "@types/mocha": "^10",
     "@types/node": "^18",
-    "@types/react": "^17.0.0",
+    "@types/react": "^19.0.0",
     "@types/sinon": "^21.0.0",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
@@ -40,7 +41,7 @@
     "eslint-plugin-import": "^2",
     "eslint-plugin-no-only-tests": "^3",
     "husky": "^9",
-    "ink-testing-library": "^2.1.0",
+    "ink-testing-library": "^4.0.0",
     "lint-staged": "^15",
     "mocha": "^10",
     "nock": "^13",
@@ -48,11 +49,11 @@
     "oclif": "^4",
     "prettier": "^3",
     "sinon": "^21.0.3",
-    "ts-node": "^10",
+    "tsx": "^4",
     "typescript": "^5"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "files": [
     "/bin",
@@ -137,7 +138,7 @@
     "lint-write": "eslint . --fix --ext .js,.ts,.tsx --config .eslintrc.json && prettier --write **.{js,ts,tsx,json,md}",
     "prepack": "rm -rf lib; rm -f tsconfig.tsbuildinfo; tsc -b && oclif manifest && oclif readme --multi",
     "pretest": "tsc -b && oclif manifest",
-    "test": "nyc --extension .ts mocha --require ts-node/register --require test/setup.ts --forbid-only \"test/**/*.test.ts\"",
+    "test": "nyc --extension .ts mocha --require tsx --require test/setup.ts --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif readme --multi && git add README.md docs/",
     "prepare": "husky",
     "setup": "bash scripts/setup.sh",
@@ -148,8 +149,7 @@
   "types": "lib/index.d.ts",
   "lint-staged": {
     "*.{js,ts,tsx,json,md}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "*/**/*.{js,ts,tsx}": [
       "eslint --quiet"

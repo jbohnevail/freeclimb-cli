@@ -1,6 +1,6 @@
-import React from "react"
+import type { ReactElement } from "react"
 import { Box, Text } from "ink"
-import { BrandColors, supportsColor, getTerminalWidth } from "../theme"
+import { BrandColors, supportsColor, getTerminalWidth } from "../theme.js"
 
 export interface TableColumn {
     header: string
@@ -70,7 +70,7 @@ function computeColumnWidths(
     return rawWidths
 }
 
-export function Table({ rows, columns, title }: TableProps): React.ReactElement {
+export function Table({ rows, columns, title }: TableProps): ReactElement {
     if (rows.length === 0) {
         return <Text dimColor>No data available</Text>
     }

@@ -1,13 +1,13 @@
-import React from "react"
+import type { ReactElement } from "react"
 import { Box, Text } from "ink"
-import { BrandColors, supportsColor } from "../theme"
+import { BrandColors, supportsColor } from "../theme.js"
 
 export interface KeyValueProps {
     data: Record<string, unknown>
     labelColor?: string
 }
 
-export function KeyValue({ data, labelColor }: KeyValueProps): React.ReactElement {
+export function KeyValue({ data, labelColor }: KeyValueProps): ReactElement {
     const entries = Object.entries(data)
     const maxKeyLen = Math.max(...entries.map(([key]) => key.length))
     const color = labelColor || (supportsColor() ? BrandColors.darkTeal : undefined)

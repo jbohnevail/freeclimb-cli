@@ -1,5 +1,5 @@
 import chalk from "chalk"
-import { BrandColors, supportsColor, isTTY } from "./theme"
+import { BrandColors, supportsColor, isTTY } from "./theme.js"
 
 // Unicode box drawing characters (rounded corners)
 export const box = {

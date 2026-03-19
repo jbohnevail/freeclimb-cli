@@ -1,9 +1,9 @@
 import axios from "axios"
 import type { Method } from "axios"
-import { cred } from "./credentials"
-import { Environment } from "./environment"
-import * as Errors from "./errors"
-import { createApiAxios } from "./http"
+import { cred } from "./credentials.js"
+import { Environment } from "./environment.js"
+import * as Errors from "./errors.js"
+import { createApiAxios } from "./http.js"
 
 type Errorer = { error(message: string, exitCode: { exit: number }): any }
 

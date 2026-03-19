@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { Environment } from "../../src/environment"
+import { Environment } from "../../src/environment.js"
 
 describe("First process - Environment Test", () => {
     it("can access the temp value in the current process", () => {

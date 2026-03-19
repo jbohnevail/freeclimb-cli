@@ -1,6 +1,6 @@
-import React from "react"
+import type { ReactElement } from "react"
 import { Box, Text } from "ink"
-import { BrandColors, supportsColor } from "../theme"
+import { BrandColors, supportsColor } from "../theme.js"
 
 export interface SuccessMessageProps {
     command?: string
@@ -10,7 +10,7 @@ export interface SuccessMessageProps {
 export function SuccessMessage({
     message,
     command,
-}: SuccessMessageProps): React.ReactElement {
+}: SuccessMessageProps): ReactElement {
     const useColor = supportsColor()
     const displayMessage = message || "Received a success code from FreeClimb. There is no further output."
 

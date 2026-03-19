@@ -1,12 +1,12 @@
-import React from "react"
+import type { ReactElement } from "react"
 import { Box, Text } from "ink"
-import { supportsColor } from "../theme"
+import { supportsColor } from "../theme.js"
 
 export interface JsonViewProps {
     data: unknown
 }
 
-function renderValue(value: unknown, indent: number): React.ReactElement {
+function renderValue(value: unknown, indent: number): ReactElement {
     if (value === null) {
         return <Text color={supportsColor() ? "magenta" : undefined}>null</Text>
     }
@@ -81,6 +81,6 @@ function renderValue(value: unknown, indent: number): React.ReactElement {
     return <Text>{String(value)}</Text>
 }
 
-export function JsonView({ data }: JsonViewProps): React.ReactElement {
+export function JsonView({ data }: JsonViewProps): ReactElement {
     return <Box flexDirection="column">{renderValue(data, 0)}</Box>
 }

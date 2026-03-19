@@ -1,6 +1,6 @@
-import React from "react"
+import type { ReactElement } from "react"
 import { Box, Text } from "ink"
-import { BrandColors, supportsColor } from "../theme"
+import { BrandColors, supportsColor } from "../theme.js"
 
 export interface PaginationBarProps {
     hasNext: boolean
@@ -10,7 +10,7 @@ export interface PaginationBarProps {
 export function PaginationBar({
     pageNum,
     hasNext,
-}: PaginationBarProps): React.ReactElement {
+}: PaginationBarProps): ReactElement {
     const useColor = supportsColor()
 
     return (

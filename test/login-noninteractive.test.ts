@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import nock from "nock"
 import { runCommand } from "@oclif/test"
-import { cred } from "../src/credentials"
+import { cred } from "../src/credentials.js"
 
 describe("login --yes non-interactive", function () {
     afterEach(() => nock.cleanAll())

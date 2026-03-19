@@ -1,5 +1,5 @@
 import chalk from "chalk"
-import { isAgentMode } from "./agent-config"
+import { isAgentMode } from "./agent-config.js"
 
 const { red, yellow, cyan, dim, bold } = chalk
 

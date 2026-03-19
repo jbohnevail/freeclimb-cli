@@ -1,6 +1,6 @@
 import chalk from "chalk"
-import { BrandColors, supportsColor, isTTY } from "./theme"
-import { getBoxChars } from "./chars"
+import { BrandColors, supportsColor, isTTY } from "./theme.js"
+import { getBoxChars } from "./chars.js"
 
 export interface StructuredOutput<T = unknown> {
     data: T

@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { Environment } from "../../src/environment"
+import { Environment } from "../../src/environment.js"
 
 describe("Second process - Environment Test", () => {
     let environment: Environment

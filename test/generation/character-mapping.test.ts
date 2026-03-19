@@ -1,8 +1,13 @@
 import { expect } from "chai"
-const mapChars = require("../../generation/commands/character-mapping")
-const apiInfo = require("../../generation/schema/generated-api-schema.json")
-const localFlags = require("./test-local-flags.json")
-const testingJson = require("./character-mapping-test.json")
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
+import mapChars from "../../generation/commands/character-mapping.js"
+
+const testDir = dirname(fileURLToPath(import.meta.url))
+const apiInfo = JSON.parse(readFileSync(join(testDir, "../../generation/schema/generated-api-schema.json"), "utf-8"))
+const localFlags = JSON.parse(readFileSync(join(testDir, "./test-local-flags.json"), "utf-8"))
+const testingJson = JSON.parse(readFileSync(join(testDir, "./character-mapping-test.json"), "utf-8"))
 
 describe("Tests the character-mapping", function () {
     const testedMap = mapChars(testingJson, localFlags)

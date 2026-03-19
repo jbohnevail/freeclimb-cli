@@ -1,6 +1,6 @@
 import chalk from "chalk"
-import { BrandColors, supportsColor, getTerminalWidth } from "./theme"
-import { getBoxChars, icons, horizontalRule } from "./chars"
+import { BrandColors, supportsColor, getTerminalWidth } from "./theme.js"
+import { getBoxChars, icons, horizontalRule } from "./chars.js"
 
 // Inline ANSI stripping (strip-ansi v7+ is ESM-only, incompatible with CommonJS)
 function stripAnsi(text: string): string {

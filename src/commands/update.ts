@@ -1,13 +1,16 @@
 import { Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import axios from "axios"
-import { wrapJsonOutput } from "../ui/format"
-import { createSpinner } from "../ui/spinner"
-import { borderedBox, keyValue, statusIndicator } from "../ui/components"
-import { BrandColors, supportsColor, isTTY } from "../ui/theme"
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
+import { wrapJsonOutput } from "../ui/format.js"
+import { createSpinner } from "../ui/spinner.js"
+import { borderedBox, keyValue, statusIndicator } from "../ui/components.js"
+import { BrandColors, supportsColor, isTTY } from "../ui/theme.js"
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version: currentVersion } = require("../../package.json")
+const pkgPath = join(dirname(fileURLToPath(import.meta.url)), "../../package.json")
+const { version: currentVersion } = JSON.parse(readFileSync(pkgPath, "utf-8"))
 
 interface UpdateCheckResult {
     currentVersion: string

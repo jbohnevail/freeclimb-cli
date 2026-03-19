@@ -1,10 +1,10 @@
-import React from "react"
+import type { ReactElement, ReactNode } from "react"
 import { Box, Text } from "ink"
-import { BrandColors, supportsColor } from "../theme"
+import { BrandColors, supportsColor } from "../theme.js"
 
 export interface BorderedBoxProps {
     borderColor?: string
-    children: React.ReactNode
+    children: ReactNode
     title?: string
     width?: number
 }
@@ -14,7 +14,7 @@ export function BorderedBox({
     title,
     borderColor,
     width,
-}: BorderedBoxProps): React.ReactElement {
+}: BorderedBoxProps): ReactElement {
     const color = borderColor || (supportsColor() ? BrandColors.lightTeal : undefined)
 
     return (

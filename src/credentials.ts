@@ -1,5 +1,5 @@
 import { Entry } from "@napi-rs/keyring"
-import { env } from "./environment"
+import { env } from "./environment.js"
 
 const SERVICE_NAME = "FreeClimb"
 const ACCOUNT_KEY = "accountId"

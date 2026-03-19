@@ -1,5 +1,5 @@
 import chalk from "chalk"
-import { BrandColors, isTTY } from "./theme"
+import { BrandColors, isTTY } from "./theme.js"
 
 export interface SelectChoice<T = string> {
     name: string
