@@ -4,7 +4,7 @@ import chalk from "chalk"
 import { Output } from '../../output'
 import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
-import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
+import { wrapJsonOutput } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
 import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 import { sleep, calculateSinceTimestamp } from "../../tail"
@@ -65,8 +65,8 @@ export class logsFilter extends Command {
             if (outputFormat === "json") {
                 return JSON.stringify(wrapJsonOutput(outputData), null, 2)
             }
-            const formatter = getFormatterForTopic("logs", "filter")
-            return formatter ? formatter(outputData) : JSON.stringify(outputData, null, 2)
+            out.render(outputData, { topic: "logs", command: "filter" })
+            return null
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
@@ -74,7 +74,7 @@ export class logsFilter extends Command {
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "logs:filter" }), null, 2))
                 } else {
-                    out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
+                    out.render(null, { topic: "logs", command: "filter" })
                 }
             } else if (response.data) {
                 if (flags.quiet) {
@@ -83,7 +83,8 @@ export class logsFilter extends Command {
                     return
                 }
                 const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
-                out.out(formatOutput(processedData))
+                const result = formatOutput(processedData)
+                if (result !== null) { out.out(result) }
             } else { throw new Errors.UndefinedResponseError() }
         }
         
@@ -100,8 +101,8 @@ export class logsFilter extends Command {
                     const ids = extractQuietIds(response.data, "requestId")
                     if (ids) { out.out(ids) }
                 } else {
-                    const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
-                    out.out(formatOutput(processedData))
+                    const result = formatOutput(flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data)
+                    if (result !== null) { out.out(result) }
                 }
             } else { throw new Errors.UndefinedResponseError() }
             if(out.next === null && !flags.quiet) {

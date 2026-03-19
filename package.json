@@ -18,6 +18,8 @@
     "axios": "^1",
     "chalk": "^4",
     "dotenv": "^16",
+    "ink": "^3.2.0",
+    "react": "^17.0.2",
     "tslib": "^2"
   },
   "devDependencies": {
@@ -25,6 +27,7 @@
     "@types/chai": "^4",
     "@types/mocha": "^10",
     "@types/node": "^18",
+    "@types/react": "^17.0.0",
     "@types/sinon": "^21.0.0",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
@@ -37,6 +40,7 @@
     "eslint-plugin-import": "^2",
     "eslint-plugin-no-only-tests": "^3",
     "husky": "^9",
+    "ink-testing-library": "^2.1.0",
     "lint-staged": "^15",
     "mocha": "^10",
     "nock": "^13",
@@ -129,8 +133,8 @@
   },
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
-    "lint": "eslint . --ext .js,.ts --config .eslintrc.json",
-    "lint-write": "eslint . --fix --ext .js,.ts --config .eslintrc.json && prettier --write **.{js,ts,json,md}",
+    "lint": "eslint . --ext .js,.ts,.tsx --config .eslintrc.json",
+    "lint-write": "eslint . --fix --ext .js,.ts,.tsx --config .eslintrc.json && prettier --write **.{js,ts,tsx,json,md}",
     "prepack": "rm -rf lib; rm -f tsconfig.tsbuildinfo; tsc -b && oclif manifest && oclif readme --multi",
     "pretest": "tsc -b && oclif manifest",
     "test": "nyc --extension .ts mocha --require ts-node/register --require test/setup.ts --forbid-only \"test/**/*.test.ts\"",
@@ -143,11 +147,11 @@
   },
   "types": "lib/index.d.ts",
   "lint-staged": {
-    "*.{js,ts,json,md}": [
+    "*.{js,ts,tsx,json,md}": [
       "prettier --write",
       "git add"
     ],
-    "*/**/*.{js,ts}": [
+    "*/**/*.{js,ts,tsx}": [
       "eslint --quiet"
     ]
   },

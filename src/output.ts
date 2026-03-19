@@ -1,5 +1,10 @@
+import chalk from "chalk"
 import { Page, Next } from "./pages"
 import { Environment } from "./environment"
+import { isTTY } from "./ui/theme"
+import { getOutputFormat } from "./agent-config"
+import { renderData, RenderDataOptions } from "./ui/ink/renderer"
+import { getFormatterForTopic } from "./ui/format"
 
 type Log = { log(x: string): any }
 type DataStore = Log & { config: { dataDir: string } }
@@ -35,6 +40,55 @@ export class Output {
             this.logger.log(
                 `== Currently on page ${this.currentPage.num}. Run this command again with the -n flag to go to the next page. ==`
             )
+        }
+    }
+
+    /**
+     * Render data using Ink components when in TTY + human mode,
+     * otherwise fall back to string-based formatters via out().
+     */
+    render(data: unknown, options?: { command?: string; topic?: string }): void {
+        // Null data = 204 success
+        if (data === null || data === undefined) {
+            if (isTTY() && getOutputFormat() === "human") {
+                renderData(data, options)
+            } else {
+                this.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
+            }
+            return
+        }
+
+        if (isTTY() && getOutputFormat() === "human") {
+            const renderOptions: RenderDataOptions = {
+                ...options,
+            }
+
+            // Attach pagination info if available
+            if (this.currentPage) {
+                renderOptions.pageNum = this.currentPage.num
+                renderOptions.hasNext = this.currentPage.next !== null
+            }
+
+            renderData(data, renderOptions)
+
+            // Track pagination state from data
+            const pageStr = JSON.stringify(data)
+            this.currentPage = new Page(pageStr)
+            if (this.currentPage.next as string) {
+                this.environment.setStringPersist(
+                    `FREECLIMB_${this.commandName}_NEXT`,
+                    this.currentPage.next as string
+                )
+            }
+        } else {
+            // Non-TTY fallback: use existing string-based formatters, matching old behavior
+            const { topic, command } = options || {}
+            const formatter = topic && command ? getFormatterForTopic(topic, command) : null
+            if (formatter) {
+                this.out(formatter(data))
+            } else {
+                this.out(JSON.stringify(data, null, 2))
+            }
         }
     }
 

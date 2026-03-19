@@ -86,7 +86,7 @@
     "n/no-process-exit": "off"
   },
   "overrides": [
-    { "files": ["*.js", "*.ts"] },
+    { "files": ["*.js", "*.ts", "*.tsx"] },
     {
       "files": ["*.spec.js", "*.spec.ts", "*.spec.tsx"],
       "rules": {

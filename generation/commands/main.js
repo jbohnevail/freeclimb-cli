@@ -125,7 +125,7 @@ import chalk from "chalk"
 import { Output } from '../../output'
 import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
-import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
+import { wrapJsonOutput } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
 import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 ${
@@ -155,8 +155,8 @@ export class ${command.className} extends Command {
             if (outputFormat === "json") {
                 return JSON.stringify(wrapJsonOutput(outputData), null, 2)
             }
-            const formatter = getFormatterForTopic("${command.topic}", "${command.name}")
-            return formatter ? formatter(outputData) : JSON.stringify(outputData, null, 2)
+            out.render(outputData, { topic: "${command.topic}", command: "${command.name}" })
+            return null
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
@@ -164,7 +164,7 @@ export class ${command.className} extends Command {
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "${command.topic}:${command.name}" }), null, 2))
                 } else {
-                    out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
+                    out.render(null, { topic: "${command.topic}", command: "${command.name}" })
                 }
             } else if (response.data) {
                 if (flags.quiet) {
@@ -173,7 +173,9 @@ export class ${command.className} extends Command {
                     return
                 }
                 ${command.topic === "logs" ? `const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
-                out.out(formatOutput(processedData))` : `out.out(formatOutput(response.data))`}
+                const result = formatOutput(processedData)
+                if (result !== null) { out.out(result) }` : `const result = formatOutput(response.data)
+                if (result !== null) { out.out(result) }`}
             } else { throw new Errors.UndefinedResponseError() }
         }${tail ? getTailResponse() : ""}${
         command.pagination
@@ -184,8 +186,9 @@ export class ${command.className} extends Command {
                     const ids = extractQuietIds(response.data, "${topicIdFields[command.topic] || "id"}")
                     if (ids) { out.out(ids) }
                 } else {
-                    ${command.topic === "logs" ? `const processedData = flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data
-                    out.out(formatOutput(processedData))` : `out.out(formatOutput(response.data))`}
+                    ${command.topic === "logs" ? `const result = formatOutput(flags.maxItem ? { ...response.data, logs: response.data.logs.splice(0, flags.maxItem) } : response.data)
+                    if (result !== null) { out.out(result) }` : `const result = formatOutput(response.data)
+                    if (result !== null) { out.out(result) }`}
                 }
             } else { throw new Errors.UndefinedResponseError() }
             if(out.next === null && !flags.quiet) {

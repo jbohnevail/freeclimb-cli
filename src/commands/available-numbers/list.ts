@@ -4,7 +4,7 @@ import chalk from "chalk"
 import { Output } from '../../output'
 import { FreeClimbApi, FreeClimbResponse } from '../../freeclimb'
 import * as Errors from '../../errors'
-import { wrapJsonOutput, getFormatterForTopic } from '../../ui/format'
+import { wrapJsonOutput } from '../../ui/format'
 import { getOutputFormat } from '../../agent-config'
 import { extractQuietIds, filterFieldsDeep, rejectControlChars, validateResourceId } from '../../validation'
 
@@ -44,8 +44,8 @@ export class availableNumbersList extends Command {
             if (outputFormat === "json") {
                 return JSON.stringify(wrapJsonOutput(outputData), null, 2)
             }
-            const formatter = getFormatterForTopic("available-numbers", "list")
-            return formatter ? formatter(outputData) : JSON.stringify(outputData, null, 2)
+            out.render(outputData, { topic: "available-numbers", command: "list" })
+            return null
         }
         const normalResponse = (response: FreeClimbResponse) => {
             if (response.status === 204) {
@@ -53,7 +53,7 @@ export class availableNumbersList extends Command {
                 if (outputFormat === "json") {
                     out.out(JSON.stringify(wrapJsonOutput(null, { command: "available-numbers:list" }), null, 2))
                 } else {
-                    out.out(chalk.green("Received a success code from FreeClimb. There is no further output."))
+                    out.render(null, { topic: "available-numbers", command: "list" })
                 }
             } else if (response.data) {
                 if (flags.quiet) {
@@ -61,7 +61,8 @@ export class availableNumbersList extends Command {
                     if (ids) { out.out(ids) }
                     return
                 }
-                out.out(formatOutput(response.data))
+                const result = formatOutput(response.data)
+                if (result !== null) { out.out(result) }
             } else { throw new Errors.UndefinedResponseError() }
         }
         const nextResponse = (response: FreeClimbResponse) => {
@@ -70,7 +71,8 @@ export class availableNumbersList extends Command {
                     const ids = extractQuietIds(response.data, "phoneNumber")
                     if (ids) { out.out(ids) }
                 } else {
-                    out.out(formatOutput(response.data))
+                    const result = formatOutput(response.data)
+                    if (result !== null) { out.out(result) }
                 }
             } else { throw new Errors.UndefinedResponseError() }
             if(out.next === null && !flags.quiet) {
