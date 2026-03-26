@@ -3,7 +3,9 @@
  * This is helpful for determining whether all required parameters for every command can be positional arguments or whether some of them
  * should start being named flags after a limit has been reached.
  */
-const apiJson = require("./generated-api-schema.json")
+import { readFileSync } from "node:fs"
+
+const apiJson = JSON.parse(readFileSync(new URL("./generated-api-schema.json", import.meta.url), "utf-8"))
 function getMaxOnly() {
     console.log(
         `Maximum required parameters in a command: ${apiJson.reduce(

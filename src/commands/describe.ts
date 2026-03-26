@@ -1,5 +1,5 @@
 import { Args, Command, Flags, Interfaces } from "@oclif/core"
-import { getOutputFormat } from "../agent-config"
+import { getOutputFormat } from "../agent-config.js"
 
 interface CommandSchema {
     command: string

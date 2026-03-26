@@ -1,10 +1,13 @@
 import { Hook } from "@oclif/core"
 import axios from "axios"
-import * as fs from "fs"
-import * as path from "path"
+import * as fs from "node:fs"
+import * as path from "node:path"
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version: currentVersion } = require("../../../package.json")
+const pkgPath = join(dirname(fileURLToPath(import.meta.url)), "../../../package.json")
+const { version: currentVersion } = JSON.parse(readFileSync(pkgPath, "utf-8"))
 
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 hours
 

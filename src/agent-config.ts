@@ -1,5 +1,5 @@
-import { Environment } from "./environment"
-import { isTTY } from "./ui/theme"
+import { Environment } from "./environment.js"
+import { isTTY } from "./ui/theme.js"
 
 export type OutputFormat = "human" | "json" | "raw"
 

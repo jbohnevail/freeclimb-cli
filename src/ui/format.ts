@@ -1,6 +1,6 @@
 import chalk from "chalk"
-import { BrandColors, supportsColor, isTTY } from "./theme"
-import { getBoxChars } from "./chars"
+import { BrandColors, supportsColor, isTTY } from "./theme.js"
+import { getBoxChars } from "./chars.js"
 
 export interface StructuredOutput<T = unknown> {
     data: T
@@ -85,24 +85,48 @@ const STATUS_COLORS: Record<string, "success" | "warning" | "error"> = {
     cancelled: "error",
 }
 
-// Color a status value based on its semantic meaning
-function colorStatus(value: string): string {
+// Log level values that should be colored
+const LEVEL_COLORS: Record<string, "success" | "warning" | "error" | "info" | "debug"> = {
+    error: "error",
+    warning: "warning",
+    warn: "warning",
+    info: "info",
+    success: "success",
+    debug: "debug",
+}
+
+// Columns that get automatic colorization
+const COLORIZED_COLUMNS = new Set(["status", "level"])
+
+// Color a cell value based on its column and semantic meaning
+function colorCell(colKey: string, value: string): string {
     if (!supportsColor()) return value
 
+    const normalizedCol = colKey.toLowerCase()
+    if (!COLORIZED_COLUMNS.has(normalizedCol)) return value
+
     const normalizedValue = value.toLowerCase().replace(/[_\s]/g, "-")
-    const colorType = STATUS_COLORS[normalizedValue]
+    const colorType = normalizedCol === "level"
+        ? LEVEL_COLORS[normalizedValue]
+        : STATUS_COLORS[normalizedValue]
 
     if (!colorType) return value
 
     switch (colorType) {
         case "success": {
-            return chalk.hex(BrandColors.lime)(value)
+            return chalk.hex("#3fb950")(value)
         }
         case "warning": {
             return chalk.hex(BrandColors.orange)(value)
         }
         case "error": {
             return chalk.red(value)
+        }
+        case "info": {
+            return chalk.hex("#58a6ff")(value)
+        }
+        case "debug": {
+            return chalk.hex("#8b949e")(value)
         }
         default: {
             return value
@@ -141,15 +165,15 @@ export function formatTable(
         columns
             .map((col, i) => {
                 const val = String(row[col.key] || "")
-                const isStatusCol = col.key.toLowerCase() === "status"
+                const shouldColorize = COLORIZED_COLUMNS.has(col.key.toLowerCase())
                 let displayVal =
                     val.length > colWidths[i]
                         ? truncateText(val, colWidths[i])
                         : val.padEnd(colWidths[i])
 
-                // Color status columns
-                if (isStatusCol) {
-                    const coloredVal = colorStatus(val)
+                // Color status/level columns
+                if (shouldColorize && supportsColor()) {
+                    const coloredVal = colorCell(col.key, val)
                     const padding = colWidths[i] - val.length
                     displayVal = coloredVal + (padding > 0 ? " ".repeat(padding) : "")
                 }
@@ -194,7 +218,7 @@ export function formatTableWithBorders(
         const paddedTitle = ` ${title} `
         const remainingWidth = Math.max(0, totalWidth - paddedTitle.length - 2)
         const titleLine = supportsColor()
-            ? `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.orange).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
+            ? `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.darkTeal).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
             : `${chars.topLeft}${chars.horizontal}${paddedTitle}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
         lines.push(titleLine)
     } else {
@@ -220,7 +244,7 @@ export function formatTableWithBorders(
     for (const row of data) {
         const cells = columns.map((col, i) => {
             const val = String(row[col.key] || "")
-            const isStatusCol = col.key.toLowerCase() === "status"
+            const shouldColorize = COLORIZED_COLUMNS.has(col.key.toLowerCase())
             let cell: string
 
             if (val.length > colWidths[i]) {
@@ -229,9 +253,9 @@ export function formatTableWithBorders(
                 cell = val.padEnd(colWidths[i])
             }
 
-            // Color status columns
-            if (isStatusCol && supportsColor()) {
-                const coloredVal = colorStatus(val)
+            // Color status/level columns
+            if (shouldColorize && supportsColor()) {
+                const coloredVal = colorCell(col.key, val)
                 const padding = colWidths[i] - val.length
                 cell = coloredVal + (padding > 0 ? " ".repeat(padding) : "")
             }

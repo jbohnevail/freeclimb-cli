@@ -20,7 +20,7 @@
     "no-await-in-loop": ["warn"],
     "node/no-extraneous-import": "off",
     "prefer-destructuring": ["error", { "object": true, "array": false }],
-    "global-require": ["warn"],
+    "global-require": "off",
     "no-var": ["error"],
     "no-param-reassign": ["error", { "props": false }],
     "no-underscore-dangle": ["error"],
@@ -28,7 +28,7 @@
     "no-use-before-define": "off",
     "eqeqeq": "error",
     "import/no-named-as-default": ["warn"],
-    "import/no-dynamic-require": ["warn"],
+    "import/no-dynamic-require": "off",
     "import/order": [
       "error",
       {
@@ -86,7 +86,7 @@
     "n/no-process-exit": "off"
   },
   "overrides": [
-    { "files": ["*.js", "*.ts"] },
+    { "files": ["*.js", "*.ts", "*.tsx"] },
     {
       "files": ["*.spec.js", "*.spec.ts", "*.spec.tsx"],
       "rules": {
@@ -94,17 +94,9 @@
       }
     },
     {
-      "files": ["character-mapping.test.ts"],
-      "rules": {
-        "@typescript-eslint/no-var-requires": "off"
-      }
-    },
-    {
       "files": ["*.js"],
       "rules": {
-        "@typescript-eslint/no-var-requires": "off",
-        "import/no-default-export": "warn",
-        "no-undef": "warn"
+        "import/no-default-export": "warn"
       }
     },
     {

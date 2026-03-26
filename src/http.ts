@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from "axios"
 import { randomUUID } from "crypto"
-import { Environment } from "./environment"
-import { cred } from "./credentials"
+import { Environment } from "./environment.js"
+import { cred } from "./credentials.js"
 
 const DEFAULT_TIMEOUT = 30_000
 const DEFAULT_MAX_RETRIES = 3

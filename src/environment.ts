@@ -1,11 +1,15 @@
-import * as path from "path"
+import * as path from "node:path"
 import { config } from "dotenv"
-import * as fs from "fs"
+import * as fs from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname } from "node:path"
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
 
 export class Environment {
     private dataPath: string
 
-    constructor(newDataPath = `${__dirname}/../`) {
+    constructor(newDataPath = `${currentDir}/../`) {
         // newDataPath is of type string, and we get type inference from the default argument
         this.dataPath = newDataPath
         if (!fs.existsSync(this.dataPath)) {

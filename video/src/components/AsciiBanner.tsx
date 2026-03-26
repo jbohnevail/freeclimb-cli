@@ -62,9 +62,9 @@ export const AsciiBanner: React.FC<AsciiBannerProps> = ({ appearFrame }) => {
         <span style={{ color: BRAND.dimText }}>
           {'  The communications CLI for '}
         </span>
-        <span style={{ color: BRAND.orange }}>{BANNER_TAGLINE.word1}</span>
+        <span style={{ color: BRAND.lime }}>{BANNER_TAGLINE.word1}</span>
         <span style={{ color: BRAND.dimText }}>{' and '}</span>
-        <span style={{ color: BRAND.orange }}>{BANNER_TAGLINE.word2}</span>
+        <span style={{ color: BRAND.lime }}>{BANNER_TAGLINE.word2}</span>
       </div>
 
       {/* Empty line */}
@@ -97,7 +97,7 @@ export const AsciiBanner: React.FC<AsciiBannerProps> = ({ appearFrame }) => {
 
       {/* Learn more */}
       <div style={{ whiteSpace: 'pre', minHeight: '1.6em' }}>
-        <span style={{ color: BRAND.orange }}>{'  Learn more'}</span>
+        <span style={{ color: BRAND.lightTeal }}>{'  Learn more'}</span>
         <span style={{ color: BRAND.dimText }}>{' at '}</span>
         <span
           style={{

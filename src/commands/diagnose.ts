@@ -1,13 +1,13 @@
 import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
 import axios from "axios"
-import { cred } from "../credentials"
-import { Environment } from "../environment"
-import { wrapJsonOutput } from "../ui/format"
-import { createSpinner, Spinner } from "../ui/spinner"
-import { borderedBox, statusIndicator, keyValue } from "../ui/components"
-import { BrandColors, supportsColor, isTTY } from "../ui/theme"
-import { icons, getBoxChars } from "../ui/chars"
+import { cred } from "../credentials.js"
+import { Environment } from "../environment.js"
+import { wrapJsonOutput } from "../ui/format.js"
+import { createSpinner, Spinner } from "../ui/spinner.js"
+import { borderedBox, statusIndicator, keyValue } from "../ui/components.js"
+import { BrandColors, supportsColor, isTTY } from "../ui/theme.js"
+import { icons, getBoxChars } from "../ui/chars.js"
 
 interface DiagnoseResult {
     timestamp: string

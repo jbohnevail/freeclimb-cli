@@ -80,7 +80,7 @@ export const StatusDashboard: React.FC = () => {
         {frame >= titleFrame && (
           <>
             <TerminalLine />
-            <TerminalLine color={BRAND.orange} bold>
+            <TerminalLine color={BRAND.darkTeal} bold>
               FreeClimb Diagnostics
             </TerminalLine>
             <TerminalLine dim>{'─'.repeat(40)}</TerminalLine>

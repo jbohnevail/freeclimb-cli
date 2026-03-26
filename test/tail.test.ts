@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { calculateSinceTimestamp } from "../src/tail"
+import { calculateSinceTimestamp } from "../src/tail.js"
 
 describe("Tests the calculateSinceTimestamp", function () {
     it("Checks calculateSinceTimestamp outputs as expected", () => {

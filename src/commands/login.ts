@@ -1,9 +1,9 @@
 import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
-import { cred } from "../credentials"
-import * as Errors from "../errors"
-import { prompts } from "../prompts"
-import { FreeClimbApi, FreeClimbResponse, FreeClimbErrorResponse } from "../freeclimb"
+import { cred } from "../credentials.js"
+import * as Errors from "../errors.js"
+import { prompts } from "../prompts.js"
+import { FreeClimbApi, FreeClimbResponse, FreeClimbErrorResponse } from "../freeclimb.js"
 
 export class login extends Command {
     static description = `Log in to FreeClimb with your credentials. Alternatively you can set the ACCOUNT_ID and API_KEY environment variables. To learn how to put them in a file, run freeclimb data -h`

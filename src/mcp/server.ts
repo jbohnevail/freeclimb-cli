@@ -15,11 +15,14 @@ import {
     ListPromptsRequestSchema,
     GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js"
-import { createApiAxios } from "../http"
-import { tools, ToolName } from "./tools"
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
+import { createApiAxios } from "../http.js"
+import { tools, ToolName } from "./tools.js"
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version: CLI_VERSION } = require("../../package.json")
+const pkgPath = join(dirname(fileURLToPath(import.meta.url)), "../../package.json")
+const { version: CLI_VERSION } = JSON.parse(readFileSync(pkgPath, "utf-8"))
 
 // Generate PerCL JSON for common call flow patterns
 function generatePerclPattern(

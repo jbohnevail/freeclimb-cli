@@ -1,11 +1,10 @@
 import chalk from "chalk"
-import { BrandColors, supportsColor, typography } from "./theme"
-import { icons } from "./chars"
+import { BrandColors, supportsColor, typography } from "./theme.js"
+import { icons } from "./chars.js"
 
 // FreeClimb brand colors for banner
 const darkTeal = supportsColor() ? chalk.hex(BrandColors.darkTeal) : chalk
 const lightTeal = supportsColor() ? chalk.hex(BrandColors.lightTeal) : chalk
-const orange = supportsColor() ? chalk.hex(BrandColors.orange) : chalk
 const highlight = supportsColor() ? chalk.hex(BrandColors.lime) : chalk
 const dim = chalk.dim
 
@@ -31,7 +30,7 @@ export const ASCII_BANNER = supportsColor()
 `
 
 export const TAGLINE = supportsColor()
-    ? dim("  The communications CLI for ") + orange("developers") + dim(" and ") + orange("agents")
+    ? dim("  The communications CLI for ") + highlight("developers") + dim(" and ") + highlight("agents")
     : "  The communications CLI for developers and agents"
 
 export function getWelcomeBanner(): string {
@@ -56,7 +55,7 @@ export function getWelcomeBanner(): string {
         "",
         `  ${highlight("try:")} ${highlight("freeclimb calls:list --json")}`,
         "",
-        `  ${orange("Learn more")} ${hintStyle("at")} ${chalk.underline("https://docs.freeclimb.com/docs/freeclimb-cli-quickstart")}`,
+        `  ${lightTeal("Learn more")} ${hintStyle("at")} ${chalk.underline("https://docs.freeclimb.com/docs/freeclimb-cli-quickstart")}`,
         "",
     ]
     return lines.join("\n")

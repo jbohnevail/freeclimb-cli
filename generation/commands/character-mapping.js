@@ -8,7 +8,7 @@
 
 // Return a map of param names to flag characters
 
-module.exports = (apiInfo, localFlags) => {
+export default (apiInfo, localFlags) => {
     const commands = apiInfo.map((topic) => topic.commands).flat(1)
     const frequency = new Map()
     const charMap = new Map()

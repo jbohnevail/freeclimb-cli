@@ -6,9 +6,11 @@
  * component for generating command files. Changes made to this file may affect
  * generated command files.
  */
-const descriptionOverrides = require("../schema/description-overrides.json")
+import { readFileSync } from "node:fs"
 
-module.exports = class ApiCommand {
+const descriptionOverrides = JSON.parse(readFileSync(new URL("../schema/description-overrides.json", import.meta.url), "utf-8"))
+
+export default class ApiCommand {
     constructor(topic, command) {
         Object.keys(command).forEach((key) => {
             this[key] = command[key]

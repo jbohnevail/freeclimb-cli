@@ -1,6 +1,6 @@
 import { Args, Command, Flags } from "@oclif/core"
 import chalk from "chalk"
-import { generateMcpConfig } from "../../mcp/server"
+import { generateMcpConfig } from "../../mcp/server.js"
 
 export class McpConfig extends Command {
     static description = `Output MCP configuration for AI assistants like Claude Desktop.

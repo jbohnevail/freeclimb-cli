@@ -1,8 +1,8 @@
 import { Command, Help, Interfaces } from "@oclif/core"
 import chalk from "chalk"
-import { getWelcomeBanner } from "./ui/banner"
-import { BrandColors, supportsColor } from "./ui/theme"
-import { getBoxChars } from "./ui/chars"
+import { getWelcomeBanner } from "./ui/banner.js"
+import { BrandColors, supportsColor } from "./ui/theme.js"
+import { getBoxChars } from "./ui/chars.js"
 
 const { bold } = chalk
 
