@@ -10,7 +10,7 @@ function stripAnsi(text: string): string {
 
 // Create a bordered section header
 export function sectionHeader(title: string, width?: number): string {
-    const termWidth = width || Math.min(getTerminalWidth(), 60)
+    const termWidth = width || getTerminalWidth()
     const chars = getBoxChars()
 
     // Build the top border with title
@@ -20,7 +20,7 @@ export function sectionHeader(title: string, width?: number): string {
 
     let topBorder: string
     if (supportsColor()) {
-        topBorder = `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.darkTeal).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
+        topBorder = `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.lightTeal).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
     } else {
         topBorder = `${chars.topLeft}${chars.horizontal}${paddedTitle}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
     }
@@ -30,17 +30,24 @@ export function sectionHeader(title: string, width?: number): string {
 
 // Create a bordered box with optional title
 export function borderedBox(content: string | string[], title?: string, width?: number): string {
-    const termWidth = width || Math.min(getTerminalWidth(), 60)
+    const termWidth = width || getTerminalWidth()
     const chars = getBoxChars()
     const innerWidth = termWidth - 2 // Account for left and right borders
 
     const lines: string[] = []
 
-    // Top border (with or without title)
+    // Top border (always plain)
+    lines.push(`${chars.topLeft}${chars.horizontal.repeat(innerWidth)}${chars.topRight}`)
+
+    // Title row inside the box
     if (title) {
-        lines.push(sectionHeader(title, termWidth))
-    } else {
-        lines.push(`${chars.topLeft}${chars.horizontal.repeat(innerWidth)}${chars.topRight}`)
+        const titleDisplay = supportsColor()
+            ? chalk.hex(BrandColors.lightTeal).bold(` ${title}`)
+            : ` ${title}`
+        const titleVisualLen = stripAnsi(titleDisplay).length
+        const titlePad = Math.max(0, innerWidth - titleVisualLen)
+        lines.push(`${chars.vertical}${titleDisplay}${" ".repeat(titlePad)}${chars.vertical}`)
+        lines.push(`${chars.teeRight}${chars.horizontal.repeat(innerWidth)}${chars.teeLeft}`)
     }
 
     // Content lines
@@ -59,7 +66,7 @@ export function borderedBox(content: string | string[], title?: string, width?: 
 
 // Create a section separator within a box
 export function sectionSeparator(title?: string, width?: number): string {
-    const termWidth = width || Math.min(getTerminalWidth(), 60)
+    const termWidth = width || getTerminalWidth()
     const innerWidth = termWidth - 2
     const chars = getBoxChars()
 
@@ -88,7 +95,7 @@ export function keyValue(pairs: KeyValuePair[], keyWidth?: number): string[] {
         if (supportsColor() && pair.valueColor) {
             switch (pair.valueColor) {
                 case "success": {
-                    formattedValue = chalk.hex(BrandColors.lime)(pair.value)
+                    formattedValue = chalk.hex("#3fb950")(pair.value)
                     break
                 }
                 case "warning": {
@@ -100,7 +107,7 @@ export function keyValue(pairs: KeyValuePair[], keyWidth?: number): string[] {
                     break
                 }
                 case "info": {
-                    formattedValue = chalk.hex(BrandColors.darkTeal)(pair.value)
+                    formattedValue = chalk.hex(BrandColors.lightTeal)(pair.value)
                     break
                 }
             }
@@ -135,13 +142,13 @@ export function statusBadge(status: string): string {
     switch (normalizedStatus) {
         case "active":
         case "full": {
-            return `${icons.active()} ${chalk.hex(BrandColors.lime).bold(status.toUpperCase())}`
+            return `${icons.active()} ${chalk.hex("#3fb950").bold(status.toUpperCase())}`
         }
         case "pending": {
             return `${icons.pending()} ${chalk.hex(BrandColors.orange)(status.toUpperCase())}`
         }
         case "trial": {
-            return chalk.hex(BrandColors.orange).bold(status.toUpperCase())
+            return chalk.hex(BrandColors.lightTeal).bold(status.toUpperCase())
         }
         case "failed":
         case "suspended":
@@ -165,7 +172,7 @@ export function statusIndicator(status: "pass" | "fail" | "warn" | "info", text:
 
     const colorFn = supportsColor()
         ? {
-              pass: chalk.hex(BrandColors.lime),
+              pass: chalk.hex("#3fb950"),
               fail: chalk.red,
               warn: chalk.hex(BrandColors.orange),
               info: chalk.dim,

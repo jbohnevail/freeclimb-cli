@@ -16,7 +16,7 @@ export function SuccessMessage({
 
     return (
         <Box paddingX={1}>
-            <Text color={useColor ? BrandColors.lime : undefined}>
+            <Text color={useColor ? "#3fb950" : undefined}>
                 {"\u2714"} {displayMessage}
             </Text>
             {command && (

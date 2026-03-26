@@ -67,7 +67,7 @@ export const icons = {
     success: (): string => {
         const icon = "\u2714"
         if (!supportsColor()) return icon
-        return chalk.hex(BrandColors.lime)(icon)
+        return chalk.hex("#3fb950")(icon)
     },
 
     // Error/fail
@@ -88,14 +88,14 @@ export const icons = {
     info: (): string => {
         const icon = "\u2139"
         if (!supportsColor()) return icon
-        return chalk.hex(BrandColors.darkTeal)(icon)
+        return chalk.hex(BrandColors.lightTeal)(icon)
     },
 
     // Filled circle (active)
     active: (): string => {
         const icon = "\u25cf"
         if (!supportsColor()) return icon
-        return chalk.hex(BrandColors.lime)(icon)
+        return chalk.hex("#3fb950")(icon)
     },
 
     // Empty circle (inactive)
@@ -179,5 +179,5 @@ export function horizontalRule(title?: string, width = 40): string {
         return `${chars.teeRight}${left}${paddedTitle}${right}${chars.teeLeft}`
     }
 
-    return `${chars.teeRight}${left}${chalk.hex(BrandColors.darkTeal)(paddedTitle)}${right}${chars.teeLeft}`
+    return `${chars.teeRight}${left}${chalk.hex(BrandColors.lightTeal)(paddedTitle)}${right}${chars.teeLeft}`
 }

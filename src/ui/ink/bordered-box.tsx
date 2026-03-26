@@ -30,7 +30,7 @@ export function BorderedBox({
         >
             {title && (
                 <Box marginBottom={1}>
-                    <Text bold color={supportsColor() ? BrandColors.darkTeal : undefined}>
+                    <Text bold color={supportsColor() ? BrandColors.lightTeal : undefined}>
                         {title}
                     </Text>
                 </Box>

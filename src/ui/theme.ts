@@ -42,16 +42,16 @@ const createBrandChalk = () => {
 
     return {
         // Primary brand colors
-        primary: chalk.hex(BrandColors.darkTeal), // Dark teal - main headers
+        primary: chalk.hex(BrandColors.lightTeal), // Light teal - main headers
         secondary: chalk.hex(BrandColors.lightTeal), // Light teal - secondary elements
         accent: chalk.hex(BrandColors.lightTeal), // Light teal - command highlights
         highlight: chalk.hex(BrandColors.lime), // Lime - success, highlights
 
         // Semantic colors (using brand palette)
-        success: chalk.hex(BrandColors.lime), // Lime green
+        success: chalk.hex("#3fb950"), // Green (semantic success)
         warning: chalk.hex(BrandColors.orange), // Orange (brand)
         error: chalk.red, // Red for errors
-        info: chalk.hex(BrandColors.darkTeal), // Dark teal for info
+        info: chalk.hex(BrandColors.lightTeal), // Light teal for info
         dim: chalk.dim, // Standard dim
     }
 }
@@ -63,7 +63,7 @@ export const typography = {
     // Headers
     h1: (text: string): string => {
         if (!supportsColor()) return text.toUpperCase()
-        return chalk.hex(BrandColors.darkTeal).bold(text)
+        return chalk.hex(BrandColors.lightTeal).bold(text)
     },
 
     h2: (text: string): string => {
@@ -96,7 +96,7 @@ export const typography = {
     // Success message
     success: (text: string): string => {
         if (!supportsColor()) return text
-        return chalk.hex(BrandColors.lime)(text)
+        return chalk.hex("#3fb950")(text)
     },
 
     // Warning message
