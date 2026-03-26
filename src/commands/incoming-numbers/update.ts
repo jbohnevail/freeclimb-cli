@@ -68,7 +68,10 @@ export class incomingNumbersUpdate extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "incoming-numbers:update" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "incoming-numbers:update", request: { method: "POST", endpoint: `IncomingPhoneNumbers/${args.phoneNumberId}`, body: {
+                        applicationId: flags.applicationId,
+                        alias: flags.alias
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "incoming-numbers", command: "update" })
                 }

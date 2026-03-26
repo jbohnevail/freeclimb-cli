@@ -73,7 +73,12 @@ export class smsSend extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "sms:send" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "sms:send", request: { method: "POST", endpoint: `Messages`, body: {
+                        from: args.from,
+                        to: args.to,
+                        text: args.text,
+                        notificationUrl: flags.notificationUrl
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "sms", command: "send" })
                 }

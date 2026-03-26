@@ -46,7 +46,7 @@ export class applicationsGet extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:get" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:get", request: { method: "GET", endpoint: `Applications/${args.applicationId}` } }), null, 2))
                 } else {
                     out.render(null, { topic: "applications", command: "get" })
                 }

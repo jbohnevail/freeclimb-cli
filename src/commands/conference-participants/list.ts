@@ -47,7 +47,7 @@ export class conferenceParticipantsList extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conference-participants:list" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conference-participants:list", request: { method: "GET", endpoint: `Conferences/${args.conferenceId}/Participants` } }), null, 2))
                 } else {
                     out.render(null, { topic: "conference-participants", command: "list" })
                 }

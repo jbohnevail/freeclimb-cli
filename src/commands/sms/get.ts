@@ -45,7 +45,7 @@ export class smsGet extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "sms:get" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "sms:get", request: { method: "GET", endpoint: `Messages/${args.messageId}` } }), null, 2))
                 } else {
                     out.render(null, { topic: "sms", command: "get" })
                 }

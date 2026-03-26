@@ -170,7 +170,7 @@ export class ${command.className} extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "${command.topic}:${command.name}" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "${command.topic}:${command.name}", ${getRequestMetadata(command)} }), null, 2))
                 } else {
                     out.render(null, { topic: "${command.topic}", command: "${command.name}" })
                 }
@@ -499,6 +499,16 @@ function getInputValidation(command) {
         }
     }
     return data
+}
+
+function getRequestMetadata(command) {
+    const bodyObj = command.bodyParams.length > 0
+        ? `, body: {${command.bodyParams.map((p) => {
+            if (p.dataType === "boolean") return `\n                        ${p.name}: typeof ${accessSpecifier(p)}.${p.name} === "undefined" ? undefined : ${accessSpecifier(p)}.${p.name} === "true"`
+            return `\n                        ${p.name}: ${accessSpecifier(p)}.${p.name}`
+        }).join(",")}\n                    }`
+        : ""
+    return `request: { method: "${command.method}", endpoint: \`${command.endpoint}\`${bodyObj} }`
 }
 
 function getDryRunCheck(command) {

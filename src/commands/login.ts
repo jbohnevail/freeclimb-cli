@@ -3,6 +3,7 @@ import chalk from "chalk"
 import { cred } from "../credentials.js"
 import * as Errors from "../errors.js"
 import { prompts } from "../prompts.js"
+import { isTTY } from "../ui/theme.js"
 import { FreeClimbApi, FreeClimbResponse, FreeClimbErrorResponse } from "../freeclimb.js"
 
 export class login extends Command {
@@ -59,6 +60,16 @@ export class login extends Command {
             this.error("Both --accountId and --apiKey must be provided for non-interactive login.", {
                 exit: 2,
             })
+        }
+
+        // Non-TTY without flags — fail fast with actionable guidance
+        if (!isTTY()) {
+            this.error(
+                "Login requires --accountId, --apiKey, and --yes flags in non-interactive mode.\n" +
+                "Example: freeclimb login --accountId AC... --apiKey abc123 --yes\n" +
+                "Alternatively, set ACCOUNT_ID and API_KEY environment variables.",
+                { exit: 2 },
+            )
         }
 
         // Interactive login path

@@ -79,7 +79,15 @@ export class applicationsCreate extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:create" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:create", request: { method: "POST", endpoint: `Applications`, body: {
+                        alias: flags.alias,
+                        voiceUrl: flags.voiceUrl,
+                        voiceFallbackUrl: flags.voiceFallbackUrl,
+                        callConnectUrl: flags.callConnectUrl,
+                        statusCallbackUrl: flags.statusCallbackUrl,
+                        smsUrl: flags.smsUrl,
+                        smsFallbackUrl: flags.smsFallbackUrl
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "applications", command: "create" })
                 }

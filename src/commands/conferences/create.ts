@@ -71,7 +71,13 @@ export class conferencesCreate extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conferences:create" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conferences:create", request: { method: "POST", endpoint: `Conferences`, body: {
+                        alias: flags.alias,
+                        playBeep: flags.playBeep,
+                        record: typeof flags.record === "undefined" ? undefined : flags.record === "true",
+                        waitUrl: flags.waitUrl,
+                        statusCallbackUrl: flags.statusCallbackUrl
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "conferences", command: "create" })
                 }

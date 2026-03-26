@@ -45,7 +45,7 @@ export class recordingsStream extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "recordings:stream" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "recordings:stream", request: { method: "GET", endpoint: `Recordings/${args.recordingId}/Stream` } }), null, 2))
                 } else {
                     out.render(null, { topic: "recordings", command: "stream" })
                 }

@@ -12,6 +12,11 @@ export interface StructuredOutput<T = unknown> {
     metadata: {
         accountId?: string
         command?: string
+        request?: {
+            body?: unknown
+            endpoint: string
+            method: string
+        }
         requestId?: string
         timestamp: string
     }
@@ -30,6 +35,11 @@ export function wrapJsonOutput<T>(
         command?: string
         nextCursor?: string | null
         page?: number
+        request?: {
+            body?: unknown
+            endpoint: string
+            method: string
+        }
         requestId?: string
         total?: number
     } = {},
@@ -48,6 +58,10 @@ export function wrapJsonOutput<T>(
 
     if (options.command) {
         output.metadata.command = options.command
+    }
+
+    if (options.request) {
+        output.metadata.request = options.request
     }
 
     if (options.requestId) {

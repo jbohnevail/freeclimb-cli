@@ -37,6 +37,10 @@ Full URLs are restricted to FreeClimb domains for credential safety.
             char: "d",
             description: "JSON data for POST/PUT requests (accepts full API payload)",
         }),
+        stdin: Flags.boolean({
+            description: "Read JSON request body from stdin instead of --data flag",
+            default: false,
+        }),
         param: Flags.string({
             char: "p",
             description: "Query parameter (format: key=value, can be repeated)",
@@ -71,6 +75,7 @@ Full URLs are restricted to FreeClimb domains for credential safety.
         "$ freeclimb api /IncomingPhoneNumbers --json",
         "$ freeclimb api /Calls --fields callId,status,from,to",
         "$ freeclimb api /Messages --method POST --dry-run -d '{\"to\":\"+15551234567\"}'",
+        "$ echo '{\"to\":\"+15551234567\",\"from\":\"+15559876543\",\"text\":\"Hello\"}' | freeclimb api /Messages --method POST --stdin",
     ]
 
     async run() {
@@ -131,7 +136,24 @@ Full URLs are restricted to FreeClimb domains for credential safety.
         }
 
         let data: unknown
-        if (cmdFlags.data) {
+        if (cmdFlags.stdin) {
+            if (cmdFlags.data) {
+                this.error("Cannot use both --stdin and --data flags", { exit: 1 })
+            }
+            const chunks: Buffer[] = []
+            for await (const chunk of process.stdin) {
+                chunks.push(Buffer.from(chunk))
+            }
+            const raw = Buffer.concat(chunks).toString("utf-8").trim()
+            if (!raw) {
+                this.error("No data received from stdin. Pipe data or use --data flag instead.", { exit: 1 })
+            }
+            try {
+                data = JSON.parse(raw)
+            } catch {
+                this.error("Invalid JSON received from stdin", { exit: 1 })
+            }
+        } else if (cmdFlags.data) {
             try {
                 data = JSON.parse(cmdFlags.data)
             } catch {

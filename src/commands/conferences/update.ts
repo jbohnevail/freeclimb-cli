@@ -71,7 +71,11 @@ export class conferencesUpdate extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conferences:update" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conferences:update", request: { method: "POST", endpoint: `Conferences/${args.conferenceId}`, body: {
+                        alias: flags.alias,
+                        playBeep: flags.playBeep,
+                        status: flags.status
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "conferences", command: "update" })
                 }
