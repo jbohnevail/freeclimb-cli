@@ -272,6 +272,7 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
             return (
                 await client.post("/Logs", {
                     pql: args.pql,
+                    maxItems: args.maxItems,
                 })
             ).data
         }

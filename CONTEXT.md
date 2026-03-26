@@ -281,7 +281,7 @@ For structured JSON-RPC invocation (eliminates shell escaping):
 
 ```bash
 freeclimb mcp:start
-freeclimb mcp:config  # Print Claude Desktop config
+freeclimb mcp:config  # Print MCP client config
 ```
 
 ## Pagination

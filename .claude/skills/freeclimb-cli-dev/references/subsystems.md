@@ -105,7 +105,7 @@ JSON-RPC over stdio implementing the Model Context Protocol.
 | `list_calls` | `calls:list` |
 | `send_sms` | `sms:send` |
 | `list_applications` | `applications:list` |
-| `create_application` | `applications:create` |
+| `get_application` | `applications:get` |
 | `search_available_numbers` | `available-numbers:list` |
 | `get_account` | `accounts:get` |
 | ... | ... |
