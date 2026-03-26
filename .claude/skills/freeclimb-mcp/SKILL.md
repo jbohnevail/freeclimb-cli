@@ -16,7 +16,7 @@ freeclimb mcp:start
 
 ## Setup
 
-Configure your MCP client (e.g., Claude Desktop) with:
+Configure any MCP-compatible client (Claude Desktop, Cursor, Copilot, or custom agents) with:
 
 ```json
 {
@@ -186,13 +186,31 @@ Generate valid PerCL JSON for common call flow patterns. Returns a PerCL command
 
 ## Resources
 
-The MCP server also exposes resources (read-only data):
+The MCP server exposes resources (read-only data) via ListResources/ReadResource:
 
-| URI | Description |
-|-----|-------------|
-| `freeclimb://account` | Current account info and status |
-| `freeclimb://numbers` | All owned phone numbers |
-| `freeclimb://applications` | All configured applications |
+### API Resources
+
+| URI | Description | Type |
+|-----|-------------|------|
+| `freeclimb://account` | Current account info and status | JSON |
+| `freeclimb://numbers` | All owned phone numbers | JSON |
+| `freeclimb://applications` | All configured applications | JSON |
+
+### Skill Resources
+
+Domain knowledge documents discoverable at runtime. Any MCP client can read these to gain FreeClimb expertise:
+
+| URI | Description | Type |
+|-----|-------------|------|
+| `freeclimb://skills/freeclimb-platform-concepts` | Account model, resources, webhooks | Markdown |
+| `freeclimb://skills/freeclimb-percl-reference` | PerCL command language reference | Markdown |
+| `freeclimb://skills/freeclimb-voice-applications` | Voice app patterns (IVR, call center) | Markdown |
+| `freeclimb://skills/freeclimb-error-recovery` | Error codes and troubleshooting | Markdown |
+| `freeclimb://skills/freeclimb-cli-usage` | CLI commands and flags | Markdown |
+| `freeclimb://skills/freeclimb-cli-workflows` | Multi-step operational recipes | Markdown |
+| `freeclimb://skills/freeclimb-mcp-tools` | This document (MCP tool reference) | Markdown |
+
+Use `ListResources` to discover all available skills, then `ReadResource` to load any skill by URI.
 
 ## Prompts
 
