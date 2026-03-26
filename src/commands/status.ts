@@ -6,7 +6,7 @@ import { Environment } from "../environment.js"
 import { wrapJsonOutput } from "../ui/format.js"
 import { createSpinner } from "../ui/spinner.js"
 import { borderedBox, keyValue, statusBadge, sectionSeparator, quickActions } from "../ui/components.js"
-import { BrandColors, supportsColor, isTTY } from "../ui/theme.js"
+import { BrandColors, supportsColor, isTTY, truncate, getTerminalWidth } from "../ui/theme.js"
 import { icons, getBoxChars } from "../ui/chars.js"
 
 interface AccountStatus {
@@ -117,7 +117,8 @@ Use --json for machine-readable output.
 
     private renderStatusDashboard(status: AccountStatus): void {
         const chars = getBoxChars()
-        const width = 55
+        const width = Math.min(getTerminalWidth(), 80)
+        const valueMaxLen = width - 22 // 2 borders + 2 padding + 14 key width + 2 gap + 2 buffer
 
         this.log("")
 
@@ -126,7 +127,7 @@ Use --json for machine-readable output.
 
         // Account info section
         const accountInfo = keyValue([
-            { key: "Account ID", value: status.accountId },
+            { key: "Account ID", value: truncate(status.accountId, valueMaxLen) },
             { key: "Type", value: statusBadge(status.type) },
             { key: "Status", value: statusBadge(status.status) },
         ], 14)
@@ -134,7 +135,7 @@ Use --json for machine-readable output.
         // Add balance if available
         if (status.balance) {
             const balanceValue = supportsColor()
-                ? chalk.hex(BrandColors.lime)(`$${status.balance}`)
+                ? chalk.hex("#3fb950")(`$${status.balance}`)
                 : `$${status.balance}`
             accountInfo.push(`  ${"Balance".padEnd(14)}  ${balanceValue}`)
         }

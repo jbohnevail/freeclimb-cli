@@ -17,7 +17,8 @@
         "$ freeclimb api /Messages --method POST -d '{\"to\":\"+15551234567\",\"from\":\"+15559876543\",\"text\":\"Hello\"}'",
         "$ freeclimb api /IncomingPhoneNumbers --json",
         "$ freeclimb api /Calls --fields callId,status,from,to",
-        "$ freeclimb api /Messages --method POST --dry-run -d '{\"to\":\"+15551234567\"}'"
+        "$ freeclimb api /Messages --method POST --dry-run -d '{\"to\":\"+15551234567\"}'",
+        "$ echo '{\"to\":\"+15551234567\",\"from\":\"+15559876543\",\"text\":\"Hello\"}' | freeclimb api /Messages --method POST --stdin"
       ],
       "flags": {
         "method": {
@@ -42,6 +43,12 @@
           "hasDynamicHelp": false,
           "multiple": false,
           "type": "option"
+        },
+        "stdin": {
+          "description": "Read JSON request body from stdin instead of --data flag",
+          "name": "stdin",
+          "allowNo": false,
+          "type": "boolean"
         },
         "param": {
           "char": "p",

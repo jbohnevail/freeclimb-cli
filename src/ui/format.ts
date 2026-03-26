@@ -1,5 +1,5 @@
 import chalk from "chalk"
-import { BrandColors, supportsColor, isTTY } from "./theme.js"
+import { BrandColors, supportsColor, isTTY, getTerminalWidth } from "./theme.js"
 import { getBoxChars } from "./chars.js"
 
 export interface StructuredOutput<T = unknown> {
@@ -141,6 +141,17 @@ function truncateText(text: string, maxLen: number): string {
     return text.slice(0, maxLen - 1) + "\u2026"
 }
 
+function shrinkColumnsToFit(widths: number[], overhead: number, termWidth: number): number[] {
+    const totalRaw = widths.reduce((a, b) => a + b, 0)
+    const available = termWidth - overhead
+
+    if (totalRaw > available && available > widths.length) {
+        return widths.map((w) => Math.max(6, Math.floor((w / totalRaw) * available)))
+    }
+
+    return widths
+}
+
 export function formatTable(
     data: Record<string, unknown>[],
     columns: { header: string; key: string; width?: number }[],
@@ -149,11 +160,11 @@ export function formatTable(
         return chalk.dim("No data available")
     }
 
-    const colWidths = columns.map((col) => {
+    const colWidths = shrinkColumnsToFit(columns.map((col) => {
         const headerLen = col.header.length
         const maxDataLen = Math.max(...data.map((row) => String(row[col.key] || "").length))
         return col.width || Math.max(headerLen, maxDataLen, 10)
-    })
+    }), columns.length * 2 + 2, getTerminalWidth())
 
     const headerRow = columns
         .map((col, i) => chalk.bold(col.header.padEnd(colWidths[i])))
@@ -203,14 +214,15 @@ export function formatTableWithBorders(
 
     const chars = getBoxChars()
 
-    // Calculate column widths
-    const colWidths = columns.map((col) => {
+    // Calculate column widths, shrink proportionally if wider than terminal
+    const overhead = (columns.length - 1) * 3 + 4
+    const colWidths = shrinkColumnsToFit(columns.map((col) => {
         const headerLen = col.header.length
         const maxDataLen = Math.max(...data.map((row) => String(row[col.key] || "").length))
         return col.width || Math.max(headerLen, maxDataLen, 10)
-    })
+    }), overhead, getTerminalWidth())
 
-    const totalWidth = colWidths.reduce((a, b) => a + b, 0) + (columns.length - 1) * 3 + 4
+    const totalWidth = colWidths.reduce((a, b) => a + b, 0) + overhead
     const lines: string[] = []
 
     // Top border with optional title
@@ -218,7 +230,7 @@ export function formatTableWithBorders(
         const paddedTitle = ` ${title} `
         const remainingWidth = Math.max(0, totalWidth - paddedTitle.length - 2)
         const titleLine = supportsColor()
-            ? `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.darkTeal).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
+            ? `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.lightTeal).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
             : `${chars.topLeft}${chars.horizontal}${paddedTitle}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
         lines.push(titleLine)
     } else {

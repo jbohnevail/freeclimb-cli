@@ -6,7 +6,7 @@ import { Environment } from "../environment.js"
 import { wrapJsonOutput } from "../ui/format.js"
 import { createSpinner, Spinner } from "../ui/spinner.js"
 import { borderedBox, statusIndicator, keyValue } from "../ui/components.js"
-import { BrandColors, supportsColor, isTTY } from "../ui/theme.js"
+import { BrandColors, supportsColor, isTTY, getTerminalWidth } from "../ui/theme.js"
 import { icons, getBoxChars } from "../ui/chars.js"
 
 interface DiagnoseResult {
@@ -59,7 +59,7 @@ Useful for troubleshooting authentication or connectivity issues.
         if (!flags.json) {
             this.log("")
             if (supportsColor()) {
-                this.log(chalk.hex(BrandColors.orange).bold("FreeClimb Diagnostics"))
+                this.log(chalk.hex(BrandColors.lightTeal).bold("FreeClimb Diagnostics"))
             } else {
                 this.log("FreeClimb Diagnostics")
             }
@@ -311,7 +311,7 @@ Useful for troubleshooting authentication or connectivity issues.
     }
 
     private renderSummary(result: DiagnoseResult): void {
-        const width = 50
+        const width = Math.min(getTerminalWidth(), 80)
         this.log("")
 
         // Summary header
@@ -347,16 +347,35 @@ Useful for troubleshooting authentication or connectivity issues.
                 break
         }
 
+        // Word-wrap status message to fit within the box
+        const maxLineLen = width - 6 // 2 borders + 2 padding + 2 indent
+        const words = statusMessage.split(" ")
+        const wrappedLines: string[] = []
+        let currentLine = ""
+        for (const word of words) {
+            if (currentLine.length + word.length + 1 > maxLineLen) {
+                wrappedLines.push(currentLine)
+                currentLine = word
+            } else {
+                currentLine = currentLine ? `${currentLine} ${word}` : word
+            }
+        }
+        if (currentLine) wrappedLines.push(currentLine)
+
         if (supportsColor()) {
             const colorFn =
                 statusColor === "success"
-                    ? chalk.hex(BrandColors.lime)
+                    ? chalk.hex("#3fb950")
                     : statusColor === "warning"
                     ? chalk.hex(BrandColors.orange)
                     : chalk.red
-            summaryLines.push(`  ${colorFn(statusMessage)}`)
+            for (const line of wrappedLines) {
+                summaryLines.push(`  ${colorFn(line)}`)
+            }
         } else {
-            summaryLines.push(`  ${statusMessage}`)
+            for (const line of wrappedLines) {
+                summaryLines.push(`  ${line}`)
+            }
         }
 
         summaryLines.push("")

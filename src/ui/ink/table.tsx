@@ -16,11 +16,11 @@ export interface TableProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    active: BrandColors.lime,
-    completed: BrandColors.lime,
-    answered: BrandColors.lime,
-    delivered: BrandColors.lime,
-    sent: BrandColors.lime,
+    active: "#3fb950",
+    completed: "#3fb950",
+    answered: "#3fb950",
+    delivered: "#3fb950",
+    sent: "#3fb950",
     queued: BrandColors.orange,
     pending: BrandColors.orange,
     ringing: BrandColors.orange,
@@ -104,7 +104,7 @@ export function Table({ rows, columns, title }: TableProps): ReactElement {
         >
             {title && (
                 <Box marginBottom={0}>
-                    <Text bold color={supportsColor() ? BrandColors.darkTeal : undefined}>
+                    <Text bold color={supportsColor() ? BrandColors.lightTeal : undefined}>
                         {title}
                     </Text>
                 </Box>

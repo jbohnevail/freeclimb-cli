@@ -12,7 +12,7 @@ export function KeyValue({ data, labelColor }: KeyValueProps): ReactElement {
     const termWidth = useTerminalWidth()
     const entries = Object.entries(data)
     const maxKeyLen = Math.max(...entries.map(([key]) => key.length))
-    const color = labelColor || (supportsColor() ? BrandColors.darkTeal : undefined)
+    const color = labelColor || (supportsColor() ? BrandColors.lightTeal : undefined)
 
     return (
         <Box flexDirection="column" width={termWidth}>
