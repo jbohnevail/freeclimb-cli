@@ -11,10 +11,14 @@ Find your data directory. You can store your credentials here in a .env file, af
 
 ```
 USAGE
-  $ freeclimb data
+  $ freeclimb data [-h]
 
-OPTIONS
-  -h, --help  show CLI help
+FLAGS
+  -h, --help  Show CLI help.
+
+DESCRIPTION
+  Find your data directory. You can store your credentials here in a .env file, after setting permissions appropriately.
+  See https://oclif.io/docs/config for how to change this location.
 ```
 
-_See code: [src/commands/data.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.5.4/src/commands/data.ts)_
+_See code: [src/commands/data.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/data.ts)_

@@ -1,0 +1,26 @@
+{
+  "total": 1,
+  "start": 0,
+  "end": 0,
+  "page": 0,
+  "numPages": 1,
+  "pageSize": 100,
+  "nextPageUri": null,
+  "applications": [
+    {
+      "uri": "/apiserver/Accounts/ACtest1234567890/Applications/AP0000000000000000000000000000001",
+      "dateCreated": "Mon, 01 Jan 2024 00:00:00 GMT",
+      "dateUpdated": "Mon, 01 Jan 2024 00:00:00 GMT",
+      "revision": 1,
+      "applicationId": "AP0000000000000000000000000000001",
+      "accountId": "ACtest1234567890",
+      "alias": "My App",
+      "voiceUrl": "https://example.com/voice",
+      "voiceFallbackUrl": "https://example.com/voice-fallback",
+      "callConnectUrl": "https://example.com/connect",
+      "statusCallbackUrl": "https://example.com/status",
+      "smsUrl": "https://example.com/sms",
+      "smsFallbackUrl": "https://example.com/sms-fallback"
+    }
+  ]
+}

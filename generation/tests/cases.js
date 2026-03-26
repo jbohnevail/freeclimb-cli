@@ -1,10 +1,10 @@
-const requiredParamTest = require("./components/required-param.js")
-const allTypeTest = require("./components/all-type.js")
-const optionalTypeTest = require("./components/optional-type.js")
-const maxItemFlagTest = require("./components/max-item-flag.js")
-const nextFlagTest = require("./components/next-flag.js")
-const booleanInputTest = require("./components/boolean-input.js")
-const statusCodeTest = require("./components/status-code.js")
+import requiredParamTest from "./components/required-param.js"
+import allTypeTest from "./components/all-type.js"
+import optionalTypeTest from "./components/optional-type.js"
+import maxItemFlagTest from "./components/max-item-flag.js"
+import nextFlagTest from "./components/next-flag.js"
+import booleanInputTest from "./components/boolean-input.js"
+import statusCodeTest from "./components/status-code.js"
 
 function Tests(topic, command, commandName) {
     this.topic = topic.topic
@@ -97,4 +97,4 @@ Tests.prototype.runTests = function () {
 })`
 }
 
-module.exports = Tests
+export default Tests

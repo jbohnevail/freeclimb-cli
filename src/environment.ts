@@ -1,11 +1,15 @@
-import * as path from "path"
-import { load, config } from "dotenv"
-import * as fs from "fs"
+import * as path from "node:path"
+import { config } from "dotenv"
+import * as fs from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname } from "node:path"
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
 
 export class Environment {
     private dataPath: string
 
-    constructor(newDataPath = `${__dirname}/../`) {
+    constructor(newDataPath = `${currentDir}/../`) {
         // newDataPath is of type string, and we get type inference from the default argument
         this.dataPath = newDataPath
         if (!fs.existsSync(this.dataPath)) {
@@ -65,9 +69,17 @@ export class Environment {
 
 export const env = {
     get accountId() {
-        return Environment.getString("ACCOUNT_ID")
+        // Support both new FREECLIMB_ prefix and legacy ACCOUNT_ID
+        return (
+            Environment.getString("FREECLIMB_ACCOUNT_ID") ||
+            Environment.getString("ACCOUNT_ID")
+        )
     },
     get apiKey() {
-        return Environment.getString("API_KEY")
+        // Support both new FREECLIMB_ prefix and legacy API_KEY
+        return (
+            Environment.getString("FREECLIMB_API_KEY") ||
+            Environment.getString("API_KEY")
+        )
     },
 }

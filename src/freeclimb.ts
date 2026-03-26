@@ -1,37 +1,20 @@
 import axios from "axios"
-import { cred } from "./credentials"
-import { Environment } from "./environment"
-import * as Errors from "./errors"
+import type { Method } from "axios"
+import { cred } from "./credentials.js"
+import { Environment } from "./environment.js"
+import * as Errors from "./errors.js"
+import { createApiAxios } from "./http.js"
 
 type Errorer = { error(message: string, exitCode: { exit: number }): any }
 
 type Body = { data: Record<string, any> }
-type Query = { params: Record<string, any> } // the linter recommends Record<string, any> to represent any object
+type Query = { params: Record<string, any> }
 
-type AxiosMethodType =
-    | "get"
-    | "GET"
-    | "delete"
-    | "DELETE"
-    | "head"
-    | "HEAD"
-    | "options"
-    | "OPTIONS"
-    | "post"
-    | "POST"
-    | "put"
-    | "PUT"
-    | "patch"
-    | "PATCH"
-    | "link"
-    | "LINK"
-    | "unlink"
-    | "UNLINK"
-    | undefined
+type AxiosMethodType = Method | undefined
 
 export type FreeClimbErrorResponse = { response: Body }
 
-export type FreeClimbResponse = Body & { status: number }
+export type FreeClimbResponse = Body & { config?: any; status: number }
 
 export class FreeClimbApi {
     private endpoint: string
@@ -56,27 +39,44 @@ export class FreeClimbApi {
         onSuccess: (response: FreeClimbResponse) => any,
         onError = (error: any) => {
             let err: Errors.FreeClimbError
-            if (error.message && error.code) {
-                err = error
-            } else if (error.response) {
+            if (error.response) {
                 err = new Errors.FreeClimbAPIError(error.response.data)
+            } else if (error instanceof Errors.FreeClimbError) {
+                err = error
             } else {
                 err = new Errors.DefaultFatalError(error)
             }
             this.errorHandler.error(err.message, { exit: err.code })
-        }
+        },
     ) {
-        const accountId = await cred.accountId
-        const apiKey = await cred.apiKey
-        await axios(
-            `${this.baseUrl}${this.authenticate ? `/Accounts/${accountId}` : ``}${this.endpoint}`,
-            {
-                method: method,
-                auth: { username: accountId, password: apiKey },
-                params: (requestContent as Query) ? (requestContent as Query).params : undefined,
-                data: (requestContent as Body) ? (requestContent as Body).data : undefined,
+        if (this.authenticate) {
+            // Use the resilient shared HTTP client for authenticated calls
+            try {
+                const client = await createApiAxios()
+                const response = await client.request({
+                    url: this.endpoint,
+                    method: method,
+                    params: (requestContent as Query)
+                        ? (requestContent as Query).params
+                        : undefined,
+                    data: (requestContent as Body) ? (requestContent as Body).data : undefined,
+                })
+                await onSuccess(response as FreeClimbResponse)
+            } catch (error: any) {
+                await onError(error)
             }
-        )
+            return
+        }
+
+        // Unauthenticated calls use axios directly
+        const accountId = (await cred.accountId) || ""
+        const apiKey = (await cred.apiKey) || ""
+        await axios(`${this.baseUrl}${this.endpoint}`, {
+            method: method,
+            auth: { username: accountId, password: apiKey },
+            params: (requestContent as Query) ? (requestContent as Query).params : undefined,
+            data: (requestContent as Body) ? (requestContent as Body).data : undefined,
+        })
             .then(onSuccess)
             .catch(onError)
     }

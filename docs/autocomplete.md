@@ -3,27 +3,21 @@
 
 Display autocomplete installation instructions
 
-* [`freeclimb autocomplete [SHELL]`](#freeclimb-autocomplete-shell)
+* [`freeclimb autocomplete`](#freeclimb-autocomplete)
 
-## `freeclimb autocomplete [SHELL]`
+## `freeclimb autocomplete`
 
 Display autocomplete installation instructions
 
 ```
 USAGE
-  $ freeclimb autocomplete [SHELL]
+  $ freeclimb autocomplete [-h]
 
-ARGUMENTS
-  SHELL  shell type
+FLAGS
+  -h, --help  Show CLI help.
 
-OPTIONS
-  -r, --refresh-cache  Refresh cache (ignores displaying instructions)
-
-EXAMPLES
-  $ freeclimb autocomplete
-  $ freeclimb autocomplete bash
-  $ freeclimb autocomplete zsh
-  $ freeclimb autocomplete --refresh-cache
+DESCRIPTION
+  Display autocomplete installation instructions
 ```
 
-_See code: [src/commands/autocomplete/index.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.5.4/src/commands/autocomplete/index.ts)_
+_See code: [src/commands/autocomplete/index.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/autocomplete/index.ts)_

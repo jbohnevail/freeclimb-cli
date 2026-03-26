@@ -1,91 +1,179 @@
 # FreeClimb CLI
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io) [![Version](https://img.shields.io/npm/v/freeclimb-cli.svg)](https://npmjs.org/package/freeclimb-cli) [![Downloads/week](https://img.shields.io/npm/dw/freeclimb-cli.svg)](https://npmjs.org/package/freeclimb-cli) [![License](https://img.shields.io/npm/l/freeclimb-cli.svg)](https://github.com/FreeClimbAPI/freeclimb-cli/blob/master/package.json)
 
-Install FreeClimb's CLI to start managing apps, buying numbers, and testing applications from your command line.
+[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
+[![Version](https://img.shields.io/npm/v/freeclimb-cli.svg)](https://npmjs.org/package/freeclimb-cli)
+[![License](https://img.shields.io/npm/l/freeclimb-cli.svg)](https://github.com/FreeClimbAPI/freeclimb-cli/blob/master/package.json)
 
-Read the complete [FreeClimb CLI Quickstart documentation](https://docs.freeclimb.com/docs/freeclimb-cli-quickstart) for detailed install instructions, how to start using the CLI, and example use cases.
-
-[Learn more about FreeClimb](https://www.freeclimb.com/), a voice and SMS API built for developers.
+Command-line interface for the [FreeClimb](https://www.freeclimb.com/) voice and SMS communications API. Built with [oclif](https://oclif.io), designed for developers and AI agents.
 
 ## Requirements
-A [FreeClimb account](https://freeclimb.com/dashboard/)
 
-[Node.js](https://nodejs.org/en/download/) version 14.15.0 or higher
+- [Node.js](https://nodejs.org/) >= 18.0.0
+- A [FreeClimb account](https://freeclimb.com/dashboard/)
 
-Linux users may require further prerequisites. See details about this in the [documentation](https://docs.freeclimb.com/docs/freeclimb-cli-quickstart#linux).
+## Install
 
-## Install 
-From npm
 ```sh
 npm install -g freeclimb-cli
 ```
-Linux users may require further prerequisites. See details about this in the [documentation](https://docs.freeclimb.com/docs/freeclimb-cli-quickstart#linux).
+
+## Quick Start
+
+```sh
+freeclimb login
+freeclimb sms:send +1FROM +1TO "Hello from FreeClimb"
+freeclimb calls:list --fields callId,status,from,to --json
+```
+
+## Authentication
+
+### Interactive
+
+```sh
+freeclimb login
+```
+
+### Environment Variables (headless / agent use)
+
+```sh
+export FREECLIMB_ACCOUNT_ID=your_account_id
+export FREECLIMB_API_KEY=your_api_key
+```
 
 ## Usage
-To begin using the FreeClimb CLI:
+
 ```sh
-$ freeclimb login
+freeclimb help                     # Show topics and commands
+freeclimb [TOPIC]                  # Explore commands in a topic
+freeclimb [COMMAND] --help         # Command usage details
+freeclimb describe [COMMAND]       # Machine-readable schema (JSON)
 ```
-To see a list of topics, commands, and accompanying explanations:
-```sh
-$ freeclimb help
-```
-To explore commands organized under each topic:
-```sh
-$ freeclimb [TOPIC]
-```
-To run commands:
-```sh
-$ freeclimb [COMMAND]
-```
-Many commands require arguments and also include option flags. To see arguments and option flags for each command, as well as explanations:
-```sh
-$ freeclimb [COMMAND] --help
-```
-Review [Explore FreeClimb's CLI](https://docs.freeclimb.com/docs/freeclimb-cli-quickstart#explore-freeclimbs-cli) for more detailed information about usage.
 
 ## Command Topics
-* [`freeclimb accounts`](docs/accounts.md) - Manage FreeClimb account information
-* [`freeclimb applications`](docs/applications.md) - Manage your account's FreeClimb applications
-* [`freeclimb autocomplete`](docs/autocomplete.md) - Autocomplete installation instructions
-* [`freeclimb available-numbers`](docs/available-numbers.md) - See FreeClimb numbers available for purchase
-* [`freeclimb call-queues`](docs/call-queues.md) - Manage call queues
-* [`freeclimb calls`](docs/calls.md) - See past calls and make new calls
-* [`freeclimb conference-participants`](docs/conference-participants.md) - Manage and remove conference participants
-* [`freeclimb conferences`](docs/conferences.md) - Create and manage conference calls
-* [`freeclimb data`](docs/data.md) - Find your data directory
-* [`freeclimb help`](docs/help.md) - Display help information, including a list of topics, commands, and accompanying explanations
-* [`freeclimb incoming-numbers`](docs/incoming-numbers.md) - Manage your purchased FreeClimb numbers
-* [`freeclimb login`](docs/login.md) - Log in to FreeClimb with your Account ID and API Key
-* [`freeclimb logout`](docs/logout.md) - Log out and remove your saved FreeClimb Account ID and API Key from your computer's keychain
-* [`freeclimb logs`](docs/logs.md) - Search and filter logs
-* [`freeclimb queue-members`](docs/queue-members.md) - Manage and remove queue members
-* [`freeclimb recordings`](docs/recordings.md) - Find, download, stream, and manage recordings
-* [`freeclimb sms`](docs/sms.md) - See past messages and send new messages
+
+| Topic | Description |
+|-------|-------------|
+| [`accounts`](docs/accounts.md) | View and manage account settings |
+| [`applications`](docs/applications.md) | CRUD for FreeClimb applications (webhook endpoints) |
+| [`available-numbers`](docs/available-numbers.md) | Search phone numbers available for purchase |
+| [`call-queues`](docs/call-queues.md) | Create and manage call queues |
+| [`calls`](docs/calls.md) | Make, list, get, and update voice calls |
+| [`conference-participants`](docs/conference-participants.md) | Manage conference participants |
+| [`conferences`](docs/conferences.md) | Create and manage conference calls |
+| [`incoming-numbers`](docs/incoming-numbers.md) | Manage purchased phone numbers |
+| [`logs`](docs/logs.md) | Search and filter API logs |
+| [`queue-members`](docs/queue-members.md) | Manage call queue members |
+| [`recordings`](docs/recordings.md) | Access and manage call recordings |
+| [`sms`](docs/sms.md) | Send and manage SMS messages |
+
+### Utility Commands
+
+| Command | Description |
+|---------|-------------|
+| `api` | Make authenticated raw API requests |
+| `describe` | Machine-readable command schema introspection |
+| `diagnose` | System diagnostics and connectivity check |
+| `status` | Account status overview |
+| `mcp:start` | Start MCP server for AI agent integration |
+
+## Key Features
+
+### Agent-Friendly Output
+
+```sh
+freeclimb calls:list --json                          # JSON output
+freeclimb calls:list --fields callId,status,from,to  # Limit fields
+export FREECLIMB_OUTPUT_FORMAT=json                  # Global JSON mode
+```
+
+### Safety Rails
+
+```sh
+freeclimb sms:send +1FROM +1TO "Hello" --dry-run     # Preview without executing
+freeclimb applications:delete APP_ID --dry-run        # Validate before deleting
+```
+
+### Schema Introspection
+
+```sh
+freeclimb describe              # List all topics
+freeclimb describe calls        # Commands in a topic
+freeclimb describe calls:list   # Full flag/arg schema
+freeclimb describe --all        # Everything
+```
+
+### Raw API Access
+
+```sh
+freeclimb api /Calls --fields callId,status
+freeclimb api /Messages --method POST -d '{"to":"+15551234567","from":"+15559876543","text":"Hello"}'
+```
+
+### MCP Integration
+
+For AI agents that prefer structured JSON-RPC:
+
+```sh
+freeclimb mcp:start      # Start MCP server (stdio)
+freeclimb mcp:config     # Print Claude Desktop config
+```
 
 ## Examples
-Review [Other Use Cases](https://docs.freeclimb.com/docs/freeclimb-cli-quickstart#other-use-cases)
 
-## Troubleshooting
-Newer versions of Node may give an invalid header value error when using the CLI. To resolve this issue: 
- 1. Use Node version 14.15.0
- 2. Add NODE_OPTIONS as a persistent environment variable by running the following command:
- ```
- $ echo export NODE_OPTIONS=--http-parser=legacy >> ~/.bash_profile
- $ source ~/.bash_profile
- ```
-Possible resolutions for "TypeError: cannot read property of undefined":
- 1. Make sure to add NODE_OPTIONS as a persistent environment variable as explained in the section above
- 2. CLI does not have correct write permissions to the OCLIF configuration directory (information about the data directory is [here](https://oclif.io/docs/config))
+### Send SMS
+
+```sh
+freeclimb sms:send +15551234567 +15559876543 "Hello from FreeClimb" --dry-run
+freeclimb sms:send +15551234567 +15559876543 "Hello from FreeClimb"
+```
+
+### Make a Call
+
+```sh
+freeclimb calls:make +15551234567 +15559876543 AP1234567890 --dry-run
+freeclimb calls:make +15551234567 +15559876543 AP1234567890
+```
+
+### Manage Applications
+
+```sh
+freeclimb applications:list --fields applicationId,alias --json
+freeclimb applications:create --alias "MyApp" --voiceUrl "https://example.com/voice" --dry-run
+```
+
+### Buy a Number
+
+```sh
+freeclimb available-numbers:list --fields phoneNumber,region --json
+freeclimb incoming-numbers:buy --phoneNumber "+15551234567" --dry-run
+```
+
+## Development
+
+```sh
+git clone https://github.com/FreeClimbAPI/freeclimb-cli.git
+cd freeclimb-cli
+npm run setup             # Install, build, and verify (recommended)
+```
+
+Or manually:
+
+```sh
+npm install --ignore-scripts
+npx tsc --noEmit          # Type check
+npm test                  # Run tests
+npm run lint-write        # Lint and format
+npm run prepack           # Build for distribution
+```
+
+### AI Agent Integration
+
+MCP server configs are auto-discovered by Claude Code (`.mcp.json`), Cursor (`.cursor/mcp.json`), and VS Code Copilot (`.vscode/mcp.json`). After `npm run setup`, set `FREECLIMB_ACCOUNT_ID` and `FREECLIMB_API_KEY` in the config files or your environment. See [AGENTS.md](AGENTS.md) for details.
 
 ## Contributing
-1. Clone this repo
-2. From the repository root directory, run: 
-```
- $ npm install -g freeclimb-cli
- $ yarn install
-```
-3. Run ./bin/run from the repository root directory to run the CLI
+
+See [CLAUDE.md](CLAUDE.md) for architecture details and development conventions.
 
 ## Feedback & Issues
-The FreeClimb CLI is currently in a beta release phase. We are actively working to improve it for all your FreeClimb-related needs. If you would like to give the team feedback or you encounter a problem, please [contact support](https://www.freeclimb.com/support/) or [submit a ticket](https://freeclimb.com/dashboard/portal/support) in the dashboard.
+
+[Contact support](https://www.freeclimb.com/support/) or [submit a ticket](https://freeclimb.com/dashboard/portal/support).

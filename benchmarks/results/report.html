@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreeClimb CLI Benchmark Report — v0.5.4 → v0.6.0</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-hover: #1c2129;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #484f58;
+    --green: #3fb950;
+    --green-dim: rgba(63,185,80,0.15);
+    --red: #f85149;
+    --red-dim: rgba(248,81,73,0.15);
+    --blue: #58a6ff;
+    --blue-dim: rgba(88,166,255,0.15);
+    --purple: #bc8cff;
+    --purple-dim: rgba(188,140,255,0.15);
+    --yellow: #d29922;
+    --yellow-dim: rgba(210,153,34,0.15);
+    --orange: #f0883e;
+    --gray: #484f58;
+    --bar-old: #f85149;
+    --bar-new: #3fb950;
+    --radius: 8px;
+    --font: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero .subtitle {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .hero .version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  .hero .version-badge .old { color: var(--red); }
+  .hero .version-badge .arrow { color: var(--text-dim); }
+  .hero .version-badge .new { color: var(--green); }
+
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 32px;
+  }
+
+  .meta-row span { display: inline-flex; align-items: center; gap: 4px; }
+
+  /* ── Summary Stats ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--text-dim); }
+  .stat-card .stat-value { font-size: 36px; font-weight: 700; line-height: 1.2; }
+  .stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card.faster .stat-value { color: var(--green); }
+  .stat-card.slower .stat-value { color: var(--red); }
+  .stat-card.same .stat-value { color: var(--text-dim); }
+  .stat-card.new-cap .stat-value { color: var(--purple); }
+  .stat-card.total .stat-value { color: var(--blue); }
+
+  /* ── Donut ── */
+  .donut-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    margin: 32px 0;
+    flex-wrap: wrap;
+  }
+
+  .donut-svg { width: 180px; height: 180px; }
+
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .section-header .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-red { background: var(--red-dim); color: var(--red); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); }
+  .badge-purple { background: var(--purple-dim); color: var(--purple); }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
+
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+
+  /* ── Bar Charts ── */
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 220px 1fr 90px;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+  }
+
+  .bar-label {
+    text-align: right;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-track {
+    position: relative;
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .bar-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: 100%;
+    justify-content: center;
+  }
+
+  .bar {
+    height: 12px;
+    border-radius: 3px;
+    position: relative;
+    min-width: 2px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .bar-old { background: var(--bar-old); opacity: 0.6; }
+  .bar-new { background: var(--bar-new); }
+
+  .bar-change {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .bar-change.positive { color: var(--red); }
+  .bar-change.negative { color: var(--green); }
+  .bar-change.neutral { color: var(--text-dim); }
+
+  .bar-legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .bar-legend-item { display: flex; align-items: center; gap: 6px; }
+  .bar-legend-swatch { width: 16px; height: 8px; border-radius: 2px; }
+
+  /* ── MCP Cards ── */
+  .mcp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .mcp-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mcp-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--blue));
+  }
+
+  .mcp-card .metric-name {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .mcp-card .metric-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--purple);
+  }
+
+  .mcp-card .metric-unit {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .mcp-card .metric-details {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* ── Data Table ── */
+  .data-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .data-table th {
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
+  }
+
+  .data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+
+  .data-table tr:hover td { background: var(--bg-card-hover); }
+
+  .data-table .suite-header td {
+    background: var(--bg-card);
+    font-weight: 600;
+    color: var(--blue);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px;
+  }
+
+  .verdict-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .verdict-faster { background: var(--green-dim); color: var(--green); }
+  .verdict-slower { background: var(--red-dim); color: var(--red); }
+  .verdict-same { background: rgba(139,148,158,0.1); color: var(--text-dim); }
+  .verdict-new { background: var(--purple-dim); color: var(--purple); }
+
+  .num-right { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ── Callout ── */
+  .callout {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--yellow);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .callout strong { color: var(--yellow); }
+
+  /* ── Collapsible ── */
+  details { margin-bottom: 16px; }
+
+  details summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.2s;
+  }
+
+  details summary:hover { border-color: var(--text-dim); }
+  details summary::before { content: '▸'; transition: transform 0.2s; display: inline-block; }
+  details[open] summary::before { transform: rotate(90deg); }
+  details[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom-color: transparent; }
+
+  details .details-body {
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 16px;
+  }
+
+  /* ── Highlight box ── */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(63,185,80,0.08), rgba(88,166,255,0.08));
+    border: 1px solid rgba(63,185,80,0.2);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .highlight-box .big-number {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1.1;
+  }
+
+  .highlight-box .big-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .highlight-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  /* ── DevEx mixed chart ── */
+  .devex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .devex-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .devex-card .metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+
+  .devex-card .metric-name {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .devex-card .metric-change {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .devex-card .metric-change.improved { color: var(--green); }
+  .devex-card .metric-change.regressed { color: var(--red); }
+
+  .devex-card .metric-bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .devex-card .metric-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .devex-card .metric-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .bar-row {
+      grid-template-columns: 140px 1fr 70px;
+    }
+    .hero h1 { font-size: 22px; }
+    .container { padding: 16px 12px; }
+  }
+
+  @media (max-width: 480px) {
+    .bar-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .bar-label { text-align: left; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; color: #000; }
+    .stat-card, .mcp-card, .devex-card, .data-table th, details summary { background: #f5f5f5; border-color: #ddd; }
+    .data-table tr:hover td { background: transparent; }
+    .hero h1 { -webkit-text-fill-color: #000; background: none; }
+    .bar-old { opacity: 0.4; }
+    :root {
+      --bg: #fff;
+      --bg-card: #f5f5f5;
+      --border: #ddd;
+      --text: #000;
+      --text-muted: #555;
+    }
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section { animation: fadeIn 0.4s ease-out both; }
+  .section:nth-child(2) { animation-delay: 0.05s; }
+  .section:nth-child(3) { animation-delay: 0.1s; }
+  .section:nth-child(4) { animation-delay: 0.15s; }
+  .section:nth-child(5) { animation-delay: 0.2s; }
+  .section:nth-child(6) { animation-delay: 0.25s; }
+  .section:nth-child(7) { animation-delay: 0.3s; }
+  .section:nth-child(8) { animation-delay: 0.35s; }
+
+  .footer {
+    text-align: center;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>FreeClimb CLI Benchmark Report</h1>
+    <p class="subtitle">oclif v1 → v4 migration performance comparison</p>
+    <div class="version-badge">
+      <span class="old">v0.5.4</span>
+      <span class="arrow">→</span>
+      <span class="new">v0.6.0</span>
+    </div>
+    <div class="meta-row">
+      <span>win32 10.0.26200 (x64)</span>
+      <span>Node v22.16.0</span>
+      <span>16 CPUs</span>
+      <span>2026-03-18</span>
+    </div>
+
+    <div class="summary-grid">
+      <div class="stat-card total">
+        <div class="stat-value">55</div>
+        <div class="stat-label">Total Metrics</div>
+      </div>
+      <div class="stat-card faster">
+        <div class="stat-value">29</div>
+        <div class="stat-label">Faster</div>
+      </div>
+      <div class="stat-card slower">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Slower</div>
+      </div>
+      <div class="stat-card same">
+        <div class="stat-value">21</div>
+        <div class="stat-label">Same</div>
+      </div>
+      <div class="stat-card new-cap">
+        <div class="stat-value">2</div>
+        <div class="stat-label">New Capabilities</div>
+      </div>
+    </div>
+
+    <div class="donut-container">
+      <svg class="donut-svg" viewBox="0 0 42 42">
+        <!-- Donut chart: 29 faster, 3 slower, 21 same, 2 new -->
+        <!-- Total: 55. Angles: faster=189.8, slower=19.6, same=137.5, new=13.1 -->
+        <circle cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"
+          stroke="var(--green)" stroke-dasharray="52.73 47.27"
+          stroke-dashoffset="25" />
+        <circle cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"
+          stroke="var(--red)" stroke-dasharray="5.45 94.55"
+          stroke-dashoffset="-27.73" />
+        <circle cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"
+          stroke="var(--gray)" stroke-dasharray="38.18 61.82"
+          stroke-dashoffset="-33.18" />
+        <circle cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"
+          stroke="var(--purple)" stroke-dasharray="3.64 96.36"
+          stroke-dashoffset="-71.36" />
+        <text x="21" y="20" text-anchor="middle" fill="var(--text)" font-size="6" font-weight="700" font-family="var(--font)">53%</text>
+        <text x="21" y="25" text-anchor="middle" fill="var(--text-muted)" font-size="3" font-family="var(--font)">faster</text>
+      </svg>
+      <div class="donut-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span> 29 Faster (53%)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span> 3 Slower (5%)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--gray)"></span> 21 Same (38%)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span> 2 New (4%)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Startup -->
+  <div class="section" id="startup">
+    <div class="section-header">
+      <h2>Startup Performance</h2>
+      <span class="badge badge-green">16/16 faster</span>
+    </div>
+    <p class="section-desc">All startup metrics improved by 64–72%. The oclif v4 migration dramatically reduced cold and warm start times across every command.</p>
+
+    <div class="highlight-row">
+      <div class="highlight-box">
+        <div class="big-number">66%</div>
+        <div class="big-label">Average Improvement</div>
+      </div>
+      <div class="highlight-box">
+        <div class="big-number">1748 → 597<span style="font-size:20px;color:var(--text-muted)"> ms</span></div>
+        <div class="big-label">Cold Start (--version)</div>
+      </div>
+    </div>
+
+    <div class="bar-legend">
+      <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-old);opacity:0.6"></span> v0.5.4 (old)</div>
+      <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-new)"></span> v0.6.0 (new)</div>
+    </div>
+    <div class="bar-chart" id="startup-chart"></div>
+  </div>
+
+  <!-- Token Consumption -->
+  <div class="section" id="tokens">
+    <div class="section-header">
+      <h2>Token Consumption</h2>
+      <span class="badge badge-green">Agent-Friendly</span>
+    </div>
+    <p class="section-desc">Help output is now more concise, consuming fewer LLM tokens. Root --help dropped from 729 to 413 tokens (−43%). Output character count dropped 70%.</p>
+
+    <div class="highlight-row">
+      <div class="highlight-box">
+        <div class="big-number">−43%</div>
+        <div class="big-label">Root --help Tokens (729 → 413)</div>
+      </div>
+      <div class="highlight-box">
+        <div class="big-number">−70%</div>
+        <div class="big-label">--help Output Chars (3443 → 1044)</div>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">Help Token Counts by Command</h3>
+    <div class="bar-legend">
+      <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-old);opacity:0.6"></span> v0.5.4</div>
+      <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-new)"></span> v0.6.0</div>
+    </div>
+    <div class="bar-chart" id="tokens-chart"></div>
+  </div>
+
+  <!-- DevEx -->
+  <div class="section" id="devex">
+    <div class="section-header">
+      <h2>Developer Experience</h2>
+      <span class="badge badge-yellow">Mixed Results</span>
+    </div>
+    <p class="section-desc">Build time and dependency footprint improved, but the migration added source code and slightly increased test suite time. Trade-offs expected for a framework upgrade.</p>
+
+    <div class="devex-grid" id="devex-cards"></div>
+  </div>
+
+  <!-- Command Execution -->
+  <div class="section" id="commands">
+    <div class="section-header">
+      <h2>Command Execution</h2>
+      <span class="badge badge-yellow">Data Caveat</span>
+    </div>
+    <div class="callout">
+      <strong>Note:</strong> Most API commands show ~30s execution times due to the mock server timing out during benchmarks. These results reflect the timeout, not actual performance. Only <code>sms:send</code> completed successfully and shows a valid comparison.
+    </div>
+
+    <div class="highlight-row">
+      <div class="highlight-box">
+        <div class="big-number">−68%</div>
+        <div class="big-label">sms:send (1854ms → 595ms)</div>
+      </div>
+    </div>
+
+    <div class="bar-legend">
+      <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-old);opacity:0.6"></span> v0.5.4</div>
+      <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-new)"></span> v0.6.0</div>
+    </div>
+    <div class="bar-chart" id="commands-chart"></div>
+  </div>
+
+  <!-- MCP Server -->
+  <div class="section" id="mcp">
+    <div class="section-header">
+      <h2>MCP Server</h2>
+      <span class="badge badge-purple">New Capability</span>
+    </div>
+    <p class="section-desc">v0.6.0 introduces a built-in Model Context Protocol server, enabling AI agents to discover and invoke CLI commands programmatically.</p>
+
+    <div class="mcp-grid">
+      <div class="mcp-card">
+        <div class="metric-name">Server Startup (initialize)</div>
+        <div class="metric-value">14.8 <span class="metric-unit">ms</span></div>
+        <div class="metric-details">min 1.6ms · max 23.3ms · 6 samples</div>
+      </div>
+      <div class="mcp-card">
+        <div class="metric-name">tools/list Response</div>
+        <div class="metric-value">0.44 <span class="metric-unit">ms</span></div>
+        <div class="metric-details">min 0.27ms · max 1.01ms · 15 samples</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Memory -->
+  <div class="section" id="memory">
+    <div class="section-header">
+      <h2>Memory Usage</h2>
+      <span class="badge badge-yellow">Incomplete Data</span>
+    </div>
+    <div class="callout">
+      <strong>Note:</strong> Memory probing returned 0 for most metrics on both versions due to a platform instrumentation issue. The only usable data is from <code>calls:list</code> under v0.5.4 (RSS: 144.5 MB, Heap: 80.4 MB). v0.6.0 calls:list also returned 0 due to the same mock server timeout.
+    </div>
+
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th class="num-right">v0.5.4</th>
+            <th class="num-right">v0.6.0</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Peak RSS at startup</td>
+            <td class="num-right">0 MB</td>
+            <td class="num-right">0 MB</td>
+            <td style="color:var(--yellow)">Probe returned 0</td>
+          </tr>
+          <tr>
+            <td>Heap used at startup</td>
+            <td class="num-right">0 MB</td>
+            <td class="num-right">0 MB</td>
+            <td style="color:var(--yellow)">Probe returned 0</td>
+          </tr>
+          <tr>
+            <td>Peak RSS during calls:list</td>
+            <td class="num-right" style="color:var(--text)">144.5 MB</td>
+            <td class="num-right">0 MB</td>
+            <td style="color:var(--yellow)">New version timed out</td>
+          </tr>
+          <tr>
+            <td>Heap used during calls:list</td>
+            <td class="num-right" style="color:var(--text)">80.4 MB</td>
+            <td class="num-right">0 MB</td>
+            <td style="color:var(--yellow)">New version timed out</td>
+          </tr>
+          <tr>
+            <td>Peak RSS during --help</td>
+            <td class="num-right">0 MB</td>
+            <td class="num-right">0 MB</td>
+            <td style="color:var(--yellow)">Probe returned 0</td>
+          </tr>
+          <tr>
+            <td>Heap growth over 5 runs</td>
+            <td class="num-right">0 MB</td>
+            <td class="num-right">0 MB</td>
+            <td style="color:var(--yellow)">Probe returned 0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Raw Data -->
+  <div class="section" id="raw-data">
+    <details>
+      <summary>Raw Data Table — All 55 Metrics</summary>
+      <div class="details-body">
+        <div class="data-table-wrapper">
+          <table class="data-table" id="raw-table">
+            <thead>
+              <tr>
+                <th>Suite</th>
+                <th>Metric</th>
+                <th class="num-right">Old (mean)</th>
+                <th class="num-right">New (mean)</th>
+                <th class="num-right">Change</th>
+                <th>Unit</th>
+                <th>Verdict</th>
+              </tr>
+            </thead>
+            <tbody id="raw-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="footer">
+    Generated from benchmark suite · FreeClimb CLI · v0.5.4 vs v0.6.0 · 2026-03-18
+  </div>
+</div>
+
+<script>
+// Embedded benchmark data
+const DATA = {"meta":{"arch":"x64","cpus":16,"newCommit":"fd42348a25bb3340861363c85333df3a91e97a1d","newRef":"work/main","newVersion":"0.6.0","nodeVersion":"v22.16.0","oldCommit":"64ebaf5f5259895c5378965169474c67622ffa58","oldRef":"v0.5.4","oldVersion":"0.5.4","platform":"win32 10.0.26200","timestamp":"2026-03-18T01:37:14.053Z"},"suites":{"startup":{"Cold start (--version)":{"change":-65.84,"new":{"mean":597.07,"unit":"ms"},"old":{"mean":1747.79,"unit":"ms"},"verdict":"faster"},"Warm start (--version)":{"change":-66.26,"new":{"mean":566.97,"unit":"ms"},"old":{"mean":1680.26,"unit":"ms"},"verdict":"faster"},"--help rendering":{"change":-68.79,"new":{"mean":546.03,"unit":"ms"},"old":{"mean":1749.36,"unit":"ms"},"verdict":"faster"},"accounts --help":{"change":-71.75,"new":{"mean":533.34,"unit":"ms"},"old":{"mean":1887.83,"unit":"ms"},"verdict":"faster"},"applications --help":{"change":-69.63,"new":{"mean":533.47,"unit":"ms"},"old":{"mean":1756.32,"unit":"ms"},"verdict":"faster"},"available-numbers --help":{"change":-69.46,"new":{"mean":530.73,"unit":"ms"},"old":{"mean":1737.53,"unit":"ms"},"verdict":"faster"},"calls --help":{"change":-69.24,"new":{"mean":552.61,"unit":"ms"},"old":{"mean":1796.50,"unit":"ms"},"verdict":"faster"},"call-queues --help":{"change":-66.79,"new":{"mean":583.94,"unit":"ms"},"old":{"mean":1758.08,"unit":"ms"},"verdict":"faster"},"conferences --help":{"change":-68.02,"new":{"mean":567.16,"unit":"ms"},"old":{"mean":1773.58,"unit":"ms"},"verdict":"faster"},"conference-participants --help":{"change":-69.20,"new":{"mean":535.91,"unit":"ms"},"old":{"mean":1740.08,"unit":"ms"},"verdict":"faster"},"incoming-numbers --help":{"change":-64.30,"new":{"mean":658.04,"unit":"ms"},"old":{"mean":1843.01,"unit":"ms"},"verdict":"faster"},"logs --help":{"change":-68.14,"new":{"mean":583.86,"unit":"ms"},"old":{"mean":1832.43,"unit":"ms"},"verdict":"faster"},"queue-members --help":{"change":-65.48,"new":{"mean":627.66,"unit":"ms"},"old":{"mean":1818.23,"unit":"ms"},"verdict":"faster"},"recordings --help":{"change":-70.88,"new":{"mean":527.57,"unit":"ms"},"old":{"mean":1811.75,"unit":"ms"},"verdict":"faster"},"sms --help":{"change":-68.55,"new":{"mean":605.12,"unit":"ms"},"old":{"mean":1923.78,"unit":"ms"},"verdict":"faster"},"Plugin load time":{"change":-66.26,"new":{"mean":597.04,"unit":"ms"},"old":{"mean":1769.58,"unit":"ms"},"verdict":"faster"}},"command-execution":{"accounts:get":{"change":-0.02,"new":{"mean":30017.89,"unit":"ms"},"old":{"mean":30023.56,"unit":"ms"},"verdict":"same"},"calls:list":{"change":-0.01,"new":{"mean":30020.23,"unit":"ms"},"old":{"mean":30022.48,"unit":"ms"},"verdict":"same"},"sms:send":{"change":-67.89,"new":{"mean":595.37,"unit":"ms"},"old":{"mean":1854.12,"unit":"ms"},"verdict":"faster"},"incoming-numbers:list":{"change":0.00,"new":{"mean":30022.03,"unit":"ms"},"old":{"mean":30022.01,"unit":"ms"},"verdict":"same"},"applications:list":{"change":-0.02,"new":{"mean":30019.55,"unit":"ms"},"old":{"mean":30024.69,"unit":"ms"},"verdict":"same"},"Error path (500)":{"change":0.00,"new":{"mean":30017.52,"unit":"ms"},"old":{"mean":30017.16,"unit":"ms"},"verdict":"same"}},"memory":{"Peak RSS at startup (MB)":{"change":0,"new":{"mean":0,"unit":"MB"},"old":{"mean":0,"unit":"MB"},"verdict":"same"},"Heap used at startup (MB)":{"change":0,"new":{"mean":0,"unit":"MB"},"old":{"mean":0,"unit":"MB"},"verdict":"same"},"Peak RSS during calls:list (MB)":{"change":-100,"new":{"mean":0,"unit":"MB"},"old":{"mean":144.51,"unit":"MB"},"verdict":"faster"},"Heap used during calls:list (MB)":{"change":-100,"new":{"mean":0,"unit":"MB"},"old":{"mean":80.41,"unit":"MB"},"verdict":"faster"},"Peak RSS during --help (MB)":{"change":0,"new":{"mean":0,"unit":"MB"},"old":{"mean":0,"unit":"MB"},"verdict":"same"},"Heap growth over 5 runs (MB)":{"change":0,"new":{"mean":0,"unit":"MB"},"old":{"mean":0,"unit":"MB"},"verdict":"same"}},"mcp-server":{"Server startup (initialize)":{"change":100,"new":{"mean":14.80,"unit":"ms"},"old":{"mean":0,"unit":"ms"},"verdict":"new"},"tools/list response":{"change":100,"new":{"mean":0.44,"unit":"ms"},"old":{"mean":0,"unit":"ms"},"verdict":"new"}},"token-consumption":{"--help tokens":{"change":-43.35,"new":{"mean":413,"unit":"tokens"},"old":{"mean":729,"unit":"tokens"},"verdict":"faster"},"accounts --help tokens":{"change":2.63,"new":{"mean":78,"unit":"tokens"},"old":{"mean":76,"unit":"tokens"},"verdict":"same"},"applications --help tokens":{"change":-2.40,"new":{"mean":163,"unit":"tokens"},"old":{"mean":167,"unit":"tokens"},"verdict":"same"},"available-numbers --help tokens":{"change":-4.21,"new":{"mean":91,"unit":"tokens"},"old":{"mean":95,"unit":"tokens"},"verdict":"same"},"calls --help tokens":{"change":-5.90,"new":{"mean":271,"unit":"tokens"},"old":{"mean":288,"unit":"tokens"},"verdict":"faster"},"call-queues --help tokens":{"change":0,"new":{"mean":111,"unit":"tokens"},"old":{"mean":111,"unit":"tokens"},"verdict":"same"},"conferences --help tokens":{"change":-2.20,"new":{"mean":89,"unit":"tokens"},"old":{"mean":91,"unit":"tokens"},"verdict":"same"},"conference-participants --help tokens":{"change":-6.03,"new":{"mean":109,"unit":"tokens"},"old":{"mean":116,"unit":"tokens"},"verdict":"faster"},"incoming-numbers --help tokens":{"change":-7.43,"new":{"mean":187,"unit":"tokens"},"old":{"mean":202,"unit":"tokens"},"verdict":"faster"},"logs --help tokens":{"change":-1.75,"new":{"mean":112,"unit":"tokens"},"old":{"mean":114,"unit":"tokens"},"verdict":"same"},"queue-members --help tokens":{"change":-7.45,"new":{"mean":174,"unit":"tokens"},"old":{"mean":188,"unit":"tokens"},"verdict":"faster"},"recordings --help tokens":{"change":-7.45,"new":{"mean":149,"unit":"tokens"},"old":{"mean":161,"unit":"tokens"},"verdict":"faster"},"sms --help tokens":{"change":0,"new":{"mean":87,"unit":"tokens"},"old":{"mean":87,"unit":"tokens"},"verdict":"same"},"All topic help tokens (sum)":{"change":-4.42,"new":{"mean":1621,"unit":"tokens"},"old":{"mean":1696,"unit":"tokens"},"verdict":"same"},"calls:list output tokens":{"change":0,"new":{"mean":0,"unit":"tokens"},"old":{"mean":0,"unit":"tokens"},"verdict":"same"},"accounts:get output tokens":{"change":0,"new":{"mean":0,"unit":"tokens"},"old":{"mean":0,"unit":"tokens"},"verdict":"same"},"Error message tokens":{"change":0,"new":{"mean":0,"unit":"tokens"},"old":{"mean":0,"unit":"tokens"},"verdict":"same"},"--help output chars":{"change":-69.68,"new":{"mean":1044,"unit":"chars"},"old":{"mean":3443,"unit":"chars"},"verdict":"faster"},"calls:list output chars":{"change":0,"new":{"mean":0,"unit":"chars"},"old":{"mean":0,"unit":"chars"},"verdict":"same"}},"devex":{"Build time (tsc -b)":{"change":-19.29,"new":{"mean":4033.63,"unit":"ms"},"old":{"mean":4997.99,"unit":"ms"},"verdict":"faster"},"lib/ bundle size (MB)":{"change":105.00,"new":{"mean":0.41,"unit":"MB"},"old":{"mean":0.20,"unit":"MB"},"verdict":"slower"},"node_modules/ size (MB)":{"change":-43.56,"new":{"mean":120.82,"unit":"MB"},"old":{"mean":214.05,"unit":"MB"},"verdict":"faster"},"Dependency count (package.json)":{"change":-8.11,"new":{"mean":34,"unit":"deps"},"old":{"mean":37,"unit":"deps"},"verdict":"faster"},"Source lines (src/**/*.ts)":{"change":78.52,"new":{"mean":8235,"unit":"lines"},"old":{"mean":4613,"unit":"lines"},"verdict":"slower"},"Test suite time":{"change":26.12,"new":{"mean":40718.45,"unit":"ms"},"old":{"mean":32286.69,"unit":"ms"},"verdict":"slower"}}}};
+
+// Helpers
+function fmt(val, unit) {
+  if (unit === 'ms') {
+    if (val >= 1000) return (val / 1000).toFixed(2) + 's';
+    return val.toFixed(1) + 'ms';
+  }
+  if (unit === 'MB') return val.toFixed(1) + ' MB';
+  if (unit === 'tokens' || unit === 'chars' || unit === 'lines' || unit === 'deps') return val.toLocaleString() + ' ' + unit;
+  return val.toFixed(2);
+}
+
+function changeClass(change) {
+  if (change < -2) return 'negative';
+  if (change > 2) return 'positive';
+  return 'neutral';
+}
+
+function changeText(change) {
+  const sign = change > 0 ? '+' : '';
+  return sign + change.toFixed(1) + '%';
+}
+
+function verdictClass(v) {
+  if (v === 'faster') return 'verdict-faster';
+  if (v === 'slower') return 'verdict-slower';
+  if (v === 'new') return 'verdict-new';
+  return 'verdict-same';
+}
+
+// ── Render bar chart ──
+function renderBarChart(containerId, items, maxVal) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  if (!maxVal) {
+    maxVal = 0;
+    items.forEach(item => {
+      maxVal = Math.max(maxVal, item.old || 0, item.new || 0);
+    });
+  }
+
+  items.forEach(item => {
+    const oldPct = maxVal > 0 ? ((item.old || 0) / maxVal * 100) : 0;
+    const newPct = maxVal > 0 ? ((item.new || 0) / maxVal * 100) : 0;
+
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label" title="${item.label}">${item.label}</div>
+      <div class="bar-track">
+        <div class="bar-pair">
+          <div class="bar bar-old" style="width:${oldPct}%" title="v0.5.4: ${fmt(item.old || 0, item.unit)}"></div>
+          <div class="bar bar-new" style="width:${newPct}%" title="v0.6.0: ${fmt(item.new || 0, item.unit)}"></div>
+        </div>
+      </div>
+      <div class="bar-change ${changeClass(item.change)}">${changeText(item.change)}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ── Startup chart ──
+const startupItems = [];
+const startupSuite = DATA.suites.startup;
+for (const [name, d] of Object.entries(startupSuite)) {
+  startupItems.push({ label: name, old: d.old.mean, new: d.new.mean, change: d.change, unit: d.new.unit });
+}
+renderBarChart('startup-chart', startupItems);
+
+// ── Token chart — only show items with non-zero values and token unit ──
+const tokenItems = [];
+const tokenSuite = DATA.suites['token-consumption'];
+for (const [name, d] of Object.entries(tokenSuite)) {
+  if (d.new.mean === 0 && d.old.mean === 0) continue;
+  tokenItems.push({ label: name, old: d.old.mean, new: d.new.mean, change: d.change, unit: d.new.unit });
+}
+renderBarChart('tokens-chart', tokenItems);
+
+// ── Command execution chart ──
+const cmdItems = [];
+const cmdSuite = DATA.suites['command-execution'];
+// Show sms:send first, then others with annotation
+const smsSend = cmdSuite['sms:send'];
+cmdItems.push({ label: 'sms:send', old: smsSend.old.mean, new: smsSend.new.mean, change: smsSend.change, unit: 'ms' });
+for (const [name, d] of Object.entries(cmdSuite)) {
+  if (name === 'sms:send') continue;
+  cmdItems.push({ label: name + ' *', old: d.old.mean, new: d.new.mean, change: d.change, unit: 'ms' });
+}
+// Use sms:send scale only (not the 30s ones)
+renderBarChart('commands-chart', cmdItems, 30100);
+
+// ── DevEx cards ──
+const devexContainer = document.getElementById('devex-cards');
+const devexSuite = DATA.suites.devex;
+for (const [name, d] of Object.entries(devexSuite)) {
+  const isImproved = d.change < 0;
+  // For "lower is better" metrics, negative change = improved
+  // For size/count/time: negative = improved, positive = regressed
+  const card = document.createElement('div');
+  card.className = 'devex-card';
+
+  const maxOfBoth = Math.max(d.old.mean, d.new.mean);
+  const oldPct = maxOfBoth > 0 ? (d.old.mean / maxOfBoth * 100) : 0;
+  const newPct = maxOfBoth > 0 ? (d.new.mean / maxOfBoth * 100) : 0;
+  const barColor = isImproved ? 'var(--green)' : 'var(--red)';
+
+  card.innerHTML = `
+    <div class="metric-header">
+      <span class="metric-name">${name}</span>
+      <span class="metric-change ${isImproved ? 'improved' : 'regressed'}">${changeText(d.change)}</span>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;">
+      <span style="font-size:11px;color:var(--bar-old);opacity:0.6;width:60px;text-align:right;">${fmt(d.old.mean, d.old.unit)}</span>
+      <div class="metric-bar-track" style="flex:1">
+        <div class="metric-bar-fill" style="width:${oldPct}%;background:var(--bar-old);opacity:0.4;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center;margin-bottom:8px;">
+      <span style="font-size:11px;color:var(--bar-new);width:60px;text-align:right;">${fmt(d.new.mean, d.new.unit)}</span>
+      <div class="metric-bar-track" style="flex:1">
+        <div class="metric-bar-fill" style="width:${newPct}%;background:${barColor};"></div>
+      </div>
+    </div>
+  `;
+  devexContainer.appendChild(card);
+}
+
+// ── Raw data table ──
+const rawBody = document.getElementById('raw-table-body');
+const suiteNames = { startup: 'Startup', 'command-execution': 'Command Execution', memory: 'Memory', 'mcp-server': 'MCP Server', 'token-consumption': 'Token Consumption', devex: 'Developer Experience' };
+
+for (const [suiteKey, suiteName] of Object.entries(suiteNames)) {
+  const suite = DATA.suites[suiteKey];
+  if (!suite) continue;
+
+  // Suite header row
+  const headerRow = document.createElement('tr');
+  headerRow.className = 'suite-header';
+  headerRow.innerHTML = `<td colspan="7">${suiteName}</td>`;
+  rawBody.appendChild(headerRow);
+
+  for (const [metric, d] of Object.entries(suite)) {
+    const tr = document.createElement('tr');
+    const oldVal = d.verdict === 'new' ? 'n/a' : fmt(d.old.mean, d.old.unit || d.new.unit);
+    const newVal = fmt(d.new.mean, d.new.unit);
+    tr.innerHTML = `
+      <td style="color:var(--text-dim)">${suiteName}</td>
+      <td>${metric}</td>
+      <td class="num-right">${oldVal}</td>
+      <td class="num-right">${newVal}</td>
+      <td class="num-right" style="color:${d.change < -2 ? 'var(--green)' : d.change > 2 ? 'var(--red)' : 'var(--text-dim)'}">${changeText(d.change)}</td>
+      <td style="color:var(--text-dim)">${d.new.unit}</td>
+      <td><span class="verdict-badge ${verdictClass(d.verdict)}">${d.verdict}</span></td>
+    `;
+    rawBody.appendChild(tr);
+  }
+}
+
+// Animate bars on load
+requestAnimationFrame(() => {
+  document.querySelectorAll('.bar').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0%';
+    requestAnimationFrame(() => { bar.style.width = w; });
+  });
+  document.querySelectorAll('.metric-bar-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0%';
+    requestAnimationFrame(() => { bar.style.width = w; });
+  });
+});
+</script>
+
+</body>
+</html>

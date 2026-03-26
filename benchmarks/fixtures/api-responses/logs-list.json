@@ -1,0 +1,29 @@
+{
+  "total": 2,
+  "start": 0,
+  "end": 1,
+  "page": 0,
+  "numPages": 1,
+  "pageSize": 100,
+  "nextPageUri": null,
+  "logs": [
+    {
+      "timestamp": 1705312800000,
+      "level": "info",
+      "requestId": "RQ0000000000000000000000000000001",
+      "accountId": "ACtest1234567890",
+      "callId": "CA0000000000000000000000000000001",
+      "message": "Call connected",
+      "metadata": {}
+    },
+    {
+      "timestamp": 1705313100000,
+      "level": "info",
+      "requestId": "RQ0000000000000000000000000000002",
+      "accountId": "ACtest1234567890",
+      "callId": "CA0000000000000000000000000000001",
+      "message": "Call completed",
+      "metadata": {}
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
-require('@oclif/command').run()
-.then(require('@oclif/command/flush'))
-.catch(require('@oclif/errors/handle'))
+import {execute} from '@oclif/core'
+import {fileURLToPath} from 'node:url'
+import {dirname} from 'node:path'
+
+execute({dir: dirname(fileURLToPath(import.meta.url))})
