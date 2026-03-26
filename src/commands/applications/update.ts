@@ -83,7 +83,15 @@ export class applicationsUpdate extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:update" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:update", request: { method: "POST", endpoint: `Applications/${args.applicationId}`, body: {
+                        alias: flags.alias,
+                        voiceUrl: flags.voiceUrl,
+                        voiceFallbackUrl: flags.voiceFallbackUrl,
+                        callConnectUrl: flags.callConnectUrl,
+                        statusCallbackUrl: flags.statusCallbackUrl,
+                        smsUrl: flags.smsUrl,
+                        smsFallbackUrl: flags.smsFallbackUrl
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "applications", command: "update" })
                 }

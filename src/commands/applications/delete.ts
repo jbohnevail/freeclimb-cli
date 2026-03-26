@@ -61,7 +61,7 @@ export class applicationsDelete extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:delete" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "applications:delete", request: { method: "DELETE", endpoint: `Applications/${args.applicationId}` } }), null, 2))
                 } else {
                     out.render(null, { topic: "applications", command: "delete" })
                 }

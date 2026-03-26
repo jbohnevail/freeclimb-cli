@@ -61,7 +61,7 @@ export class recordingsDelete extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "recordings:delete" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "recordings:delete", request: { method: "DELETE", endpoint: `Recordings/${args.recordingId}` } }), null, 2))
                 } else {
                     out.render(null, { topic: "recordings", command: "delete" })
                 }

@@ -88,7 +88,18 @@ export class callsMake extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "calls:make" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "calls:make", request: { method: "POST", endpoint: `Calls`, body: {
+                        from: args.from,
+                        to: args.to,
+                        applicationId: args.applicationId,
+                        callConnectUrl: flags.callConnectUrl,
+                        parentCallId: flags.parentCallId,
+                        sendDigits: flags.sendDigits,
+                        ifMachine: flags.ifMachine,
+                        ifMachineUrl: flags.ifMachineUrl,
+                        timeout: flags.timeout,
+                        privacyMode: typeof flags.privacyMode === "undefined" ? undefined : flags.privacyMode === "true"
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "calls", command: "make" })
                 }

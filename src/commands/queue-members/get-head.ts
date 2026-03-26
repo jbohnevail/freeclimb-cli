@@ -45,7 +45,7 @@ export class queueMembersGetHead extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "queue-members:get-head" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "queue-members:get-head", request: { method: "GET", endpoint: `Queues/${args.queueId}/Members/Front` } }), null, 2))
                 } else {
                     out.render(null, { topic: "queue-members", command: "get-head" })
                 }

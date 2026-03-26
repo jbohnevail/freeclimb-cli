@@ -53,7 +53,7 @@ export class logsList extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "logs:list" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "logs:list", request: { method: "GET", endpoint: `Logs` } }), null, 2))
                 } else {
                     out.render(null, { topic: "logs", command: "list" })
                 }

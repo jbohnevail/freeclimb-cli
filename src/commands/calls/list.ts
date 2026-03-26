@@ -55,7 +55,7 @@ export class callsList extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "calls:list" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "calls:list", request: { method: "GET", endpoint: `Calls` } }), null, 2))
                 } else {
                     out.render(null, { topic: "calls", command: "list" })
                 }

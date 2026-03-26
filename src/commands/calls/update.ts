@@ -65,7 +65,9 @@ export class callsUpdate extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "calls:update" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "calls:update", request: { method: "POST", endpoint: `Calls/${args.callId}`, body: {
+                        status: args.status
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "calls", command: "update" })
                 }

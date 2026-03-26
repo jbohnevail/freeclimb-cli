@@ -45,7 +45,7 @@ export class recordingsDownload extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "recordings:download" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "recordings:download", request: { method: "GET", endpoint: `Recordings/${args.recordingId}/Download` } }), null, 2))
                 } else {
                     out.render(null, { topic: "recordings", command: "download" })
                 }

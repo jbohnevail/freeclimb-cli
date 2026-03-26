@@ -68,7 +68,10 @@ export class conferenceParticipantsUpdate extends Command {
             if (response.status === 204) {
                 if (flags.quiet) { return }
                 if (outputFormat === "json") {
-                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conference-participants:update" }), null, 2))
+                    out.out(JSON.stringify(wrapJsonOutput(null, { command: "conference-participants:update", request: { method: "POST", endpoint: `Conferences/${args.conferenceId}/Participants/${args.callId}`, body: {
+                        talk: typeof flags.talk === "undefined" ? undefined : flags.talk === "true",
+                        listen: typeof flags.listen === "undefined" ? undefined : flags.listen === "true"
+                    } } }), null, 2))
                 } else {
                     out.render(null, { topic: "conference-participants", command: "update" })
                 }
