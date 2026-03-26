@@ -1,11 +1,3 @@
----
-name: command-generation
-description: >
-    Auto-generate CLI commands from API schema: pipeline, schema format, adding endpoints, oclif v4 patterns
-    Use when: generate command, code gen, api schema, add endpoint, generation pipeline.
-    Do NOT use for: tasks better handled by freeclimb-cli-dev-architecture.
----
-
 # FreeClimb Command Generation
 
 ## Gotchas

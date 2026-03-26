@@ -1,10 +1,3 @@
----
-name: terminal-ui-design
-description: >
-    Production-grade terminal UI design: aesthetics, box drawing, color palettes, typography, layout, animation
-    Use when: tui design, terminal design, cli aesthetics, box drawing, terminal colors.
----
-
 Create distinctive, production-grade terminal user interfaces with high design quality. Use this skill when building CLI tools, TUI applications, or terminal-based interfaces. Generate creative, polished code that avoids generic terminal aesthetics.
 
 ## Design Thinking

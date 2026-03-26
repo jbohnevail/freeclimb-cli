@@ -1,11 +1,3 @@
----
-name: cli-usage
-description: >
-    Use the FreeClimb CLI to make calls, send SMS, manage numbers, applications, conferences, queues, and recordings
-    Use when: freeclimb cli, make call, send sms, list numbers, cli command.
-    Do NOT use for: tasks better handled by freeclimb-platform-concepts.
----
-
 # FreeClimb CLI
 
 ## Setup

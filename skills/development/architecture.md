@@ -1,10 +1,3 @@
----
-name: cli-dev-architecture
-description: >
-    Architecture, testing, and contribution guide for the FreeClimb CLI codebase (oclif v4, TypeScript)
-    Use when: cli source, add command, fix bug, cli internals, oclif.
----
-
 # FreeClimb CLI Development
 
 ## Quick Start

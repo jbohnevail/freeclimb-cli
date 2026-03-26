@@ -144,7 +144,8 @@
     "setup": "bash scripts/setup.sh",
     "benchmark": "cd benchmarks && npx tsx runner.ts",
     "benchmark:startup": "cd benchmarks && npx tsx runner.ts --suite startup",
-    "benchmark:quick": "cd benchmarks && npx tsx runner.ts --iterations 0.2"
+    "benchmark:quick": "cd benchmarks && npx tsx runner.ts --iterations 0.2",
+    "build:skills": "npx tsx scripts/build-skills.ts"
   },
   "types": "lib/index.d.ts",
   "lint-staged": {
