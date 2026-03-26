@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import { Box, Text } from "ink"
 import { BrandColors, supportsColor } from "../theme.js"
+import { useTerminalWidth } from "./terminal-context.js"
 
 export interface KeyValueProps {
     data: Record<string, unknown>
@@ -8,12 +9,13 @@ export interface KeyValueProps {
 }
 
 export function KeyValue({ data, labelColor }: KeyValueProps): ReactElement {
+    const termWidth = useTerminalWidth()
     const entries = Object.entries(data)
     const maxKeyLen = Math.max(...entries.map(([key]) => key.length))
     const color = labelColor || (supportsColor() ? BrandColors.darkTeal : undefined)
 
     return (
-        <Box flexDirection="column">
+        <Box flexDirection="column" width={termWidth}>
             {entries.map(([key, value]) => {
                 const displayValue =
                     typeof value === "object" && value !== null
@@ -27,7 +29,7 @@ export function KeyValue({ data, labelColor }: KeyValueProps): ReactElement {
                                 {key.padEnd(maxKeyLen)}
                             </Text>
                         </Box>
-                        <Text>  {displayValue}</Text>
+                        <Text wrap="wrap">  {displayValue}</Text>
                     </Box>
                 )
             })}

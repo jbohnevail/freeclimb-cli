@@ -17,7 +17,7 @@ export function PaginationBar({
         <Box paddingX={1}>
             <Text dimColor>Page {pageNum}  </Text>
             {hasNext && (
-                <Text color={useColor ? BrandColors.orange : undefined}>
+                <Text color={useColor ? BrandColors.lightTeal : undefined}>
                     Run again with -n to see next page
                 </Text>
             )}

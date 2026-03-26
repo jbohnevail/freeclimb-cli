@@ -116,7 +116,7 @@ export const icons = {
     arrow: (): string => {
         const icon = "\u203a"
         if (!supportsColor()) return icon
-        return chalk.hex(BrandColors.orange)(icon)
+        return chalk.hex(BrandColors.lightTeal)(icon)
     },
 
     // Bullet point
@@ -137,7 +137,7 @@ export const icons = {
     chevron: (): string => {
         const icon = "\u203a"
         if (!supportsColor()) return icon
-        return chalk.hex(BrandColors.orange)(icon)
+        return chalk.hex(BrandColors.lightTeal)(icon)
     },
 } as const
 
@@ -179,5 +179,5 @@ export function horizontalRule(title?: string, width = 40): string {
         return `${chars.teeRight}${left}${paddedTitle}${right}${chars.teeLeft}`
     }
 
-    return `${chars.teeRight}${left}${chalk.hex(BrandColors.orange)(paddedTitle)}${right}${chars.teeLeft}`
+    return `${chars.teeRight}${left}${chalk.hex(BrandColors.darkTeal)(paddedTitle)}${right}${chars.teeLeft}`
 }

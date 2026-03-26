@@ -40,7 +40,7 @@ interface BorderedBoxProps {
  * Bordered box matching CLI's `borderedBox()` from src/ui/components.ts.
  *
  * - Box drawing chars render in default text color (BRAND.text) — NOT dimmed
- * - Title renders in orange bold
+ * - Title renders in dark teal bold
  * - Content lines get │ on both sides, padded to inner width
  * - Separators rendered via horizontalRule() format
  */
@@ -81,7 +81,7 @@ export const BorderedBox: React.FC<BorderedBoxProps> = ({
     topBorder = (
       <div style={{ whiteSpace: 'pre', color: BRAND.text }}>
         {'╭' + H}
-        <span style={{ color: BRAND.orange, fontWeight: 700 }}>
+        <span style={{ color: BRAND.darkTeal, fontWeight: 700 }}>
           {paddedTitle}
         </span>
         {H.repeat(remainingWidth) + '╮'}
@@ -116,7 +116,7 @@ export const BorderedBox: React.FC<BorderedBoxProps> = ({
         return (
           <div key={idx} style={{ whiteSpace: 'pre', color: BRAND.text }}>
             {V + '├' + H.repeat(leftW)}
-            <span style={{ color: BRAND.orange }}>{paddedSepTitle}</span>
+            <span style={{ color: BRAND.darkTeal }}>{paddedSepTitle}</span>
             {H.repeat(rightW) + '┤' + V}
           </div>
         );

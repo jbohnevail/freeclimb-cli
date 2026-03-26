@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import { Box, Text } from "ink"
-import { BrandColors, supportsColor, getTerminalWidth } from "../theme.js"
+import { BrandColors, supportsColor } from "../theme.js"
+import { useTerminalWidth } from "./terminal-context.js"
 
 export interface TableColumn {
     header: string
@@ -33,9 +34,23 @@ const STATUS_COLORS: Record<string, string> = {
     cancelled: "#ff0000",
 }
 
-function getStatusColor(value: string): string | undefined {
+const LEVEL_COLORS: Record<string, string> = {
+    error: "#ff0000",
+    warning: "#e3b341",
+    warn: "#e3b341",
+    info: "#58a6ff",
+    success: "#3fb950",
+    debug: "#8b949e",
+}
+
+const COLORIZED_COLUMNS = new Set(["status", "level"])
+
+function getCellColor(key: string, value: string): string | undefined {
     if (!supportsColor()) return undefined
+    const colKey = key.toLowerCase()
+    if (!COLORIZED_COLUMNS.has(colKey)) return undefined
     const normalized = value.toLowerCase().replace(/[_\s]/g, "-")
+    if (colKey === "level") return LEVEL_COLORS[normalized]
     return STATUS_COLORS[normalized]
 }
 
@@ -48,8 +63,8 @@ function truncateText(text: string, maxLen: number): string {
 function computeColumnWidths(
     rows: Record<string, unknown>[],
     columns: TableColumn[],
+    termWidth: number,
 ): number[] {
-    const termWidth = getTerminalWidth()
     const rawWidths = columns.map((col) => {
         const headerLen = col.header.length
         const maxDataLen = rows.length > 0
@@ -75,7 +90,8 @@ export function Table({ rows, columns, title }: TableProps): ReactElement {
         return <Text dimColor>No data available</Text>
     }
 
-    const colWidths = computeColumnWidths(rows, columns)
+    const termWidth = useTerminalWidth()
+    const colWidths = computeColumnWidths(rows, columns, termWidth)
     const borderColor = supportsColor() ? BrandColors.lightTeal : undefined
 
     return (
@@ -84,10 +100,11 @@ export function Table({ rows, columns, title }: TableProps): ReactElement {
             borderStyle="round"
             flexDirection="column"
             paddingX={1}
+            width={termWidth}
         >
             {title && (
                 <Box marginBottom={0}>
-                    <Text bold color={supportsColor() ? BrandColors.orange : undefined}>
+                    <Text bold color={supportsColor() ? BrandColors.darkTeal : undefined}>
                         {title}
                     </Text>
                 </Box>
@@ -115,12 +132,11 @@ export function Table({ rows, columns, title }: TableProps): ReactElement {
                     {columns.map((col, i) => {
                         const val = String(row[col.key] ?? "")
                         const display = truncateText(val, colWidths[i]).padEnd(colWidths[i])
-                        const isStatus = col.key.toLowerCase() === "status"
-                        const statusColor = isStatus ? getStatusColor(val) : undefined
+                        const cellColor = getCellColor(col.key, val)
 
                         return (
                             <Box key={col.key} width={colWidths[i] + 2}>
-                                <Text color={statusColor}>{display}</Text>
+                                <Text color={cellColor}>{display}</Text>
                             </Box>
                         )
                     })}

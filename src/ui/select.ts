@@ -38,7 +38,7 @@ export async function select<T = string>(
 
     const { select: inquirerSelect } = await import("@inquirer/prompts")
     return inquirerSelect({
-        message: chalk.hex(BrandColors.orange)(message),
+        message: chalk.hex(BrandColors.lightTeal)(message),
         choices: normalizedChoices,
         pageSize: options.pageSize || 10,
     }) as Promise<T>
@@ -70,7 +70,7 @@ export async function multiSelect<T = string>(
 
     const { checkbox: inquirerCheckbox } = await import("@inquirer/prompts")
     return inquirerCheckbox({
-        message: chalk.hex(BrandColors.orange)(message),
+        message: chalk.hex(BrandColors.lightTeal)(message),
         choices: normalizedChoices,
         pageSize: options.pageSize || 10,
         required: options.required,
@@ -87,7 +87,7 @@ export async function confirm(
 
     const { confirm: inquirerConfirm } = await import("@inquirer/prompts")
     return inquirerConfirm({
-        message: chalk.hex(BrandColors.orange)(message),
+        message: chalk.hex(BrandColors.lightTeal)(message),
         default: defaultValue,
     })
 }
@@ -107,7 +107,7 @@ export async function input(
     if (options.mask) {
         const { password: inquirerPassword } = await import("@inquirer/prompts")
         return inquirerPassword({
-            message: chalk.hex(BrandColors.orange)(message),
+            message: chalk.hex(BrandColors.lightTeal)(message),
             mask: options.mask,
             validate: options.validate,
         })
@@ -115,7 +115,7 @@ export async function input(
 
     const { input: inquirerInput } = await import("@inquirer/prompts")
     return inquirerInput({
-        message: chalk.hex(BrandColors.orange)(message),
+        message: chalk.hex(BrandColors.lightTeal)(message),
         default: options.default,
         validate: options.validate,
     })
@@ -133,11 +133,11 @@ export async function numberedSelect<T = string>(
     const normalizedChoices = choices.map((choice, index) => {
         if (typeof choice === "string") {
             return {
-                name: `${chalk.hex(BrandColors.orange)(`${index + 1}.`)} ${choice}`,
+                name: `${chalk.hex(BrandColors.lightTeal)(`${index + 1}.`)} ${choice}`,
                 value: choice as unknown as T,
             }
         }
-        let display = `${chalk.hex(BrandColors.orange)(`${index + 1}.`)} ${choice.name}`
+        let display = `${chalk.hex(BrandColors.lightTeal)(`${index + 1}.`)} ${choice.name}`
         if (choice.description) {
             display = `${display} ${chalk.dim(`- ${choice.description}`)}`
         }
@@ -150,7 +150,7 @@ export async function numberedSelect<T = string>(
 
     const { select: inquirerSelect } = await import("@inquirer/prompts")
     return inquirerSelect({
-        message: chalk.hex(BrandColors.orange)(message),
+        message: chalk.hex(BrandColors.lightTeal)(message),
         choices: normalizedChoices,
         pageSize: options.pageSize || 10,
     }) as Promise<T>

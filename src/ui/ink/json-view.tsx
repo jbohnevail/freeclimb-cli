@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import { Box, Text } from "ink"
 import { supportsColor } from "../theme.js"
+import { useTerminalWidth } from "./terminal-context.js"
 
 export interface JsonViewProps {
     data: unknown
@@ -82,5 +83,6 @@ function renderValue(value: unknown, indent: number): ReactElement {
 }
 
 export function JsonView({ data }: JsonViewProps): ReactElement {
-    return <Box flexDirection="column">{renderValue(data, 0)}</Box>
+    const termWidth = useTerminalWidth()
+    return <Box flexDirection="column" width={termWidth}>{renderValue(data, 0)}</Box>
 }

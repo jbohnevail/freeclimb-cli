@@ -142,7 +142,7 @@ export const QuickStart: React.FC = () => {
             {QS_QUICK_ACTIONS.map((action, i) => (
               <TerminalLine key={i}>
                 <span>{'  '}</span>
-                <span style={{ color: BRAND.orange }}>{action.command}</span>
+                <span style={{ color: BRAND.lightTeal }}>{action.command}</span>
                 <span style={{ color: BRAND.dimText }}>
                   {'  '}{action.description}
                 </span>

@@ -1,11 +1,13 @@
 import type { ReactElement } from "react"
-import { render , Box } from "ink"
+import { render, Box } from "ink"
 import { Table, TableColumn } from "./table.js"
 import { KeyValue } from "./key-value.js"
 import { SuccessMessage } from "./success-message.js"
 import { PaginationBar } from "./pagination-bar.js"
 import { ErrorBox, ErrorBoxProps } from "./error-box.js"
 import { JsonView } from "./json-view.js"
+import { TerminalWidthProvider } from "./terminal-context.js"
+import { getTerminalWidth } from "../theme.js"
 
 // Topic → list key mapping (which property holds the array in the response)
 const TOPIC_LIST_KEYS: Record<string, string> = {
@@ -82,7 +84,12 @@ const TOPIC_COLUMNS: Record<string, TableColumn[]> = {
  * Render an Ink element to stdout and immediately unmount (static output).
  */
 export function renderInk(element: ReactElement): void {
-    const { unmount } = render(element)
+    const width = getTerminalWidth()
+    const { unmount } = render(
+        <TerminalWidthProvider value={width}>
+            {element}
+        </TerminalWidthProvider>,
+    )
     unmount()
 }
 

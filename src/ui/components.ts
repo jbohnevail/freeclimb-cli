@@ -20,7 +20,7 @@ export function sectionHeader(title: string, width?: number): string {
 
     let topBorder: string
     if (supportsColor()) {
-        topBorder = `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.orange).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
+        topBorder = `${chars.topLeft}${chars.horizontal}${chalk.hex(BrandColors.darkTeal).bold(paddedTitle)}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
     } else {
         topBorder = `${chars.topLeft}${chars.horizontal}${paddedTitle}${chars.horizontal.repeat(remainingWidth)}${chars.topRight}`
     }
@@ -208,7 +208,7 @@ export function quickActions(actions: Array<{ command: string; description: stri
     }
 
     for (const action of actions) {
-        const cmd = supportsColor() ? chalk.hex(BrandColors.orange)(action.command) : action.command
+        const cmd = supportsColor() ? chalk.hex(BrandColors.lightTeal)(action.command) : action.command
         const desc = supportsColor() ? chalk.dim(action.description) : action.description
         lines.push(`  ${cmd}  ${desc}`)
     }
@@ -223,7 +223,7 @@ export function emptyState(message: string, suggestion?: string): string {
     if (supportsColor()) {
         lines.push(chalk.dim(message))
         if (suggestion) {
-            lines.push("", chalk.dim(`Try: ${chalk.hex(BrandColors.orange)(suggestion)}`))
+            lines.push("", chalk.dim(`Try: ${chalk.hex(BrandColors.lightTeal)(suggestion)}`))
         }
     } else {
         lines.push(message)

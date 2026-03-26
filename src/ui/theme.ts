@@ -44,7 +44,7 @@ const createBrandChalk = () => {
         // Primary brand colors
         primary: chalk.hex(BrandColors.darkTeal), // Dark teal - main headers
         secondary: chalk.hex(BrandColors.lightTeal), // Light teal - secondary elements
-        accent: chalk.hex(BrandColors.orange), // Orange - command highlights
+        accent: chalk.hex(BrandColors.lightTeal), // Light teal - command highlights
         highlight: chalk.hex(BrandColors.lime), // Lime - success, highlights
 
         // Semantic colors (using brand palette)
@@ -84,7 +84,7 @@ export const typography = {
     // Command styling (for showing CLI commands)
     command: (text: string): string => {
         if (!supportsColor()) return text
-        return chalk.hex(BrandColors.orange)(text)
+        return chalk.hex(BrandColors.lightTeal)(text)
     },
 
     // Dimmed text for hints and secondary info

@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import { Box, Text } from "ink"
 import { supportsColor } from "../theme.js"
+import { useTerminalWidth } from "./terminal-context.js"
 
 export interface ErrorBoxProps {
     code: number
@@ -18,6 +19,7 @@ export function ErrorBox({
     url,
 }: ErrorBoxProps): ReactElement {
     const useColor = supportsColor()
+    const termWidth = useTerminalWidth()
 
     return (
         <Box
@@ -26,6 +28,7 @@ export function ErrorBox({
             flexDirection="column"
             paddingX={1}
             paddingY={0}
+            width={termWidth}
         >
             <Text bold color={useColor ? "red" : undefined}>
                 Error: {message}

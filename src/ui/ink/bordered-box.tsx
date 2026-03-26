@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from "react"
 import { Box, Text } from "ink"
 import { BrandColors, supportsColor } from "../theme.js"
+import { useTerminalWidth } from "./terminal-context.js"
 
 export interface BorderedBoxProps {
     borderColor?: string
@@ -15,7 +16,9 @@ export function BorderedBox({
     borderColor,
     width,
 }: BorderedBoxProps): ReactElement {
+    const termWidth = useTerminalWidth()
     const color = borderColor || (supportsColor() ? BrandColors.lightTeal : undefined)
+    const effectiveWidth = width || termWidth
 
     return (
         <Box
@@ -23,11 +26,11 @@ export function BorderedBox({
             borderStyle="round"
             flexDirection="column"
             paddingX={1}
-            width={width}
+            width={effectiveWidth}
         >
             {title && (
                 <Box marginBottom={1}>
-                    <Text bold color={supportsColor() ? BrandColors.orange : undefined}>
+                    <Text bold color={supportsColor() ? BrandColors.darkTeal : undefined}>
                         {title}
                     </Text>
                 </Box>
