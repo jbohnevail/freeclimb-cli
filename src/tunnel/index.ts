@@ -32,6 +32,9 @@ class NgrokAdapter extends EventEmitter implements Tunnel {
         const t = new NgrokTunnel()
         this.adapter = t
 
+        t.on("error", (err: Error) => this.emit("error", err))
+        t.on("close", () => this.emit("close"))
+
         this._url = await t.start(port)
         return this._url
     }

@@ -13,6 +13,11 @@ export class NgrokTunnel extends EventEmitter {
         this.listener = await ngrok.forward({
             addr: port,
             authtoken_from_env: true,
+            onStatusChange: (status: string) => {
+                if (status === "closed") {
+                    this.emit("close")
+                }
+            },
         })
 
         this._url = this.listener.url() || ""

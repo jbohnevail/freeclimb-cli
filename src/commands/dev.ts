@@ -311,10 +311,19 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
 
             if (shouldClean) {
                 await performCleanup(staleState, dataDir, this, jsonMode)
-                this.log(chalk.green("Cleanup complete.\n"))
             }
         } else {
             await performCleanup(staleState, dataDir, this, jsonMode)
+        }
+
+        // If cleanup partially failed, the state file is retained — abort to prevent overwriting it
+        if (readDevState(dataDir) !== null) {
+            this.error(
+                "Previous session cleanup incomplete — some resources could not be restored. " +
+                "Fix the issue and run 'freeclimb dev' again to retry, or manually delete " +
+                `${dataDir}/dev-state.json to proceed.`,
+                { exit: 1 },
+            )
         }
     }
 }
