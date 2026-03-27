@@ -1,11 +1,3 @@
----
-name: voice-applications
-description: >
-    Build voice apps with FreeClimb: webhook servers, IVR trees, call centers, voicemail, transfers, SMS auto-responders
-    Use when: ivr, call center, voicemail, webhook, voice app.
-    Do NOT use for: tasks better handled by freeclimb-platform-concepts, freeclimb-percl-reference.
----
-
 # Voice Application Patterns
 
 This document covers common architectures for building production voice applications with FreeClimb. All patterns use PerCL webhooks.

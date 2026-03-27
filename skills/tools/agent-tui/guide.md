@@ -1,10 +1,3 @@
----
-name: agent-tui
-description: >
-    Drive terminal UI applications programmatically for testing, automation, and inspection with agent-tui
-    Use when: agent-tui, tui automation, terminal testing, cli testing, interactive testing.
----
-
 # Terminal Automation Mastery
 
 ## Prerequisites

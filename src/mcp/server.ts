@@ -15,14 +15,16 @@ import {
     ListPromptsRequestSchema,
     GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js"
-import { readFileSync } from "node:fs"
+import { readFileSync, existsSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
 import { createApiAxios } from "../http.js"
 import { tools, ToolName } from "./tools.js"
 
-const pkgPath = join(dirname(fileURLToPath(import.meta.url)), "../../package.json")
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const pkgPath = join(__dirname, "../../package.json")
 const { version: CLI_VERSION } = JSON.parse(readFileSync(pkgPath, "utf-8"))
+const SKILLS_DIR = join(__dirname, "../../skills")
 
 // Generate PerCL JSON for common call flow patterns
 function generatePerclPattern(
@@ -127,6 +129,37 @@ function generatePerclPattern(
             )
         }
     }
+}
+
+// Discover skill files from skills/ directory
+function discoverSkillResources(): Array<{
+    uri: string
+    name: string
+    description: string
+    path: string
+}> {
+    const resources: Array<{ uri: string; name: string; description: string; path: string }> = []
+
+    if (!existsSync(SKILLS_DIR)) return resources
+
+    try {
+        const manifest = JSON.parse(readFileSync(join(SKILLS_DIR, "manifest.json"), "utf-8"))
+        for (const skill of manifest.skills) {
+            const filePath = join(SKILLS_DIR, skill.path)
+            if (existsSync(filePath)) {
+                resources.push({
+                    uri: `freeclimb://skills/${skill.id}`,
+                    name: skill.name,
+                    description: skill.description,
+                    path: filePath,
+                })
+            }
+        }
+    } catch {
+        // If manifest doesn't exist or can't be parsed, skip skill resources
+    }
+
+    return resources
 }
 
 // Tool handler
@@ -239,6 +272,7 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
             return (
                 await client.post("/Logs", {
                     pql: args.pql,
+                    maxItems: args.maxItems,
                 })
             ).data
         }
@@ -355,8 +389,8 @@ export async function startMcpServer(): Promise<void> {
     })
 
     // List resources
-    server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-        resources: [
+    server.setRequestHandler(ListResourcesRequestSchema, async () => {
+        const apiResources = [
             {
                 uri: "freeclimb://account",
                 name: "Account Info",
@@ -375,15 +409,46 @@ export async function startMcpServer(): Promise<void> {
                 description: "All applications configured in this account",
                 mimeType: "application/json",
             },
-        ],
-    }))
+        ]
+
+        const skillResources = discoverSkillResources().map((s) => ({
+            uri: s.uri,
+            name: s.name,
+            description: s.description,
+            mimeType: "text/markdown",
+        }))
+
+        return { resources: [...apiResources, ...skillResources] }
+    })
 
     // Read resources
     server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+        const uri = request.params.uri
+
+        // Handle skill resources (no API call needed)
+        if (uri.startsWith("freeclimb://skills/")) {
+            const skillResources = discoverSkillResources()
+            const skill = skillResources.find((s) => s.uri === uri)
+            if (!skill) {
+                throw new Error(`Unknown skill resource: ${uri}`)
+            }
+            const content = readFileSync(skill.path, "utf-8")
+            return {
+                contents: [
+                    {
+                        uri,
+                        mimeType: "text/markdown",
+                        text: content,
+                    },
+                ],
+            }
+        }
+
+        // Handle API resources
         const client = await createApiAxios()
         let data: unknown
 
-        switch (request.params.uri) {
+        switch (uri) {
             case "freeclimb://account": {
                 ;({ data } = await client.get(""))
                 break
@@ -397,14 +462,14 @@ export async function startMcpServer(): Promise<void> {
                 break
             }
             default: {
-                throw new Error(`Unknown resource: ${request.params.uri}`)
+                throw new Error(`Unknown resource: ${uri}`)
             }
         }
 
         return {
             contents: [
                 {
-                    uri: request.params.uri,
+                    uri,
                     mimeType: "application/json",
                     text: JSON.stringify(data, null, 2),
                 },

@@ -1,11 +1,3 @@
----
-name: percl-reference
-description: >
-    PerCL (Performance Command Language) for controlling call flow: Say, GetDigits, OutDial, Enqueue, Record, etc.
-    Use when: percl, call flow, say, getdigits, outdial.
-    Do NOT use for: tasks better handled by freeclimb-platform-concepts.
----
-
 # PerCL Reference
 
 PerCL (Performance Command Language) is FreeClimb's JSON-based language for controlling call flow. Your webhook server responds to FreeClimb's requests with PerCL commands that tell FreeClimb what to do next.
