@@ -19,7 +19,7 @@ export function loadPreset(name: PresetName): DashboardSpec {
     return spec
 }
 
-export function listPresets(): Array<{ name: PresetName; description: string }> {
+export function listPresets(): Array<{ description: string; name: PresetName }> {
     return [
         { name: "calls", description: "Call monitoring \u2014 active calls, recent calls table" },
         { name: "queues", description: "Queue monitoring \u2014 queue depth, wait times" },

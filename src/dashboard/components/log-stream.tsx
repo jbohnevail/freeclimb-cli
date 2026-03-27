@@ -2,9 +2,9 @@ import type { ReactElement } from "react"
 import { Box, Text } from "ink"
 
 interface LogEntry {
-    timestamp: string
     level: string
     message: string
+    timestamp: string
 }
 
 interface LogStreamProps {
@@ -39,9 +39,9 @@ export function LogStream({ entries, maxLines }: LogStreamProps): ReactElement {
                 const levelColor =
                     LEVEL_COLORS[entry.level.toLowerCase()] || "#8b949e"
                 return (
-                    <Box key={i} gap={1}>
+                    <Box gap={1} key={i}>
                         <Text dimColor>{formatTimestamp(entry.timestamp)}</Text>
-                        <Text color={levelColor} bold>
+                        <Text bold color={levelColor}>
                             {entry.level.toUpperCase().padEnd(5)}
                         </Text>
                         <Text>{entry.message}</Text>

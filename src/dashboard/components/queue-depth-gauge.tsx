@@ -4,9 +4,9 @@ import { BrandColors } from "../../ui/theme.js"
 
 interface QueueDepthGaugeProps {
     alias: string
+    averageWaitTime?: number | null
     currentSize: number
     maxSize: number
-    averageWaitTime?: number | null
 }
 
 function getGaugeColor(ratio: number): string {
@@ -48,10 +48,8 @@ export function QueueDepthGauge({
                 </Text>
             </Box>
             <Text color={color}>{renderBar(currentSize, maxSize, barWidth)}</Text>
-            {averageWaitTime != null && (
-                <Text dimColor>
-                    avg wait: {formatWaitTime(averageWaitTime)}
-                </Text>
+            {averageWaitTime !== null && averageWaitTime !== undefined && (
+                <Text dimColor>avg wait: {formatWaitTime(averageWaitTime)}</Text>
             )}
         </Box>
     )

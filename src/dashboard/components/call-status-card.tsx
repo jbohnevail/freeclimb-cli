@@ -4,11 +4,11 @@ import { BrandColors } from "../../ui/theme.js"
 
 interface CallStatusCardProps {
     callId: string
-    from: string
-    to: string
-    status: string
     direction?: string | null
     duration?: number | null
+    from: string
+    status: string
+    to: string
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -60,12 +60,7 @@ export function CallStatusCard({
     const icon = STATUS_ICONS[normalized] || "\u25CB"
 
     return (
-        <Box
-            flexDirection="column"
-            borderStyle="round"
-            borderColor={color}
-            paddingX={1}
-        >
+        <Box borderColor={color} borderStyle="round" flexDirection="column" paddingX={1}>
             <Box justifyContent="space-between">
                 <Text dimColor>{callId}</Text>
                 <Text color={color}>
@@ -80,15 +75,14 @@ export function CallStatusCard({
                     <Text bold>To:</Text> {to}
                 </Text>
             </Box>
-            {(direction || duration != null) && (
+            {(direction !== null || (duration !== null && duration !== undefined)) && (
                 <Box gap={2}>
-                    {direction && (
+                    {direction !== null && (
                         <Text dimColor>
-                            {direction === "inbound" ? "\u2190" : "\u2192"}{" "}
-                            {direction}
+                            {direction === "inbound" ? "\u2190" : "\u2192"} {direction}
                         </Text>
                     )}
-                    {duration != null && (
+                    {duration !== null && duration !== undefined && (
                         <Text dimColor>{formatDuration(duration)}</Text>
                     )}
                 </Box>

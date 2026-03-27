@@ -1,5 +1,5 @@
-import { createApiAxios } from "../http.js"
 import type { AxiosInstance } from "axios"
+import { createApiAxios } from "../http.js"
 import type { SourceBinding, DashboardSpec } from "./types.js"
 import { isSourceBinding } from "./types.js"
 
@@ -61,8 +61,8 @@ interface StateUpdate {
 function extractSourceBindings(
     state: Record<string, unknown>,
     prefix = "",
-): Array<{ path: string; binding: SourceBinding }> {
-    const results: Array<{ path: string; binding: SourceBinding }> = []
+): Array<{ binding: SourceBinding; path: string }> {
+    const results: Array<{ binding: SourceBinding; path: string }> = []
     for (const [key, value] of Object.entries(state)) {
         const path = prefix ? `${prefix}/${key}` : `/${key}`
         if (isSourceBinding(value)) {
@@ -85,7 +85,7 @@ function extractSourceBindings(
 
 export class DashboardDataManager {
     private interval: ReturnType<typeof setInterval> | null = null
-    private bindings: Array<{ path: string; binding: SourceBinding }> = []
+    private bindings: Array<{ binding: SourceBinding; path: string }> = []
     private onUpdate: (updates: StateUpdate[]) => void
 
     constructor(onUpdate: (updates: StateUpdate[]) => void) {

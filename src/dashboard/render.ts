@@ -2,10 +2,10 @@ import React from "react"
 import { render, Box } from "ink"
 import { JSONUIProvider } from "@json-render/ink"
 import { createStateStore } from "@json-render/core"
-import { FreeclimbRenderer } from "./catalog.js"
-import { DashboardDataManager } from "./data.js"
 import { getTerminalWidth } from "../ui/theme.js"
 import { TerminalWidthProvider } from "../ui/ink/terminal-context.js"
+import { FreeclimbRenderer } from "./catalog.js"
+import { DashboardDataManager } from "./data.js"
 import type { DashboardSpec } from "./types.js"
 
 interface DashboardAppProps {
@@ -26,9 +26,9 @@ function DashboardApp({ spec, width }: DashboardAppProps): React.ReactElement {
 }
 
 export interface RenderOptions {
-    spec: DashboardSpec
-    refreshMs: number
     once?: boolean
+    refreshMs: number
+    spec: DashboardSpec
 }
 
 export async function renderDashboard({

@@ -4,16 +4,16 @@ export interface SourceBinding {
 }
 
 export interface DashboardSpec {
-    root: string
-    state?: Record<string, unknown>
     elements: Record<
         string,
         {
-            type: string
-            props: Record<string, unknown>
             children?: string[]
+            props: Record<string, unknown>
+            type: string
         }
     >
+    root: string
+    state?: Record<string, unknown>
 }
 
 export type PresetName = "calls" | "queues" | "sms" | "health"
