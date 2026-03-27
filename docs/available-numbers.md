@@ -12,7 +12,7 @@ Search for phone numbers that are available for purchase. To purchase an availab
 ```
 USAGE
   $ freeclimb available-numbers:list [-a <value>] [-C <value>] [-r <value>] [-E true|false] [-o true|false] [-p <value>]
-    [-n] [--json] [--fields <value>] [-h]
+    [-n] [--json] [--quiet] [--fields <value>] [-h]
 
 FLAGS
   -C, --country=<value>        Filters numbers by two character ISO country code.
@@ -29,11 +29,20 @@ FLAGS
                                numbers.
       --fields=<value>         Comma-separated list of fields to include in the response. Limits output to protect
                                context windows when used by agents.
-      --json                   Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
+      --json                   Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is
+                               set.
+      --quiet                  Output only resource IDs, one per line. Useful for piping into other commands.
 
 DESCRIPTION
   Search for phone numbers that are available for purchase. To purchase an available phone number, the number should be
   submitted via POST to the /IncomingPhoneNumbers endpoint.
+
+EXAMPLES
+  $ freeclimb available-numbers:list
+
+  $ freeclimb available-numbers:list --alias 123-456-7890
+
+  $ freeclimb available-numbers:list --json
 ```
 
 _See code: [src/commands/available-numbers/list.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/available-numbers/list.ts)_
