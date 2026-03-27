@@ -6,11 +6,19 @@ export interface NumberAssignment {
     previousApplicationId: string | null
 }
 
+export interface PreviousAppUrls {
+    voiceUrl: string | null
+    smsUrl: string | null
+    statusCallbackUrl: string | null
+    callConnectUrl: string | null
+}
+
 export interface DevState {
     pid: number
     tunnelUrl: string
     applicationId: string
     isTemporary: boolean
+    previousAppUrls: PreviousAppUrls | null
     numberAssignments: NumberAssignment[]
     createdAt: string
 }

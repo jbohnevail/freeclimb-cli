@@ -1,4 +1,5 @@
 import { createApiAxios } from "../http.js"
+import type { PreviousAppUrls } from "./state.js"
 
 export interface TempAppUrls {
     voiceUrl: string
@@ -13,6 +14,17 @@ function buildWebhookUrls(tunnelUrl: string): TempAppUrls {
         smsUrl: `${tunnelUrl}/sms`,
         statusCallbackUrl: `${tunnelUrl}/status`,
         callConnectUrl: `${tunnelUrl}/call-connect`,
+    }
+}
+
+export async function getAppUrls(applicationId: string): Promise<PreviousAppUrls> {
+    const client = await createApiAxios()
+    const response = await client.get(`/Applications/${applicationId}`)
+    return {
+        voiceUrl: response.data.voiceUrl || null,
+        smsUrl: response.data.smsUrl || null,
+        statusCallbackUrl: response.data.statusCallbackUrl || null,
+        callConnectUrl: response.data.callConnectUrl || null,
     }
 }
 
@@ -37,6 +49,16 @@ export async function updateAppUrls(applicationId: string, tunnelUrl: string): P
     const urls = buildWebhookUrls(tunnelUrl)
 
     await client.post(`/Applications/${applicationId}`, urls)
+}
+
+export async function restoreAppUrls(applicationId: string, urls: PreviousAppUrls): Promise<void> {
+    const client = await createApiAxios()
+    await client.post(`/Applications/${applicationId}`, {
+        voiceUrl: urls.voiceUrl || "",
+        smsUrl: urls.smsUrl || "",
+        statusCallbackUrl: urls.statusCallbackUrl || "",
+        callConnectUrl: urls.callConnectUrl || "",
+    })
 }
 
 export async function deleteTempApp(applicationId: string): Promise<void> {

@@ -3,17 +3,13 @@ import { EventEmitter } from "events"
 import { forwardRequest, isForwardError, type ForwardResponse } from "./forwarder.js"
 import type { WebhookEvent } from "./event-display.js"
 
+const MAX_BODY_SIZE = 1024 * 1024 // 1MB — more than enough for any webhook payload
+
 export interface ProxyServerOptions {
     /** Port the proxy listens on (receives webhooks from the tunnel) */
     proxyPort: number
     /** Port of the user's local application */
     targetPort: number
-}
-
-export interface ProxyEvents {
-    webhook: [event: WebhookEvent, response: ForwardResponse]
-    error: [error: Error]
-    listening: [port: number]
 }
 
 export class WebhookProxyServer extends EventEmitter {
@@ -58,36 +54,51 @@ export class WebhookProxyServer extends EventEmitter {
     }
 
     private handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
-        let rawBody = ""
+        const chunks: Buffer[] = []
+        let totalSize = 0
+        let aborted = false
 
         req.on("data", (chunk: Buffer) => {
-            rawBody += chunk.toString()
+            totalSize += chunk.length
+            if (totalSize > MAX_BODY_SIZE) {
+                aborted = true
+                req.destroy()
+                res.writeHead(413, { "Content-Type": "application/json" })
+                res.end(JSON.stringify({ error: "Request body too large" }))
+                return
+            }
+            chunks.push(chunk)
         })
 
         req.on("end", async () => {
-            let body: Record<string, unknown> = {}
+            if (aborted) return
+
+            const rawBody = Buffer.concat(chunks)
+
+            // Try to parse as JSON for event display, but forward raw body regardless
+            let parsedBody: Record<string, unknown> = {}
             try {
-                body = rawBody ? JSON.parse(rawBody) : {}
+                parsedBody = JSON.parse(rawBody.toString("utf-8"))
             } catch {
-                // Not JSON — forward raw
-                body = { _raw: rawBody }
+                // Not JSON — still forward transparently
             }
 
             const event: WebhookEvent = {
                 timestamp: new Date(),
                 method: req.method || "POST",
                 path: req.url || "/",
-                body,
-                requestType: body.requestType as string | undefined,
-                from: body.from as string | undefined,
-                to: body.to as string | undefined,
-                callId: body.callId as string | undefined,
-                messageId: body.messageId as string | undefined,
+                body: parsedBody,
+                requestType: parsedBody.requestType as string | undefined,
+                from: parsedBody.from as string | undefined,
+                to: parsedBody.to as string | undefined,
+                callId: parsedBody.callId as string | undefined,
+                messageId: parsedBody.messageId as string | undefined,
             }
 
+            // Forward all original headers (except host which should target localhost)
             const headers: Record<string, string> = {}
             for (const [key, value] of Object.entries(req.headers)) {
-                if (typeof value === "string") headers[key] = value
+                if (typeof value === "string" && key !== "host") headers[key] = value
             }
 
             const result = await forwardRequest(
@@ -95,7 +106,7 @@ export class WebhookProxyServer extends EventEmitter {
                 event.method,
                 event.path,
                 headers,
-                body,
+                rawBody,
             )
 
             this.emit("webhook", event, result)
@@ -104,7 +115,8 @@ export class WebhookProxyServer extends EventEmitter {
                 res.writeHead(502, { "Content-Type": "application/json" })
                 res.end(JSON.stringify({ error: "Target application unavailable" }))
             } else {
-                res.writeHead(result.statusCode, { "Content-Type": "application/json" })
+                // Forward the target app's response transparently
+                res.writeHead(result.statusCode, result.headers || {})
                 const responseBody =
                     typeof result.body === "string" ? result.body : JSON.stringify(result.body)
                 res.end(responseBody)

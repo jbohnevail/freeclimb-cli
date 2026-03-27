@@ -3,6 +3,7 @@ import axios from "axios"
 export interface ForwardResult {
     statusCode: number
     body: unknown
+    headers: Record<string, string>
     latencyMs: number
 }
 
@@ -29,19 +30,22 @@ export async function forwardRequest(
         const response = await axios({
             method: method as any,
             url: `http://localhost:${targetPort}${path}`,
-            headers: {
-                "content-type": headers["content-type"] || "application/json",
-                // Forward select headers, skip hop-by-hop ones
-                ...(headers["x-request-id"] ? { "x-request-id": headers["x-request-id"] } : {}),
-            },
+            headers,
             data: body,
             timeout: 30_000,
             // Accept any status — we want to capture 4xx/5xx from the user's app too
             validateStatus: () => true,
         })
+        // Capture response headers for transparent forwarding
+        const responseHeaders: Record<string, string> = {}
+        for (const [key, value] of Object.entries(response.headers)) {
+            if (typeof value === "string") responseHeaders[key] = value
+        }
+
         return {
             statusCode: response.status,
             body: response.data,
+            headers: responseHeaders,
             latencyMs: Date.now() - start,
         }
     } catch (err: unknown) {

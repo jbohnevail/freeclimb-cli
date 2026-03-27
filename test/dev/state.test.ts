@@ -16,6 +16,7 @@ describe("Dev State", () => {
         tunnelUrl: "https://abc-xyz.loca.lt",
         applicationId: "AP_test123",
         isTemporary: true,
+        previousAppUrls: null,
         numberAssignments: [
             { phoneNumberId: "PN_test456", previousApplicationId: "AP_old789" },
         ],

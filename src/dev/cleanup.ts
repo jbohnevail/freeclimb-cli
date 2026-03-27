@@ -1,7 +1,7 @@
 import chalk from "chalk"
-import { deleteTempApp } from "./app-manager.js"
+import { deleteTempApp, restoreAppUrls } from "./app-manager.js"
 import { restoreNumber } from "./number-manager.js"
-import { readDevState, removeDevState, type DevState } from "./state.js"
+import { removeDevState, type DevState } from "./state.js"
 
 type Logger = { log(msg: string): void }
 
@@ -16,6 +16,8 @@ export async function performCleanup(
     if (cleaning) return
     cleaning = true
 
+    let allSucceeded = true
+
     try {
         // Restore number assignments
         for (const assignment of state.numberAssignments) {
@@ -23,13 +25,30 @@ export async function performCleanup(
                 await restoreNumber(assignment.phoneNumberId, assignment.previousApplicationId)
                 if (!jsonMode) {
                     logger.log(
-                        chalk.green(`  ✔ Restored ${assignment.phoneNumberId} → ${assignment.previousApplicationId || "none"}`),
+                        chalk.green(`  ✔ Restored ${assignment.phoneNumberId} → ${assignment.previousApplicationId || "(unassigned)"}`),
                     )
                 }
             } catch (err: unknown) {
+                allSucceeded = false
                 const error = err as Error
                 if (!jsonMode) {
                     logger.log(chalk.yellow(`  ⚠ Could not restore ${assignment.phoneNumberId}: ${error.message}`))
+                }
+            }
+        }
+
+        // Restore existing app URLs if we modified a non-temporary app
+        if (!state.isTemporary && state.previousAppUrls) {
+            try {
+                await restoreAppUrls(state.applicationId, state.previousAppUrls)
+                if (!jsonMode) {
+                    logger.log(chalk.green(`  ✔ Restored application ${state.applicationId} webhook URLs`))
+                }
+            } catch (err: unknown) {
+                allSucceeded = false
+                const error = err as Error
+                if (!jsonMode) {
+                    logger.log(chalk.yellow(`  ⚠ Could not restore application URLs for ${state.applicationId}: ${error.message}`))
                 }
             }
         }
@@ -42,6 +61,7 @@ export async function performCleanup(
                     logger.log(chalk.green(`  ✔ Deleted temp application ${state.applicationId}`))
                 }
             } catch (err: unknown) {
+                allSucceeded = false
                 const error = err as Error
                 if (!jsonMode) {
                     logger.log(chalk.yellow(`  ⚠ Could not delete application ${state.applicationId}: ${error.message}`))
@@ -49,25 +69,15 @@ export async function performCleanup(
             }
         }
 
-        // Remove state file
-        removeDevState(dataDir)
+        // Only remove state file if all cleanup succeeded — allows retry on failure
+        if (allSucceeded) {
+            removeDevState(dataDir)
+        } else if (!jsonMode) {
+            logger.log(chalk.yellow(`  ⚠ State file retained for retry — run 'freeclimb dev' to re-attempt cleanup`))
+        }
     } finally {
         cleaning = false
     }
-}
-
-export async function cleanupStaleState(dataDir: string, logger: Logger, jsonMode: boolean): Promise<boolean> {
-    const state = readDevState(dataDir)
-    if (!state) return false
-
-    if (!jsonMode) {
-        logger.log(chalk.yellow(`Found stale dev session from ${state.createdAt}`))
-        logger.log(chalk.yellow(`  Application: ${state.applicationId}`))
-        logger.log(chalk.dim("  Cleaning up..."))
-    }
-
-    await performCleanup(state, dataDir, logger, jsonMode)
-    return true
 }
 
 export function registerCleanupHandlers(

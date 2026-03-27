@@ -66,40 +66,7 @@ For a fully automated local dev setup, see: freeclimb dev
         const { flags } = await this.parse(Listen)
         const jsonMode = flags.json || !isTTY()
 
-        // Start proxy server
-        const proxySpinner = jsonMode ? null : createSpinner({ text: "Starting proxy server..." })
-        proxySpinner?.start()
-
-        this.proxy = new WebhookProxyServer({
-            proxyPort: flags["tunnel-port"],
-            targetPort: flags.port,
-        })
-
-        try {
-            const actualPort = await this.proxy.start()
-            proxySpinner?.succeed(`Proxy server listening on port ${actualPort}`)
-        } catch (err: unknown) {
-            const error = err as Error
-            proxySpinner?.fail(`Failed to start proxy: ${error.message}`)
-            this.error(error.message, { exit: 1 })
-        }
-
-        // Start tunnel
-        const tunnelSpinner = jsonMode ? null : createSpinner({ text: "Establishing tunnel..." })
-        tunnelSpinner?.start()
-
-        try {
-            this.tunnel = createTunnel(flags.tunnel as TunnelProvider)
-            const tunnelUrl = await this.tunnel.start(flags["tunnel-port"])
-            tunnelSpinner?.succeed(`Tunnel established: ${chalk.bold(tunnelUrl)}`)
-        } catch (err: unknown) {
-            const error = err as Error
-            tunnelSpinner?.fail(`Failed to establish tunnel: ${error.message}`)
-            await this.cleanup()
-            this.error(error.message, { exit: 1 })
-        }
-
-        // Register cleanup handlers
+        // Register cleanup handlers early
         const shutdownHandler = async () => {
             if (this.shuttingDown) return
             this.shuttingDown = true
@@ -111,6 +78,57 @@ For a fully automated local dev setup, see: freeclimb dev
         process.on("SIGINT", shutdownHandler)
         process.on("SIGTERM", shutdownHandler)
 
+        // Start proxy server
+        const proxySpinner = jsonMode ? null : createSpinner({ text: "Starting proxy server..." })
+        proxySpinner?.start()
+
+        this.proxy = new WebhookProxyServer({
+            proxyPort: flags["tunnel-port"],
+            targetPort: flags.port,
+        })
+
+        let proxyPort: number
+        try {
+            proxyPort = await this.proxy.start()
+            proxySpinner?.succeed(`Proxy server listening on port ${proxyPort}`)
+        } catch (err: unknown) {
+            const error = err as Error
+            proxySpinner?.fail(`Failed to start proxy: ${error.message}`)
+            this.error(error.message, { exit: 1 })
+        }
+
+        // Start tunnel — use the actual bound port, not the flag value
+        const tunnelSpinner = jsonMode ? null : createSpinner({ text: "Establishing tunnel..." })
+        tunnelSpinner?.start()
+
+        try {
+            this.tunnel = createTunnel(flags.tunnel as TunnelProvider)
+            await this.tunnel.start(proxyPort)
+            tunnelSpinner?.succeed(`Tunnel established: ${chalk.bold(this.tunnel.url)}`)
+        } catch (err: unknown) {
+            const error = err as Error
+            tunnelSpinner?.fail(`Failed to establish tunnel: ${error.message}`)
+            await this.cleanup()
+            this.error(error.message, { exit: 1 })
+        }
+
+        // Subscribe to tunnel death
+        this.tunnel!.on("error", (err: Error) => {
+            if (jsonMode) {
+                this.log(JSON.stringify({ event: "tunnel_error", error: err.message }))
+            } else {
+                this.log(chalk.red(`\nTunnel error: ${err.message}`))
+            }
+        })
+        this.tunnel!.on("close", () => {
+            if (jsonMode) {
+                this.log(JSON.stringify({ event: "tunnel_closed" }))
+            } else {
+                this.log(chalk.red("\nTunnel closed unexpectedly. Webhook URLs are now dead."))
+                this.log(chalk.dim("Press Ctrl+C to exit, or restart the command."))
+            }
+        })
+
         // Display summary
         const tunnelUrl = this.tunnel!.url
         if (jsonMode) {
@@ -119,7 +137,7 @@ For a fully automated local dev setup, see: freeclimb dev
                     event: "ready",
                     tunnelUrl,
                     targetPort: flags.port,
-                    proxyPort: flags["tunnel-port"],
+                    proxyPort,
                 }),
             )
         } else {

@@ -37,10 +37,9 @@ export async function restoreNumber(
     phoneNumberId: string,
     previousApplicationId: string | null,
 ): Promise<void> {
-    if (previousApplicationId === null) return
-
     const client = await createApiAxios()
+    // Pass empty string to unassign if the number had no previous application
     await client.post(`/IncomingPhoneNumbers/${phoneNumberId}`, {
-        applicationId: previousApplicationId,
+        applicationId: previousApplicationId || "",
     })
 }

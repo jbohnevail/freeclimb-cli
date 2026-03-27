@@ -14,7 +14,7 @@ import {
 import { createSpinner } from "../ui/spinner.js"
 import { borderedBox } from "../ui/components.js"
 import { BrandColors, supportsColor, isTTY } from "../ui/theme.js"
-import { createTempApp, updateAppUrls, deleteTempApp } from "../dev/app-manager.js"
+import { createTempApp, updateAppUrls, getAppUrls, deleteTempApp } from "../dev/app-manager.js"
 import { assignNumber, getNumber } from "../dev/number-manager.js"
 import { validateResourceId } from "../validation.js"
 import {
@@ -23,6 +23,7 @@ import {
     isProcessRunning,
     type DevState,
     type NumberAssignment,
+    type PreviousAppUrls,
 } from "../dev/state.js"
 import { performCleanup, registerCleanupHandlers } from "../dev/cleanup.js"
 
@@ -86,6 +87,19 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
         // Check for stale state
         await this.handleStaleState(dataDir, jsonMode)
 
+        // Register cleanup handlers early — before any destructive API work
+        registerCleanupHandlers(
+            () => this.devState,
+            dataDir,
+            this,
+            jsonMode,
+            async () => {
+                await this.tunnel?.stop().catch(() => {})
+                await this.proxy?.stop().catch(() => {})
+                process.exit(0)
+            },
+        )
+
         // Step 1: Start proxy server (before tunnel so tunnel can point to it)
         const proxySpinner = jsonMode ? null : createSpinner({ text: "Starting proxy server..." })
         proxySpinner?.start()
@@ -121,17 +135,37 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
             this.error(error.message, { exit: 1 })
         }
 
+        // Subscribe to tunnel death
+        this.tunnel!.on("error", (err: Error) => {
+            if (jsonMode) {
+                this.log(JSON.stringify({ event: "tunnel_error", error: err.message }))
+            } else {
+                this.log(chalk.red(`\nTunnel error: ${err.message}`))
+            }
+        })
+        this.tunnel!.on("close", () => {
+            if (jsonMode) {
+                this.log(JSON.stringify({ event: "tunnel_closed" }))
+            } else {
+                this.log(chalk.red("\nTunnel closed unexpectedly. Webhook URLs are now dead."))
+                this.log(chalk.dim("Press Ctrl+C to clean up, or restart the command."))
+            }
+        })
+
         // Step 3: Create or update application with tunnel URL
         const appSpinner = jsonMode ? null : createSpinner({ text: "Setting up application..." })
         appSpinner?.start()
 
         let applicationId: string
         let isTemporary: boolean
+        let previousAppUrls: PreviousAppUrls | null = null
 
         try {
             if (flags["app-id"]) {
                 applicationId = flags["app-id"]
                 isTemporary = false
+                // Save existing URLs before overwriting so we can restore on cleanup
+                previousAppUrls = await getAppUrls(applicationId)
                 await updateAppUrls(applicationId, tunnelUrl)
                 appSpinner?.succeed(`Updated application: ${chalk.bold(applicationId)}`)
             } else {
@@ -150,8 +184,19 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
             this.error(error.message, { exit: 1 })
         }
 
+        // Write state immediately after app creation so cleanup can find it
+        this.devState = {
+            pid: process.pid,
+            tunnelUrl,
+            applicationId,
+            isTemporary,
+            previousAppUrls,
+            numberAssignments: [],
+            createdAt: new Date().toISOString(),
+        }
+        writeDevState(dataDir, this.devState)
+
         // Step 4: Assign phone number if requested
-        const numberAssignments: NumberAssignment[] = []
         let assignedPhoneNumber: string | undefined
 
         if (flags.number) {
@@ -163,18 +208,21 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
                 assignedPhoneNumber = numberInfo.phoneNumber
                 const previousAppId = await assignNumber(flags.number, applicationId)
 
-                numberAssignments.push({
+                this.devState.numberAssignments.push({
                     phoneNumberId: flags.number,
                     previousApplicationId: previousAppId,
                 })
+                // Update state file with number assignment for crash recovery
+                writeDevState(dataDir, this.devState)
 
-                const prevLabel = previousAppId ? chalk.dim(`(was: ${previousAppId})`) : ""
+                const prevLabel = previousAppId ? chalk.dim(`(was: ${previousAppId})`) : chalk.dim("(was: unassigned)")
                 numSpinner?.succeed(
                     `Assigned ${chalk.bold(assignedPhoneNumber)} → ${applicationId} ${prevLabel}`,
                 )
             } catch (err: unknown) {
                 const error = err as Error
                 numSpinner?.fail(`Failed to assign number: ${error.message}`)
+                // Cleanup will handle restoration via state file
                 if (isTemporary) await deleteTempApp(applicationId).catch(() => {})
                 await this.tunnel?.stop().catch(() => {})
                 await this.proxy?.stop().catch(() => {})
@@ -182,30 +230,7 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
             }
         }
 
-        // Step 5: Write state file and register cleanup
-        this.devState = {
-            pid: process.pid,
-            tunnelUrl,
-            applicationId,
-            isTemporary,
-            numberAssignments,
-            createdAt: new Date().toISOString(),
-        }
-        writeDevState(dataDir, this.devState)
-
-        registerCleanupHandlers(
-            () => this.devState,
-            dataDir,
-            this,
-            jsonMode,
-            async () => {
-                await this.tunnel?.stop().catch(() => {})
-                await this.proxy?.stop().catch(() => {})
-                process.exit(0)
-            },
-        )
-
-        // Step 6: Display summary
+        // Step 5: Display summary
         if (jsonMode) {
             this.log(
                 JSON.stringify({
