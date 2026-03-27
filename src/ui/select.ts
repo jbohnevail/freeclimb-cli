@@ -2,10 +2,10 @@ import chalk from "chalk"
 import { BrandColors, isTTY } from "./theme.js"
 
 export interface SelectChoice<T = string> {
-    name: string
-    value: T
     description?: string
     disabled?: boolean | string
+    name: string
+    value: T
 }
 
 export interface SelectOptions {
@@ -15,10 +15,12 @@ export interface SelectOptions {
 export async function select<T = string>(
     message: string,
     choices: Array<SelectChoice<T> | string>,
-    options: SelectOptions = {}
+    options: SelectOptions = {},
 ): Promise<T> {
     if (!isTTY()) {
-        throw new Error("Interactive selection requires a TTY. Use --json flag for non-interactive output.")
+        throw new Error(
+            "Interactive selection requires a TTY. Use --json flag for non-interactive output.",
+        )
     }
 
     const normalizedChoices = choices.map((choice) => {
@@ -32,7 +34,7 @@ export async function select<T = string>(
         return {
             name: display,
             value: choice.value,
-            disabled: choice.disabled ? true : false,
+            disabled: Boolean(choice.disabled),
         }
     })
 
@@ -47,10 +49,12 @@ export async function select<T = string>(
 export async function multiSelect<T = string>(
     message: string,
     choices: Array<SelectChoice<T> | string>,
-    options: SelectOptions & { required?: boolean } = {}
+    options: SelectOptions & { required?: boolean } = {},
 ): Promise<T[]> {
     if (!isTTY()) {
-        throw new Error("Interactive selection requires a TTY. Use --json flag for non-interactive output.")
+        throw new Error(
+            "Interactive selection requires a TTY. Use --json flag for non-interactive output.",
+        )
     }
 
     const normalizedChoices = choices.map((choice) => {
@@ -64,7 +68,7 @@ export async function multiSelect<T = string>(
         return {
             name: display,
             value: choice.value,
-            disabled: choice.disabled ? true : false,
+            disabled: Boolean(choice.disabled),
         }
     })
 
@@ -77,12 +81,11 @@ export async function multiSelect<T = string>(
     }) as Promise<T[]>
 }
 
-export async function confirm(
-    message: string,
-    defaultValue = false
-): Promise<boolean> {
+export async function confirm(message: string, defaultValue = false): Promise<boolean> {
     if (!isTTY()) {
-        throw new Error("Interactive confirmation requires a TTY. Use --yes flag for non-interactive mode.")
+        throw new Error(
+            "Interactive confirmation requires a TTY. Use --yes flag for non-interactive mode.",
+        )
     }
 
     const { confirm: inquirerConfirm } = await import("@inquirer/prompts")
@@ -96,9 +99,9 @@ export async function input(
     message: string,
     options: {
         default?: string
-        validate?: (input: string) => boolean | string
         mask?: string
-    } = {}
+        validate?: (input: string) => boolean | string
+    } = {},
 ): Promise<string> {
     if (!isTTY()) {
         throw new Error("Interactive input requires a TTY.")
@@ -124,10 +127,12 @@ export async function input(
 export async function numberedSelect<T = string>(
     message: string,
     choices: Array<SelectChoice<T> | string>,
-    options: SelectOptions = {}
+    options: SelectOptions = {},
 ): Promise<T> {
     if (!isTTY()) {
-        throw new Error("Interactive selection requires a TTY. Use --json flag for non-interactive output.")
+        throw new Error(
+            "Interactive selection requires a TTY. Use --json flag for non-interactive output.",
+        )
     }
 
     const normalizedChoices = choices.map((choice, index) => {
@@ -144,7 +149,7 @@ export async function numberedSelect<T = string>(
         return {
             name: display,
             value: choice.value,
-            disabled: choice.disabled ? true : false,
+            disabled: Boolean(choice.disabled),
         }
     })
 

@@ -3,15 +3,15 @@ import { BrandColors, supportsColor } from "../ui/theme.js"
 import type { ForwardResult, ForwardError } from "./forwarder.js"
 
 export interface WebhookEvent {
-    timestamp: Date
+    body: Record<string, unknown>
+    callId?: string
+    from?: string
+    messageId?: string
     method: string
     path: string
-    body: Record<string, unknown>
     requestType?: string
-    from?: string
+    timestamp: Date
     to?: string
-    callId?: string
-    messageId?: string
 }
 
 function timestamp(d: Date): string {
@@ -20,9 +20,7 @@ function timestamp(d: Date): string {
 
 function extractPerclCommands(body: unknown): string | null {
     if (!Array.isArray(body)) return null
-    const names = body
-        .map((cmd: Record<string, unknown>) => Object.keys(cmd)[0])
-        .filter(Boolean)
+    const names = body.map((cmd: Record<string, unknown>) => Object.keys(cmd)[0]).filter(Boolean)
     return names.length > 0 ? `[${names.join(", ")}]` : null
 }
 
@@ -48,7 +46,7 @@ export function formatIncoming(event: WebhookEvent): string {
     const ts = chalk.dim(timestamp(event.timestamp))
     const arrow = supportsColor() ? chalk.hex(BrandColors.lightTeal)("→") : "→"
     const method = chalk.bold(event.method)
-    const path = event.path
+    const { path } = event
     const info = extractEventInfo(event)
 
     return `${ts} ${arrow} ${method} ${path}  ${chalk.cyan(info)}`
@@ -56,7 +54,8 @@ export function formatIncoming(event: WebhookEvent): string {
 
 export function formatResponse(event: WebhookEvent, result: ForwardResult): string {
     const ts = chalk.dim(timestamp(event.timestamp))
-    const statusColor = result.statusCode < 300 ? chalk.green : result.statusCode < 500 ? chalk.yellow : chalk.red
+    const statusColor =
+        result.statusCode < 300 ? chalk.green : result.statusCode < 500 ? chalk.yellow : chalk.red
     const status = statusColor(`${result.statusCode}`)
     const latency = chalk.dim(`(${result.latencyMs}ms)`)
     const percl = extractPerclCommands(result.body)

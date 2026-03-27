@@ -77,9 +77,7 @@ export const typography = {
         return chalk.bold(text)
     },
 
-    value: (text: string): string => {
-        return text
-    },
+    value: (text: string): string => text,
 
     // Command styling (for showing CLI commands)
     command: (text: string): string => {

@@ -72,6 +72,7 @@ For a fully automated local dev setup, see: freeclimb dev
             this.shuttingDown = true
             if (!jsonMode) this.log(chalk.dim("\nShutting down..."))
             await this.cleanup()
+            // eslint-disable-next-line unicorn/no-process-exit
             process.exit(0)
         }
 
@@ -91,10 +92,10 @@ For a fully automated local dev setup, see: freeclimb dev
         try {
             proxyPort = await this.proxy.start()
             proxySpinner?.succeed(`Proxy server listening on port ${proxyPort}`)
-        } catch (err: unknown) {
-            const error = err as Error
-            proxySpinner?.fail(`Failed to start proxy: ${error.message}`)
-            this.error(error.message, { exit: 1 })
+        } catch (error: unknown) {
+            const typedError = error as Error
+            proxySpinner?.fail(`Failed to start proxy: ${typedError.message}`)
+            this.error(typedError.message, { exit: 1 })
         }
 
         // Start tunnel — use the actual bound port, not the flag value
@@ -105,11 +106,11 @@ For a fully automated local dev setup, see: freeclimb dev
             this.tunnel = createTunnel(flags.tunnel as TunnelProvider)
             await this.tunnel.start(proxyPort)
             tunnelSpinner?.succeed(`Tunnel established: ${chalk.bold(this.tunnel.url)}`)
-        } catch (err: unknown) {
-            const error = err as Error
-            tunnelSpinner?.fail(`Failed to establish tunnel: ${error.message}`)
+        } catch (error: unknown) {
+            const typedError = error as Error
+            tunnelSpinner?.fail(`Failed to establish tunnel: ${typedError.message}`)
             await this.cleanup()
-            this.error(error.message, { exit: 1 })
+            this.error(typedError.message, { exit: 1 })
         }
 
         // Subscribe to tunnel death

@@ -6,7 +6,7 @@ import { icons } from "./chars.js"
 const darkTeal = supportsColor() ? chalk.hex(BrandColors.darkTeal) : chalk
 const lightTeal = supportsColor() ? chalk.hex(BrandColors.lightTeal) : chalk
 const highlight = supportsColor() ? chalk.hex(BrandColors.lime) : chalk
-const dim = chalk.dim
+const { dim } = chalk
 
 // ASCII banner - FREECLIMB in clean, uniform block letters
 const bannerLines = [
@@ -30,7 +30,10 @@ export const ASCII_BANNER = supportsColor()
 `
 
 export const TAGLINE = supportsColor()
-    ? dim("  The communications CLI for ") + highlight("developers") + dim(" and ") + highlight("agents")
+    ? dim("  The communications CLI for ") +
+      highlight("developers") +
+      dim(" and ") +
+      highlight("agents")
     : "  The communications CLI for developers and agents"
 
 export function getWelcomeBanner(): string {
@@ -77,10 +80,7 @@ export function getInfoMessage(message: string): string {
     return `${icons.info()} ${message}`
 }
 
-export function formatCommandHelp(
-    command: string,
-    description: string
-): string {
+export function formatCommandHelp(command: string, description: string): string {
     // Command names in light teal (secondary, readable)
     const cmdStyle = supportsColor() ? lightTeal : (s: string) => s
     return `  ${cmdStyle(command.padEnd(40))} ${dim(description)}`

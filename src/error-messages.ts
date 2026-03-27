@@ -4,9 +4,9 @@ import { isAgentMode } from "./agent-config.js"
 const { red, yellow, cyan, dim, bold } = chalk
 
 interface ErrorSuggestion {
+    docUrl?: string
     message: string
     tryCommands?: string[]
-    docUrl?: string
 }
 
 const errorSuggestions = new Map<number, ErrorSuggestion>()
@@ -54,7 +54,10 @@ errorSuggestions.set(9, {
 // Number-related errors
 errorSuggestions.set(10, {
     message: "This number is not SMS-enabled",
-    tryCommands: ["freeclimb incoming-numbers:list", "freeclimb available-numbers:list --smsEnabled true"],
+    tryCommands: [
+        "freeclimb incoming-numbers:list",
+        "freeclimb available-numbers:list --smsEnabled true",
+    ],
 })
 
 errorSuggestions.set(11, {
@@ -225,7 +228,7 @@ export function returnFormat(
     code: number,
     message: string,
     url: string,
-    suggestion: string
+    suggestion: string,
 ): string {
     return formatEnhancedError(code, message, suggestion, [], url)
 }
@@ -235,7 +238,7 @@ function formatEnhancedError(
     message: string,
     suggestion: string,
     tryCommands: string[],
-    docUrl?: string
+    docUrl?: string,
 ): string {
     if (isAgentMode()) {
         return JSON.stringify(
@@ -248,7 +251,7 @@ function formatEnhancedError(
                 docUrl: docUrl || undefined,
             },
             null,
-            2
+            2,
         )
     }
 

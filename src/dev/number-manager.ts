@@ -1,10 +1,10 @@
 import { createApiAxios } from "../http.js"
 
 export interface NumberInfo {
-    phoneNumberId: string
-    phoneNumber: string
-    applicationId: string | null
     alias: string | null
+    applicationId: string | null
+    phoneNumber: string
+    phoneNumberId: string
 }
 
 export async function getNumber(phoneNumberId: string): Promise<NumberInfo> {

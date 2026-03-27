@@ -2,10 +2,10 @@ import { createApiAxios } from "../http.js"
 import type { PreviousAppUrls } from "./state.js"
 
 export interface TempAppUrls {
-    voiceUrl: string
+    callConnectUrl: string
     smsUrl: string
     statusCallbackUrl: string
-    callConnectUrl: string
+    voiceUrl: string
 }
 
 function buildWebhookUrls(tunnelUrl: string): TempAppUrls {
@@ -28,7 +28,9 @@ export async function getAppUrls(applicationId: string): Promise<PreviousAppUrls
     }
 }
 
-export async function createTempApp(tunnelUrl: string): Promise<{ applicationId: string; alias: string }> {
+export async function createTempApp(
+    tunnelUrl: string,
+): Promise<{ alias: string; applicationId: string }> {
     const client = await createApiAxios()
     const alias = `fc-cli-dev-${Date.now()}`
     const urls = buildWebhookUrls(tunnelUrl)

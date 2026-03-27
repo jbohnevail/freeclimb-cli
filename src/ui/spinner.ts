@@ -1,23 +1,34 @@
 import { isTTY, supportsColor } from "./theme.js"
 import { icons } from "./chars.js"
 
-const SPINNER_FRAMES = ["\u280b", "\u2819", "\u2839", "\u2838", "\u283c", "\u2834", "\u2826", "\u2827", "\u2807", "\u280f"]
+const SPINNER_FRAMES = [
+    "\u280b",
+    "\u2819",
+    "\u2839",
+    "\u2838",
+    "\u283c",
+    "\u2834",
+    "\u2826",
+    "\u2827",
+    "\u2807",
+    "\u280f",
+]
 
 export interface SpinnerOptions {
-    text?: string
     color?: string
     stream?: NodeJS.WriteStream
+    text?: string
 }
 
 export interface Spinner {
+    fail: (text?: string) => Spinner
+    info: (text?: string) => Spinner
+    isSpinning: boolean
     start: (text?: string) => Spinner
     stop: () => Spinner
     succeed: (text?: string) => Spinner
-    fail: (text?: string) => Spinner
-    warn: (text?: string) => Spinner
-    info: (text?: string) => Spinner
     text: string
-    isSpinning: boolean
+    warn: (text?: string) => Spinner
 }
 
 export function createSpinner(options: SpinnerOptions = {}): Spinner {
@@ -150,9 +161,9 @@ export async function withSpinner<T>(
     text: string,
     operation: () => Promise<T>,
     options: {
-        successText?: string | ((result: T) => string)
         failText?: string | ((error: Error) => string)
-    } = {}
+        successText?: string | ((result: T) => string)
+    } = {},
 ): Promise<T> {
     const spinner = createSpinner({ text })
     spinner.start()
@@ -177,13 +188,13 @@ export async function withSpinner<T>(
 
 export async function runChecks<T>(
     checks: Array<{
-        text: string
+        failText?: string | ((error: Error) => string)
         run: () => Promise<T>
         successText?: string | ((result: T) => string)
-        failText?: string | ((error: Error) => string)
-    }>
-): Promise<Array<{ success: boolean; result?: T; error?: Error }>> {
-    const results: Array<{ success: boolean; result?: T; error?: Error }> = []
+        text: string
+    }>,
+): Promise<Array<{ error?: Error; result?: T; success: boolean }>> {
+    const results: Array<{ error?: Error; result?: T; success: boolean }> = []
 
     for (const check of checks) {
         try {
