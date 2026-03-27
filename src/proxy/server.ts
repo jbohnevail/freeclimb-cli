@@ -115,10 +115,17 @@ export class WebhookProxyServer extends EventEmitter {
                 res.writeHead(502, { "Content-Type": "application/json" })
                 res.end(JSON.stringify({ error: "Target application unavailable" }))
             } else {
-                // Forward the target app's response transparently
-                res.writeHead(result.statusCode, result.headers || {})
+                // Forward the target app's response, filtering hop-by-hop headers
+                const HOP_BY_HOP = new Set(["transfer-encoding", "connection", "keep-alive", "content-length"])
+                const forwardHeaders: Record<string, string> = {}
+                if (result.headers) {
+                    for (const [key, value] of Object.entries(result.headers)) {
+                        if (!HOP_BY_HOP.has(key)) forwardHeaders[key] = value
+                    }
+                }
                 const responseBody =
                     typeof result.body === "string" ? result.body : JSON.stringify(result.body)
+                res.writeHead(result.statusCode, forwardHeaders)
                 res.end(responseBody)
             }
         })

@@ -37,9 +37,16 @@ export async function forwardRequest(
             validateStatus: () => true,
         })
         // Capture response headers for transparent forwarding
+        // AxiosHeaders stores headers internally — use toJSON() to extract them
         const responseHeaders: Record<string, string> = {}
-        for (const [key, value] of Object.entries(response.headers)) {
-            if (typeof value === "string") responseHeaders[key] = value
+        const h = response.headers
+        const plain = typeof h.toJSON === "function" ? h.toJSON() : h
+        for (const [key, value] of Object.entries(plain as Record<string, unknown>)) {
+            if (typeof value === "string") {
+                responseHeaders[key] = value
+            } else if (Array.isArray(value)) {
+                responseHeaders[key] = value.join(", ")
+            }
         }
 
         return {
