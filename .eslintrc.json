@@ -1,11 +1,8 @@
 {
+  "root": true,
   "extends": ["oclif", "oclif-typescript", "plugin:@typescript-eslint/recommended", "prettier"],
   "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "import",
-    "no-only-tests"
-  ],
+  "plugins": ["@typescript-eslint", "import", "no-only-tests"],
   "globals": {
     "expect": true,
     "before": true,

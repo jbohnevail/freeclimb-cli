@@ -334,6 +334,45 @@ export const tools = {
         },
     },
 
+    // Dashboard generation
+    generate_dashboard_prompt: {
+        name: "generate_dashboard_prompt",
+        description:
+            "Get the component catalog and system prompt for generating terminal dashboard JSON specs. Returns instructions describing all available UI components, their schemas, and FreeClimb data bindings. Use this before generating a dashboard spec to understand what components you can use.",
+        inputSchema: {
+            type: "object" as const,
+            properties: {
+                preset: {
+                    type: "string",
+                    description:
+                        "Optionally include a preset dashboard spec as a starting point",
+                    enum: ["calls", "queues", "sms", "health"],
+                },
+            },
+            required: [],
+        },
+    },
+
+    render_dashboard: {
+        name: "render_dashboard",
+        description:
+            "Save a JSON dashboard spec and return the CLI command to render it. The spec must conform to the json-render format with FreeClimb data source bindings.",
+        inputSchema: {
+            type: "object" as const,
+            properties: {
+                spec: {
+                    type: "object",
+                    description: "The json-render dashboard spec to render",
+                },
+                refresh: {
+                    type: "number",
+                    description: "Polling interval in seconds (default: 30)",
+                },
+            },
+            required: ["spec"],
+        },
+    },
+
     // PerCL generation
     generate_percl: {
         name: "generate_percl",

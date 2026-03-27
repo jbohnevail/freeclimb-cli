@@ -18,13 +18,35 @@ import {
 import { readFileSync, existsSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
+import { writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { createApiAxios } from "../http.js"
+import {
+    validateResourceId,
+    validatePhoneNumber,
+    rejectControlChars,
+    validateUrl,
+    ValidationError,
+} from "../validation.js"
+import { parseDashboardSpec, PRESET_NAMES } from "../dashboard/types.js"
+import type { PresetName } from "../dashboard/types.js"
 import { tools, ToolName } from "./tools.js"
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const pkgPath = join(__dirname, "../../package.json")
+// Lazy-loaded to avoid pulling React/Ink into MCP server startup
+async function getDashboardPromptLazy(): Promise<string> {
+    const { getDashboardPrompt } = await import("../dashboard/catalog.js")
+    return getDashboardPrompt()
+}
+
+async function loadPresetLazy(name: PresetName): Promise<unknown> {
+    const { loadPreset } = await import("../dashboard/presets/index.js")
+    return loadPreset(name)
+}
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
+const pkgPath = join(currentDir, "../../package.json")
 const { version: CLI_VERSION } = JSON.parse(readFileSync(pkgPath, "utf-8"))
-const SKILLS_DIR = join(__dirname, "../../skills")
+const SKILLS_DIR = join(currentDir, "../../skills")
 
 // Generate PerCL JSON for common call flow patterns
 function generatePerclPattern(
@@ -133,12 +155,12 @@ function generatePerclPattern(
 
 // Discover skill files from skills/ directory
 function discoverSkillResources(): Array<{
-    uri: string
-    name: string
     description: string
+    name: string
     path: string
+    uri: string
 }> {
-    const resources: Array<{ uri: string; name: string; description: string; path: string }> = []
+    const resources: Array<{ description: string; name: string; path: string; uri: string }> = []
 
     if (!existsSync(SKILLS_DIR)) return resources
 
@@ -169,6 +191,9 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
     switch (name) {
         // Call management
         case "make_call": {
+            validatePhoneNumber(args.to as string | undefined, "to")
+            validatePhoneNumber(args.from as string | undefined, "from")
+            validateResourceId(args.applicationId as string | undefined, "applicationId")
             return (
                 await client.post("/Calls", {
                     to: args.to,
@@ -180,6 +205,8 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         }
 
         case "list_calls": {
+            validatePhoneNumber(args.to as string | undefined, "to")
+            validatePhoneNumber(args.from as string | undefined, "from")
             return (
                 await client.get("/Calls", {
                     params: {
@@ -192,11 +219,15 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         }
 
         case "get_call": {
+            validateResourceId(args.callId as string | undefined, "callId")
             return (await client.get(`/Calls/${args.callId}`)).data
         }
 
         // SMS management
         case "send_sms": {
+            validatePhoneNumber(args.to as string | undefined, "to")
+            validatePhoneNumber(args.from as string | undefined, "from")
+            rejectControlChars(args.text as string | undefined, "text")
             return (
                 await client.post("/Messages", {
                     to: args.to,
@@ -207,6 +238,8 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         }
 
         case "list_sms": {
+            validatePhoneNumber(args.to as string | undefined, "to")
+            validatePhoneNumber(args.from as string | undefined, "from")
             return (
                 await client.get("/Messages", {
                     params: {
@@ -218,6 +251,7 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         }
 
         case "get_sms": {
+            validateResourceId(args.messageId as string | undefined, "messageId")
             return (await client.get(`/Messages/${args.messageId}`)).data
         }
 
@@ -227,6 +261,7 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         }
 
         case "get_number": {
+            validateResourceId(args.phoneNumberId as string | undefined, "phoneNumberId")
             return (await client.get(`/IncomingPhoneNumbers/${args.phoneNumberId}`)).data
         }
 
@@ -249,6 +284,7 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         }
 
         case "get_application": {
+            validateResourceId(args.applicationId as string | undefined, "applicationId")
             return (await client.get(`/Applications/${args.applicationId}`)).data
         }
 
@@ -269,6 +305,7 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
         }
 
         case "filter_logs": {
+            rejectControlChars(args.pql as string | undefined, "pql")
             return (
                 await client.post("/Logs", {
                     pql: args.pql,
@@ -279,6 +316,9 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
 
         // Recordings
         case "list_recordings": {
+            if (args.callId) {
+                validateResourceId(args.callId as string, "callId")
+            }
             return (
                 await client.get("/Recordings", {
                     params: {
@@ -306,6 +346,7 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
 
         // Call update
         case "update_call": {
+            validateResourceId(args.callId as string | undefined, "callId")
             return (
                 await client.put(`/Calls/${args.callId}`, {
                     status: args.status,
@@ -313,8 +354,45 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
             ).data
         }
 
+        // Dashboard generation (local, no API call)
+        case "generate_dashboard_prompt": {
+            const prompt = await getDashboardPromptLazy()
+            let result = prompt
+            if (args.preset) {
+                const presetName = args.preset as string
+                if (!PRESET_NAMES.includes(presetName as PresetName)) {
+                    throw new ValidationError(
+                        `Unknown preset: ${presetName}. Available: ${PRESET_NAMES.join(", ")}`,
+                    )
+                }
+                const presetSpec = await loadPresetLazy(presetName as PresetName)
+                result += `\n\n---\n\nHere is the "${presetName}" preset spec as a starting point:\n\n\`\`\`json\n${JSON.stringify(presetSpec, null, 2)}\n\`\`\``
+            }
+            return result
+        }
+
+        case "render_dashboard": {
+            const validatedSpec = parseDashboardSpec(args.spec)
+            const specJson = JSON.stringify(validatedSpec, null, 2)
+            const tmpPath = join(tmpdir(), `freeclimb-dashboard-${Date.now()}.json`)
+            writeFileSync(tmpPath, specJson, "utf-8")
+            const refresh =
+                typeof args.refresh === "number"
+                    ? Math.max(10, Math.min(3600, args.refresh))
+                    : undefined
+            const refreshFlag = refresh ? ` --refresh ${refresh}` : ""
+            return {
+                message: "Dashboard spec saved. Run this command to render it:",
+                command: `freeclimb dashboard --spec "${tmpPath}"${refreshFlag}`,
+                specPath: tmpPath,
+            }
+        }
+
         // PerCL generation (local, no API call)
         case "generate_percl": {
+            rejectControlChars(args.pattern as string | undefined, "pattern")
+            rejectControlChars(args.text as string | undefined, "text")
+            validateUrl(args.actionUrl as string | undefined, "actionUrl")
             return generatePerclPattern(
                 args.pattern as string,
                 args.text as string | undefined,
@@ -368,15 +446,20 @@ export async function startMcpServer(): Promise<void> {
                     },
                 ],
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error)
+            const details =
+                error instanceof Error && "response" in error
+                    ? (error as { response?: { data?: unknown } }).response?.data
+                    : undefined
             return {
                 content: [
                     {
                         type: "text" as const,
                         text: JSON.stringify(
                             {
-                                error: error.message || "Unknown error",
-                                details: error.response?.data,
+                                error: message,
+                                details,
                             },
                             null,
                             2,
@@ -423,7 +506,7 @@ export async function startMcpServer(): Promise<void> {
 
     // Read resources
     server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-        const uri = request.params.uri
+        const { uri } = request.params
 
         // Handle skill resources (no API call needed)
         if (uri.startsWith("freeclimb://skills/")) {
@@ -505,6 +588,18 @@ export async function startMcpServer(): Promise<void> {
                 description:
                     "Run FreeClimb CLI diagnostics to check connectivity and authentication",
             },
+            {
+                name: "dashboard",
+                description:
+                    "Generate a custom terminal monitoring dashboard for FreeClimb resources",
+                arguments: [
+                    {
+                        name: "focus",
+                        description: "What to monitor: calls, queues, sms, or health",
+                        required: false,
+                    },
+                ],
+            },
         ],
     }))
 
@@ -548,6 +643,22 @@ export async function startMcpServer(): Promise<void> {
                             content: {
                                 type: "text" as const,
                                 text: "Run diagnostics on the FreeClimb CLI setup. Use the get_account tool to verify connectivity and authentication, then report the account status.",
+                            },
+                        },
+                    ],
+                }
+            }
+            case "dashboard": {
+                const focus = request.params.arguments?.focus || "general"
+                const prompt = await getDashboardPromptLazy()
+                return {
+                    description: "Generate a FreeClimb monitoring dashboard",
+                    messages: [
+                        {
+                            role: "user" as const,
+                            content: {
+                                type: "text" as const,
+                                text: `${prompt}\n\nGenerate a terminal dashboard spec focused on: ${focus}. Use the FreeClimb data sources (calls, sms, queues, conferences, account, logs, numbers, applications) with $source bindings in the state. After generating the spec, use the render_dashboard tool to save and render it.`,
                             },
                         },
                     ],
