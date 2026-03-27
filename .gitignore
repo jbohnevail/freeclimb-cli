@@ -13,4 +13,16 @@ tsconfig.tsbuildinfo
 .DS_Store
 benchmarks/results/
 benchmarks/node_modules/
-benchmarks/dist/.claude/worktrees/
+benchmarks/dist/
+.claude/worktrees/
+
+# Generated files
+/oclif.manifest.json
+
+# Design/media assets (no longer committed)
+/*.PNG
+/*.png
+/freeclimb-cli-*.html
+
+# VHS demo output
+/demos/out/
