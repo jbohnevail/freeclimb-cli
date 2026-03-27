@@ -1,23 +1,20 @@
 export class Page {
+    private isPaginated = false
+
     private nextId?: string
 
     private pageNumber: number
 
-    private isPaginated = false
-
     constructor(output: string) {
-        const uri = /"nextPageUri": (?:[\s\S]*cursor=)?([0-9a-zA-Z]+)/g.exec(output)
-        const pageNum = /"page":[\s]*([\d]+)/g.exec(output)
+        const uri = /"nextPageUri": (?:[\S\s]*cursor=)?([\dA-Za-z]+)/g.exec(output)
+        const pageNum = /"page":\s*(\d+)/g.exec(output)
         if (uri !== null) {
             // otherwise each call to output would overwrite the next ID
             this.nextId = uri[1]
             this.isPaginated = true
         }
-        if (pageNum === null) {
-            this.pageNumber = 0
-        } else {
-            this.pageNumber = parseInt(pageNum[1], 10)
-        }
+
+        this.pageNumber = pageNum === null ? 0 : Number.parseInt(pageNum[1], 10)
     }
 
     /**
@@ -29,6 +26,7 @@ export class Page {
         if (this.isPaginated) {
             return this.nextId === "null" ? null : this.nextId
         }
+
         return undefined
     }
 
@@ -37,4 +35,4 @@ export class Page {
     }
 }
 
-export type Next = string | undefined | null
+export type Next = null | string | undefined

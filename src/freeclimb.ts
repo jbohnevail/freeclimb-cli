@@ -1,46 +1,47 @@
 import axios from "axios"
+
 import { cred } from "./credentials"
 import { Environment } from "./environment"
 import * as Errors from "./errors"
 
-type Errorer = { error(message: string, exitCode: { exit: number }): any }
+type Errorer = { error(message: string, exitCode: { exit: number }): void }
 
 type Body = { data: Record<string, any> }
-type Query = { params: Record<string, any> } // the linter recommends Record<string, any> to represent any object
+type Query = { params: Record<string, any> }
 
 type AxiosMethodType =
-    | "get"
-    | "GET"
-    | "delete"
     | "DELETE"
-    | "head"
+    | "GET"
     | "HEAD"
-    | "options"
-    | "OPTIONS"
-    | "post"
-    | "POST"
-    | "put"
-    | "PUT"
-    | "patch"
-    | "PATCH"
-    | "link"
     | "LINK"
-    | "unlink"
+    | "OPTIONS"
+    | "PATCH"
+    | "POST"
+    | "PUT"
     | "UNLINK"
+    | "delete"
+    | "get"
+    | "head"
+    | "link"
+    | "options"
+    | "patch"
+    | "post"
+    | "put"
+    | "unlink"
     | undefined
 
 export type FreeClimbErrorResponse = { response: Body }
 
-export type FreeClimbResponse = Body & { status: number }
+export type FreeClimbResponse = { status: number } & Body
 
 export class FreeClimbApi {
-    private endpoint: string
-
-    private errorHandler: Errorer
-
     private authenticate: boolean
 
     private baseUrl: string
+
+    private endpoint: string
+
+    private errorHandler: Errorer
 
     constructor(endpoint: string, authenticate: boolean, errorHandler: Errorer) {
         this.endpoint = endpoint.length > 0 ? `/${endpoint}` : ""
@@ -53,7 +54,7 @@ export class FreeClimbApi {
     async apiCall(
         method: AxiosMethodType,
         requestContent: any,
-        onSuccess: (response: FreeClimbResponse) => any,
+        onSuccess: (response: FreeClimbResponse) => void,
         onError = (error: any) => {
             let err: Errors.FreeClimbError
             if (error.message && error.code) {
@@ -63,6 +64,7 @@ export class FreeClimbApi {
             } else {
                 err = new Errors.DefaultFatalError(error)
             }
+
             this.errorHandler.error(err.message, { exit: err.code })
         }
     ) {
@@ -71,10 +73,10 @@ export class FreeClimbApi {
         await axios(
             `${this.baseUrl}${this.authenticate ? `/Accounts/${accountId}` : ``}${this.endpoint}`,
             {
-                method: method,
-                auth: { username: accountId, password: apiKey },
-                params: (requestContent as Query) ? (requestContent as Query).params : undefined,
+                auth: { password: apiKey, username: accountId },
                 data: (requestContent as Body) ? (requestContent as Body).data : undefined,
+                method,
+                params: (requestContent as Query) ? (requestContent as Query).params : undefined,
             }
         )
             .then(onSuccess)

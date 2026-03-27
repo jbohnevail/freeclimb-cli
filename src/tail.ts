@@ -3,42 +3,47 @@ export function sleep(ms: number) {
 }
 
 function processInput(timeStr: string) {
-    const regexp = /(?<number>\d+)(?<unit>[a-zA-Z]+)/g
-    const replacedStr = timeStr.replace(/^((?<number>\d+)(?<units>[a-zA-Z]+) *)+$/g, "")
+    const regexp = /(?<number>\d+)(?<unit>[A-Za-z]+)/g
+    const replacedStr = timeStr.replace(/^((?<number>\d+)(?<units>[A-Za-z]+) *)+$/g, "")
 
-    if (replacedStr.length !== 0) {
+    if (replacedStr.length > 0) {
         const err = new Error(`${replacedStr}`)
         err.name = "Incorrect Format - Missing Number or Unit"
         throw err
     }
 
     const finalOutput = []
-    let match: any
+    let match: RegExpExecArray | null
     while ((match = regexp.exec(timeStr.toLowerCase())) !== null) {
-        finalOutput.push({ unit: match.groups.unit, number: match.groups.number })
+        const { groups } = match
+        if (groups) {
+            finalOutput.push({ number: groups.number, unit: groups.unit })
+        }
     }
+
     return finalOutput
 }
 
 function convertTime(unit: string, time: number) {
     switch (unit) {
         case "w": {
-            return time * 604800000000
+            return time * 604_800_000_000
         }
 
         case "d": {
-            return time * 86400000000
+            return time * 86_400_000_000
         }
 
         case "h": {
-            return time * 3600000000
+            return time * 3_600_000_000
         }
 
         case "m": {
-            return time * 60000000
+            return time * 60_000_000
         }
+
         case "s": {
-            return time * 1000000
+            return time * 1_000_000
         }
 
         case "ms": {
@@ -61,8 +66,9 @@ export function calculateSinceTimestamp(since: string) {
     let total = 0
     const timeSeperation = processInput(since)
     for (const timeSegment of timeSeperation) {
-        const time = parseInt(timeSegment.number, 10)
+        const time = Number.parseInt(timeSegment.number, 10)
         total += convertTime(timeSegment.unit, time)
     }
+
     return total
 }

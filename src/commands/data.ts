@@ -8,7 +8,7 @@ export class data extends Command {
     }
 
     async run() {
-        const { flags } = this.parse(data)
+        this.parse(data)
         this.log(`FreeClimb CLI Data directory: ${this.config.dataDir}`)
         return this.config.dataDir
     }

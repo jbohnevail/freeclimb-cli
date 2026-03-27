@@ -1,10 +1,7 @@
-import Help from "@oclif/help"
-
 import * as Config from "@oclif/config"
-
-import * as indent from "indent-string"
-
+import Help from "@oclif/help"
 import chalk from "chalk"
+import * as indent from "indent-string"
 
 const { bold } = chalk
 
@@ -16,9 +13,9 @@ export default class FreeClimbHelpClass extends Help {
         const body = renderList(
             topics.map((c) => [c.name, c.description && this.render(c.description.split("\n")[0])]),
             {
+                maxWidth: this.opts.maxWidth - 2,
                 spacer: "\n",
                 stripAnsi: this.opts.stripAnsi,
-                maxWidth: this.opts.maxWidth - 2,
             }
         )
         return [

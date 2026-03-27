@@ -1,4 +1,5 @@
 {
+  "root": true,
   "extends": ["oclif", "oclif-typescript", "plugin:@typescript-eslint/recommended", "prettier"],
   "parser": "@typescript-eslint/parser",
   "plugins": [
@@ -21,7 +22,7 @@
     "no-var": ["error"],
     "no-param-reassign": ["error", { "props": false }],
     "no-underscore-dangle": ["error"],
-    "no-shadow": ["warn"],
+    "no-shadow": ["warn", { "allow": ["flags"] }],
     // in TS it is not uncommon to see constrcutors without bodies in ambient declarations
     "no-useless-constructor": "off",
     "no-use-before-define": "off",
@@ -54,6 +55,12 @@
   "overrides": [
     // eslint will lint ts and tsx files as well since they are matched in an overrides entry
     { "files": ["*.js", "*.ts"] },
+    {
+      "files": ["src/freeclimb.ts", "src/parse-errors.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
     // disable core no-unused-expressions rule in favor of a chai-friendly version for spec files
     {
       "files": ["*.spec.js", "*.spec.ts", "*.spec.tsx"],

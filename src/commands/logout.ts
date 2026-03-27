@@ -1,5 +1,6 @@
 import { Command, flags } from "@oclif/command"
 import chalk from "chalk"
+
 import { cred } from "../credentials"
 
 export class logout extends Command {
@@ -10,7 +11,7 @@ export class logout extends Command {
     }
 
     async run() {
-        const { flags } = this.parse(logout)
+        this.parse(logout)
         // this does not remove anything that may be set in .env, just what is in keychain
         await cred.removeCredentials(-1)
         this.log(

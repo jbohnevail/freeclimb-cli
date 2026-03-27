@@ -1,10 +1,10 @@
 import {
+    ArgInvalidOptionError,
+    FlagInvalidOptionError,
     InvalidArgsSpecError,
     RequiredArgsError,
     RequiredFlagError,
     UnexpectedArgsError,
-    FlagInvalidOptionError,
-    ArgInvalidOptionError,
 } from "../node_modules/@oclif/parser/lib/errors"
 
 export function parse(output: any) {
@@ -36,6 +36,7 @@ export function parse(output: any) {
             const list = renderList(namedArgs)
             suggestion += `${list}\n`
         }
+
         suggestion += `\n${formatArg()}`
     } else if (output instanceof UnexpectedArgsError) {
         code = 1010
@@ -57,6 +58,7 @@ export function parse(output: any) {
         for (i = 1; i < message.length; i++) {
             suggestion += `\n\t ${message[i]}`
         }
+
         code = 1011
         title = "Invalid Flag Input : Option"
         url = "https://docs.freeclimb.com/reference/error-and-warning-dictionary"
@@ -67,6 +69,7 @@ export function parse(output: any) {
         for (i = 1; i < message.length; i++) {
             suggestion += `\n\t ${message[i]}`
         }
+
         code = 1012
         title = "Invalid Argument Input : Option"
         url = "https://docs.freeclimb.com/reference/error-and-warning-dictionary"
@@ -77,11 +80,13 @@ export function parse(output: any) {
         for (i = 1; i < message.length; i++) {
             s += `${message[i]} `
         }
+
         code = 1013
         title = message[0]
         suggestion = s === "" ? "Check formatting of command" : s
         url = "https://docs.freeclimb.com/reference/error-and-warning-dictionary"
     }
+
     return returnFormat(code, title, url, suggestion)
 }
 
@@ -95,18 +100,21 @@ function returnFormat(code: number, message: string, url: string, suggestion: st
     `
 }
 
-function renderList(inputs: any) {
-    const mapInfo = inputs.map(info)
+function renderList(inputs: { description?: string; name?: string }[]) {
+    const mapInfo = inputs.map((item) => formatInfo(item))
     let i
     let output = ""
     for (i = 0; i < mapInfo.length; i++) {
         output += `${mapInfo[i]}\n`
     }
+
     return output
 }
 
-function renderFlag(input: any) {
-    return `-${input.char}, --${input.name} ${input.name.toUpperCase()} ${input.description}`
+function renderFlag(input: { char?: string; description?: string; name?: string }) {
+    return `-${input.char ?? ""}, --${input.name ?? ""} ${(input.name ?? "").toUpperCase()} ${
+        input.description ?? ""
+    }`
 }
 
 function formatFlag() {
@@ -116,7 +124,7 @@ function formatFlag() {
 function formatArg() {
     return `Arguments are formatted as followed:\n\n\t {input} \n\t "{input}" \n\t '{input}'\n`
 }
-function info(item: any) {
-    const info = [item.name, item.description].join(" : ")
-    return info
+
+function formatInfo(item: { description?: string; name?: string }) {
+    return [item.name, item.description].join(" : ")
 }

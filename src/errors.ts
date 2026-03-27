@@ -1,11 +1,12 @@
 import chalk from "chalk"
+
 import { errorWithSuggestions, returnFormat } from "./error-messages"
 import { parse } from "./parse-errors"
 
 export abstract class FreeClimbError {
-    message: string
-
     code: number
+
+    message: string
 
     constructor(newMessage: string, newCode: number) {
         this.message = chalk.red(newMessage)
@@ -14,18 +15,31 @@ export abstract class FreeClimbError {
 }
 
 export class ParseError extends FreeClimbError {
-    constructor(error: any) {
+    constructor(error: unknown) {
         super(parse(error), 2)
     }
 }
 export class FreeClimbAPIError extends FreeClimbError {
-    constructor(errorMessage: any) {
+    constructor(errorMessage: {
+        code?: number
+        error?: { code: number; message: string; url: string }
+        message?: string
+        status?: number
+        url?: string
+    }) {
         if (errorMessage.status) {
             super(invalidSuggestion(), 2)
         } else if (errorMessage.error) {
             super(errorWithSuggestions(errorMessage.error), 3)
         } else if (errorMessage.code) {
-            super(errorWithSuggestions(errorMessage), 3)
+            super(
+                errorWithSuggestions({
+                    code: errorMessage.code,
+                    message: errorMessage.message,
+                    url: errorMessage.url,
+                }),
+                3
+            )
         } else {
             super(JSON.stringify(errorMessage, null, 2), 3)
         }
@@ -47,7 +61,7 @@ export class UndefinedResponseError extends FreeClimbError {
 }
 
 export class DefaultFatalError extends FreeClimbError {
-    constructor(error: any) {
+    constructor(error: unknown) {
         super(
             returnFormat(
                 1021,
@@ -139,7 +153,7 @@ export class LoginCancelled extends FreeClimbError {
 }
 
 export class SinceFormatError extends FreeClimbError {
-    constructor(errorMessage: any) {
+    constructor(errorMessage: { message: string; name: string }) {
         if (errorMessage.name === "Incorrect Format - Invalid Unit") {
             super(
                 returnFormat(
