@@ -7,6 +7,7 @@ import {
     createRenderer,
 } from "@json-render/ink"
 import { z } from "zod"
+import { BrandColors } from "../ui/theme.js"
 import { CallStatusCard } from "./components/call-status-card.js"
 import { QueueDepthGauge } from "./components/queue-depth-gauge.js"
 import { LogStream } from "./components/log-stream.js"
@@ -58,6 +59,7 @@ export const freeclimbCatalog = defineCatalog(schema, {
     actions: standardActionDefinitions,
 })
 
+// json-render's ComponentMap generic requires ComponentRenderProps wrappers; custom components receive resolved props directly
 export const FreeclimbRenderer = createRenderer(freeclimbCatalog, {
     ...standardComponents,
     CallStatusCard,
@@ -65,9 +67,18 @@ export const FreeclimbRenderer = createRenderer(freeclimbCatalog, {
     LogStream,
 } as any)
 
+const MAX_CUSTOM_RULES = 50
+const MAX_RULE_LENGTH = 500
+
 export function getDashboardPrompt(customRules?: string[]): string {
+    if (customRules && customRules.length > MAX_CUSTOM_RULES) {
+        throw new Error(`Too many custom rules (max ${MAX_CUSTOM_RULES})`)
+    }
+    const safeRules = customRules?.map((r) =>
+        r.length > MAX_RULE_LENGTH ? r.slice(0, MAX_RULE_LENGTH) : r,
+    )
     const rules = [
-        "Use FreeClimb brand colors: lightTeal=#26697a, orange=#fa660a, lime=#c2ff18",
+        `Use FreeClimb brand colors: lightTeal=${BrandColors.lightTeal}, orange=${BrandColors.orange}, lime=${BrandColors.lime}`,
         "Use Metric components for KPI cards at the top of dashboards",
         "Use Table for listing resources (calls, SMS, queues)",
         "Use BarChart or Sparkline for visualizing counts by status",
@@ -77,7 +88,7 @@ export function getDashboardPrompt(customRules?: string[]): string {
         "Use StatusLine for refresh timestamps and status messages",
         "Wrap sections in Card components with descriptive titles",
         "Use Box with flexDirection='row' to place metrics side by side",
-        ...(customRules || []),
+        ...(safeRules || []),
     ]
 
     return freeclimbCatalog.prompt({

@@ -3,7 +3,8 @@ import { readFileSync } from "node:fs"
 import { isTTY } from "../ui/theme.js"
 import { cred } from "../credentials.js"
 import type { DashboardSpec, PresetName } from "../dashboard/types.js"
-import { PRESET_NAMES } from "../dashboard/types.js"
+import { PRESET_NAMES, parseDashboardSpec } from "../dashboard/types.js"
+import { validateSourceBindings } from "../dashboard/data.js"
 import { loadPreset, listPresets } from "../dashboard/presets/index.js"
 
 export class Dashboard extends Command {
@@ -76,10 +77,9 @@ Examples:
         if (flags.spec) {
             try {
                 const content = readFileSync(flags.spec, "utf-8")
-                spec = JSON.parse(content) as DashboardSpec
+                spec = parseDashboardSpec(JSON.parse(content))
             } catch (error: unknown) {
-                const msg =
-                    error instanceof Error ? error.message : String(error)
+                const msg = error instanceof Error ? error.message : String(error)
                 this.error(`Failed to load spec from ${flags.spec}: ${msg}`, {
                     exit: 1,
                 })
@@ -87,12 +87,19 @@ Examples:
         } else {
             const presetName = (args.preset || "calls") as PresetName
             if (!PRESET_NAMES.includes(presetName)) {
-                this.error(
-                    `Unknown preset: ${presetName}. Available: ${PRESET_NAMES.join(", ")}`,
-                    { exit: 1 },
-                )
+                this.error(`Unknown preset: ${presetName}. Available: ${PRESET_NAMES.join(", ")}`, {
+                    exit: 1,
+                })
             }
             spec = loadPreset(presetName)
+        }
+
+        // Validate data source bindings in the spec
+        try {
+            validateSourceBindings(spec)
+        } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error)
+            this.error(msg, { exit: 1 })
         }
 
         // JSON mode — output spec and exit
@@ -104,10 +111,7 @@ Examples:
         // Verify credentials before launching persistent render
         const accountId = await cred.accountId
         if (!accountId) {
-            this.error(
-                "Not logged in. Run 'freeclimb login' to authenticate.",
-                { exit: 1 },
-            )
+            this.error("Not logged in. Run 'freeclimb login' to authenticate.", { exit: 1 })
         }
 
         const refreshMs = Math.max(flags.refresh, 10) * 1000

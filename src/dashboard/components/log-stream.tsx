@@ -36,10 +36,9 @@ export function LogStream({ entries, maxLines }: LogStreamProps): ReactElement {
     return (
         <Box flexDirection="column">
             {visible.map((entry, i) => {
-                const levelColor =
-                    LEVEL_COLORS[entry.level.toLowerCase()] || "#8b949e"
+                const levelColor = LEVEL_COLORS[entry.level.toLowerCase()] || "#8b949e"
                 return (
-                    <Box gap={1} key={i}>
+                    <Box gap={1} key={`${entry.timestamp}-${i}`}>
                         <Text dimColor>{formatTimestamp(entry.timestamp)}</Text>
                         <Text bold color={levelColor}>
                             {entry.level.toUpperCase().padEnd(5)}

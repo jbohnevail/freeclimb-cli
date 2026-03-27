@@ -1,6 +1,7 @@
 import React from "react"
 import { render, Box } from "ink"
 import { JSONUIProvider } from "@json-render/ink"
+import type { StateStore, Spec } from "@json-render/core"
 import { createStateStore } from "@json-render/core"
 import { getTerminalWidth } from "../ui/theme.js"
 import { TerminalWidthProvider } from "../ui/ink/terminal-context.js"
@@ -8,19 +9,25 @@ import { FreeclimbRenderer } from "./catalog.js"
 import { DashboardDataManager } from "./data.js"
 import type { DashboardSpec } from "./types.js"
 
+const RENDER_SETTLE_MS = 100
+
 interface DashboardAppProps {
     spec: DashboardSpec
+    store: StateStore
     width: number
 }
 
-function DashboardApp({ spec, width }: DashboardAppProps): React.ReactElement {
+function DashboardApp({ spec, store, width }: DashboardAppProps): React.ReactElement {
     return React.createElement(
         TerminalWidthProvider,
         { value: width },
         React.createElement(
             Box,
             { flexDirection: "column", width },
-            React.createElement(FreeclimbRenderer, { spec } as any),
+            React.createElement(FreeclimbRenderer, {
+                spec: spec as unknown as Spec,
+                store,
+            }),
         ),
     )
 }
@@ -31,26 +38,24 @@ export interface RenderOptions {
     spec: DashboardSpec
 }
 
-export async function renderDashboard({
-    spec,
-    refreshMs,
-    once,
-}: RenderOptions): Promise<void> {
+export async function renderDashboard({ spec, refreshMs, once }: RenderOptions): Promise<void> {
     const width = getTerminalWidth()
     const stateStore = createStateStore(spec.state || {})
 
-    const dataManager = new DashboardDataManager((updates) => {
-        for (const { path, value } of updates) {
-            stateStore.set(path, value)
-        }
-    })
+    const dataManager = new DashboardDataManager(
+        (updates) => {
+            for (const { path, value } of updates) {
+                stateStore.set(path, value)
+            }
+        },
+        (source, error) => {
+            process.stderr.write(`[dashboard] ${source} error: ${error.message}\n`)
+        },
+    )
 
+    const appElement = React.createElement(DashboardApp, { spec, store: stateStore, width })
     const instance = render(
-        React.createElement(
-            JSONUIProvider as any,
-            { initialState: spec.state || {} },
-            React.createElement(DashboardApp, { spec, width }),
-        ),
+        React.createElement(JSONUIProvider, { store: stateStore, children: appElement }),
     )
 
     const cleanup = () => {
@@ -58,12 +63,12 @@ export async function renderDashboard({
         instance.unmount()
     }
 
-    process.on("SIGINT", () => {
+    process.once("SIGINT", () => {
         cleanup()
         process.exit(0)
     })
 
-    process.on("SIGTERM", () => {
+    process.once("SIGTERM", () => {
         cleanup()
         process.exit(0)
     })
@@ -71,7 +76,7 @@ export async function renderDashboard({
     if (once) {
         try {
             await dataManager.start(spec, refreshMs)
-            await new Promise((resolve) => setTimeout(resolve, 100))
+            await new Promise((resolve) => setTimeout(resolve, RENDER_SETTLE_MS))
         } finally {
             cleanup()
         }
