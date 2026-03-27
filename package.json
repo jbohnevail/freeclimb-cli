@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^8.3.2",
+    "@json-render/core": "^0.15.0",
+    "@json-render/ink": "^0.15.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@napi-rs/keyring": "^1",
     "@ngrok/ngrok": "^1.7.0",
@@ -124,6 +126,9 @@
       },
       "accounts": {
         "description": " You get a FreeClimb Account at signup. This includes an account ID and an API key. These two properties enable you to connect and communicate with FreeClimb."
+      },
+      "dashboard": {
+        "description": "AI-driven terminal dashboards for monitoring FreeClimb resources"
       }
     }
   },

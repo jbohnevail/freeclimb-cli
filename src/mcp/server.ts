@@ -18,8 +18,13 @@ import {
 import { readFileSync, existsSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
+import { writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { createApiAxios } from "../http.js"
 import { tools, ToolName } from "./tools.js"
+import { getDashboardPrompt } from "../dashboard/catalog.js"
+import { loadPreset } from "../dashboard/presets/index.js"
+import type { PresetName } from "../dashboard/types.js"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkgPath = join(__dirname, "../../package.json")
@@ -313,6 +318,29 @@ async function handleToolCall(name: ToolName, args: Record<string, unknown>): Pr
             ).data
         }
 
+        // Dashboard generation (local, no API call)
+        case "generate_dashboard_prompt": {
+            const prompt = getDashboardPrompt()
+            let result = prompt
+            if (args.preset) {
+                const presetSpec = loadPreset(args.preset as PresetName)
+                result += `\n\n---\n\nHere is the "${args.preset}" preset spec as a starting point:\n\n\`\`\`json\n${JSON.stringify(presetSpec, null, 2)}\n\`\`\``
+            }
+            return result
+        }
+
+        case "render_dashboard": {
+            const specJson = JSON.stringify(args.spec, null, 2)
+            const tmpPath = join(tmpdir(), `freeclimb-dashboard-${Date.now()}.json`)
+            writeFileSync(tmpPath, specJson, "utf-8")
+            const refreshFlag = args.refresh ? ` --refresh ${args.refresh}` : ""
+            return {
+                message: "Dashboard spec saved. Run this command to render it:",
+                command: `freeclimb dashboard --spec "${tmpPath}"${refreshFlag}`,
+                specPath: tmpPath,
+            }
+        }
+
         // PerCL generation (local, no API call)
         case "generate_percl": {
             return generatePerclPattern(
@@ -505,6 +533,19 @@ export async function startMcpServer(): Promise<void> {
                 description:
                     "Run FreeClimb CLI diagnostics to check connectivity and authentication",
             },
+            {
+                name: "dashboard",
+                description:
+                    "Generate a custom terminal monitoring dashboard for FreeClimb resources",
+                arguments: [
+                    {
+                        name: "focus",
+                        description:
+                            "What to monitor: calls, queues, sms, or health",
+                        required: false,
+                    },
+                ],
+            },
         ],
     }))
 
@@ -548,6 +589,22 @@ export async function startMcpServer(): Promise<void> {
                             content: {
                                 type: "text" as const,
                                 text: "Run diagnostics on the FreeClimb CLI setup. Use the get_account tool to verify connectivity and authentication, then report the account status.",
+                            },
+                        },
+                    ],
+                }
+            }
+            case "dashboard": {
+                const focus = request.params.arguments?.focus || "general"
+                const prompt = getDashboardPrompt()
+                return {
+                    description: "Generate a FreeClimb monitoring dashboard",
+                    messages: [
+                        {
+                            role: "user" as const,
+                            content: {
+                                type: "text" as const,
+                                text: `${prompt}\n\nGenerate a terminal dashboard spec focused on: ${focus}. Use the FreeClimb data sources (calls, sms, queues, conferences, account, logs, numbers, applications) with $source bindings in the state. After generating the spec, use the render_dashboard tool to save and render it.`,
                             },
                         },
                     ],
