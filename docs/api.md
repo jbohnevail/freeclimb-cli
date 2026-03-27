@@ -22,8 +22,8 @@ Make authenticated API requests to FreeClimb.
 
 ```
 USAGE
-  $ freeclimb api [ENDPOINT] [-X GET|POST|PUT|DELETE] [-d <value>] [-p <value>...] [--fields <value>]
-    [--json] [--raw] [--dry-run] [-h]
+  $ freeclimb api [ENDPOINT] [-X GET|POST|PUT|DELETE] [-d <value>] [--stdin] [-p <value>...] [--fields
+    <value>] [--json] [--raw] [--dry-run] [-h]
 
 ARGUMENTS
   [ENDPOINT]  API endpoint path (e.g., /Calls, /Messages)
@@ -39,6 +39,7 @@ FLAGS
                           windows when used by agents.
       --json              Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
       --raw               Output raw response without wrapping
+      --stdin             Read JSON request body from stdin instead of --data flag
 
 DESCRIPTION
   Make authenticated API requests to FreeClimb.
@@ -69,6 +70,8 @@ EXAMPLES
   $ freeclimb api /Calls --fields callId,status,from,to
 
   $ freeclimb api /Messages --method POST --dry-run -d '{"to":"+15551234567"}'
+
+  $ echo '{"to":"+15551234567","from":"+15559876543","text":"Hello"}' | freeclimb api /Messages --method POST --stdin
 ```
 
 _See code: [src/commands/api.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/api.ts)_

@@ -4,9 +4,9 @@
 A Conference represents a call between two or more participants.
 
 * [`freeclimb conferences:create`](#freeclimb-conferencescreate)
-* [`freeclimb conferences:get [CONFERENCEID]`](#freeclimb-conferencesget-conferenceid)
+* [`freeclimb conferences:get CONFERENCEID`](#freeclimb-conferencesget-conferenceid)
 * [`freeclimb conferences:list`](#freeclimb-conferenceslist)
-* [`freeclimb conferences:update [CONFERENCEID]`](#freeclimb-conferencesupdate-conferenceid)
+* [`freeclimb conferences:update CONFERENCEID`](#freeclimb-conferencesupdate-conferenceid)
 
 ## `freeclimb conferences:create`
 
@@ -14,8 +14,8 @@ Create an empty Conference within the specified account.
 
 ```
 USAGE
-  $ freeclimb conferences:create [-a <value>] [-b <value>] [-r true|false] [-w <value>] [-s <value>] [--json] [--fields
-    <value>] [--dry-run] [-h]
+  $ freeclimb conferences:create [-a <value>] [-b <value>] [-r true|false] [-w <value>] [-s <value>] [--json] [--quiet]
+    [--fields <value>] [--dry-run] [-h]
 
 FLAGS
   -a, --alias=<value>              A description for this Conference. Maximum 64 characters.
@@ -31,33 +31,46 @@ FLAGS
       --dry-run                    Validate the request without executing it. Shows what would be sent to the API.
       --fields=<value>             Comma-separated list of fields to include in the response. Limits output to protect
                                    context windows when used by agents.
-      --json                       Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
+      --json                       Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json
+                                   is set.
+      --quiet                      Output only resource IDs, one per line. Useful for piping into other commands.
 
 DESCRIPTION
   Create an empty Conference within the specified account.
+
+EXAMPLES
+  $ freeclimb conferences:create --alias "Team Standup"
+
+  $ freeclimb conferences:create --json --dry-run
 ```
 
 _See code: [src/commands/conferences/create.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/conferences/create.ts)_
 
-## `freeclimb conferences:get [CONFERENCEID]`
+## `freeclimb conferences:get CONFERENCEID`
 
 Retrieve a representation of the specified conference.
 
 ```
 USAGE
-  $ freeclimb conferences:get [CONFERENCEID] [--json] [--fields <value>] [-h]
+  $ freeclimb conferences:get CONFERENCEID [--json] [--quiet] [--fields <value>] [-h]
 
 ARGUMENTS
-  [CONFERENCEID]  A string that uniquely identifies this conference resource.
+  CONFERENCEID  A string that uniquely identifies this conference resource.
 
 FLAGS
   -h, --help            Show CLI help.
       --fields=<value>  Comma-separated list of fields to include in the response. Limits output to protect context
                         windows when used by agents.
-      --json            Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
+      --json            Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.
+      --quiet           Output only resource IDs, one per line. Useful for piping into other commands.
 
 DESCRIPTION
   Retrieve a representation of the specified conference.
+
+EXAMPLES
+  $ freeclimb conferences:get CF1234567890abcdef
+
+  $ freeclimb conferences:get CF1234567890abcdef --json
 ```
 
 _See code: [src/commands/conferences/get.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/conferences/get.ts)_
@@ -68,8 +81,8 @@ Retrieve a list of Conferences associated with the specified account, sorted by 
 
 ```
 USAGE
-  $ freeclimb conferences:list [-S <value>] [-a <value>] [-d <value>] [-D <value>] [-n] [--json] [--fields <value>]
-    [-h]
+  $ freeclimb conferences:list [-S <value>] [-a <value>] [-d <value>] [-D <value>] [-n] [--json] [--quiet] [--fields
+    <value>] [-h]
 
 FLAGS
   -D, --dateUpdated=<value>  Only show Conferences that were last updated on the specified date, in the form YYYY-MM-DD.
@@ -81,25 +94,34 @@ FLAGS
   -n, --next                 Displays the next page of output.
       --fields=<value>       Comma-separated list of fields to include in the response. Limits output to protect context
                              windows when used by agents.
-      --json                 Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
+      --json                 Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is
+                             set.
+      --quiet                Output only resource IDs, one per line. Useful for piping into other commands.
 
 DESCRIPTION
   Retrieve a list of Conferences associated with the specified account, sorted by creation date, newest to oldest.
+
+EXAMPLES
+  $ freeclimb conferences:list
+
+  $ freeclimb conferences:list --status inProgress --json
+
+  $ freeclimb conferences:list --quiet
 ```
 
 _See code: [src/commands/conferences/list.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/conferences/list.ts)_
 
-## `freeclimb conferences:update [CONFERENCEID]`
+## `freeclimb conferences:update CONFERENCEID`
 
 Update the properties of the specified conference.
 
 ```
 USAGE
-  $ freeclimb conferences:update [CONFERENCEID] [-a <value>] [-b <value>] [-S <value>] [--json] [--fields <value>]
-    [--dry-run] [-h]
+  $ freeclimb conferences:update CONFERENCEID [-a <value>] [-b <value>] [-S <value>] [--json] [--quiet] [--fields
+    <value>] [--dry-run] [-h]
 
 ARGUMENTS
-  [CONFERENCEID]  String that uniquely identifies this conference resource.
+  CONFERENCEID  String that uniquely identifies this conference resource.
 
 FLAGS
   -S, --status=<value>    New status of the conference. Valid values: empty or terminated.
@@ -109,10 +131,16 @@ FLAGS
       --dry-run           Validate the request without executing it. Shows what would be sent to the API.
       --fields=<value>    Comma-separated list of fields to include in the response. Limits output to protect context
                           windows when used by agents.
-      --json              Output as structured JSON. Also enabled via FREECLIMB_OUTPUT_FORMAT=json env var.
+      --json              Output as JSON. Auto-enabled when stdout is not a TTY or FREECLIMB_OUTPUT_FORMAT=json is set.
+      --quiet             Output only resource IDs, one per line. Useful for piping into other commands.
 
 DESCRIPTION
   Update the properties of the specified conference.
+
+EXAMPLES
+  $ freeclimb conferences:update CF1234567890abcdef --status terminated
+
+  $ freeclimb conferences:update CF1234567890abcdef --status terminated --dry-run
 ```
 
 _See code: [src/commands/conferences/update.ts](https://github.com/FreeClimbAPI/freeclimb-cli/blob/v0.6.0/src/commands/conferences/update.ts)_

@@ -6,6 +6,8 @@
 - `work` = `jbohnevail/freeclimb-cli` (fork, push here)
 - **NEVER create PRs against FreeClimbAPI/freeclimb-cli**
 - Always: `git push work <branch>` and `gh pr create --repo jbohnevail/freeclimb-cli`
+- **Always base new branches on `work/main`** (never `origin/main`): `git checkout work/main -b <type>/<desc>`
+- Before starting work, verify you're current: `git log --oneline work/main -1`
 
 TypeScript CLI for the FreeClimb voice/SMS communications API, built with oclif v4.
 
