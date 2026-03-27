@@ -1,0 +1,10 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Strip Claude Code attribution from commit messages
+sed -i '/^Co-Authored-By:.*[Cc]laude/d' "$1"
+sed -i '/Generated with \[Claude Code\]/d' "$1"
+sed -i '/🤖 Generated with \[Claude Code\]/d' "$1"
+
+# Remove trailing blank lines left behind
+sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$1"
