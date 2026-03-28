@@ -1,15 +1,15 @@
 import axios from "axios"
 
 export interface ForwardResult {
-    statusCode: number
     body: unknown
     headers: Record<string, string>
     latencyMs: number
+    statusCode: number
 }
 
 export interface ForwardError {
-    error: string
     code: string
+    error: string
 }
 
 export type ForwardResponse = ForwardResult | ForwardError
@@ -55,11 +55,11 @@ export async function forwardRequest(
             headers: responseHeaders,
             latencyMs: Date.now() - start,
         }
-    } catch (err: unknown) {
-        const error = err as { code?: string; message?: string }
+    } catch (error: unknown) {
+        const typedError = error as { code?: string; message?: string }
         return {
-            error: error.message || "Unknown error",
-            code: error.code || "UNKNOWN",
+            error: typedError.message || "Unknown error",
+            code: typedError.code || "UNKNOWN",
         }
     }
 }

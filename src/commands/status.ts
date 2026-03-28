@@ -5,17 +5,23 @@ import { cred } from "../credentials.js"
 import { Environment } from "../environment.js"
 import { wrapJsonOutput } from "../ui/format.js"
 import { createSpinner } from "../ui/spinner.js"
-import { borderedBox, keyValue, statusBadge, sectionSeparator, quickActions } from "../ui/components.js"
+import {
+    borderedBox,
+    keyValue,
+    statusBadge,
+    sectionSeparator,
+    quickActions,
+} from "../ui/components.js"
 import { BrandColors, supportsColor, isTTY, truncate, getTerminalWidth } from "../ui/theme.js"
 import { icons, getBoxChars } from "../ui/chars.js"
 
 interface AccountStatus {
     accountId: string
-    type: string
-    status: string
+    applicationsCount?: number
     balance?: string
     numbersCount?: number
-    applicationsCount?: number
+    status: string
+    type: string
 }
 
 export class Status extends Command {
@@ -46,15 +52,13 @@ Use --json for machine-readable output.
         const apiKey = await cred.apiKey
 
         if (!accountId || !apiKey) {
-            this.error(
-                chalk.red("Not logged in. Run 'freeclimb login' to authenticate."),
-                { exit: 1 }
-            )
+            this.error(chalk.red("Not logged in. Run 'freeclimb login' to authenticate."), {
+                exit: 1,
+            })
         }
 
         const baseUrl =
-            Environment.getString("FREECLIMB_CLI_BASE_URL") ||
-            "https://www.freeclimb.com/apiserver"
+            Environment.getString("FREECLIMB_CLI_BASE_URL") || "https://www.freeclimb.com/apiserver"
 
         const client = axios.create({
             baseURL: `${baseUrl}/Accounts/${accountId}`,
@@ -62,9 +66,8 @@ Use --json for machine-readable output.
         })
 
         // Show spinner for TTY, silent for non-TTY/JSON
-        const spinner = !flags.json && isTTY()
-            ? createSpinner({ text: "Fetching account status..." })
-            : null
+        const spinner =
+            !flags.json && isTTY() ? createSpinner({ text: "Fetching account status..." }) : null
 
         try {
             spinner?.start()
@@ -103,10 +106,8 @@ Use --json for machine-readable output.
 
             if (error.response?.status === 401) {
                 this.error(
-                    chalk.red(
-                        "Authentication failed. Run 'freeclimb login' to re-authenticate."
-                    ),
-                    { exit: 1 }
+                    chalk.red("Authentication failed. Run 'freeclimb login' to re-authenticate."),
+                    { exit: 1 },
                 )
             }
             this.error(chalk.red(`Failed to fetch account status: ${error.message}`), {
@@ -126,11 +127,14 @@ Use --json for machine-readable output.
         const lines: string[] = []
 
         // Account info section
-        const accountInfo = keyValue([
-            { key: "Account ID", value: truncate(status.accountId, valueMaxLen) },
-            { key: "Type", value: statusBadge(status.type) },
-            { key: "Status", value: statusBadge(status.status) },
-        ], 14)
+        const accountInfo = keyValue(
+            [
+                { key: "Account ID", value: truncate(status.accountId, valueMaxLen) },
+                { key: "Type", value: statusBadge(status.type) },
+                { key: "Status", value: statusBadge(status.status) },
+            ],
+            14,
+        )
 
         // Add balance if available
         if (status.balance) {
@@ -147,18 +151,25 @@ Use --json for machine-readable output.
         lines.push(sectionSeparator("Resources", width))
         lines.push("")
 
-        const resourceInfo = keyValue([
-            {
-                key: "Phone Numbers",
-                value: `${status.numbersCount} owned`,
-                valueColor: status.numbersCount && status.numbersCount > 0 ? "success" : undefined,
-            },
-            {
-                key: "Applications",
-                value: `${status.applicationsCount} configured`,
-                valueColor: status.applicationsCount && status.applicationsCount > 0 ? "success" : undefined,
-            },
-        ], 14)
+        const resourceInfo = keyValue(
+            [
+                {
+                    key: "Phone Numbers",
+                    value: `${status.numbersCount} owned`,
+                    valueColor:
+                        status.numbersCount && status.numbersCount > 0 ? "success" : undefined,
+                },
+                {
+                    key: "Applications",
+                    value: `${status.applicationsCount} configured`,
+                    valueColor:
+                        status.applicationsCount && status.applicationsCount > 0
+                            ? "success"
+                            : undefined,
+                },
+            ],
+            14,
+        )
 
         lines.push(...resourceInfo)
 

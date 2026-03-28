@@ -10,14 +10,14 @@ import { BrandColors, supportsColor, isTTY, getTerminalWidth } from "../ui/theme
 import { icons, getBoxChars } from "../ui/chars.js"
 
 interface DiagnoseResult {
-    timestamp: string
     checks: {
+        details?: string
+        message: string
         name: string
         status: "pass" | "fail" | "warn"
-        message: string
-        details?: string
     }[]
     overallStatus: "healthy" | "degraded" | "error"
+    timestamp: string
 }
 
 export class Diagnose extends Command {
@@ -105,7 +105,7 @@ Useful for troubleshooting authentication or connectivity issues.
         name: string,
         status: "pass" | "fail" | "warn",
         message: string,
-        details?: string
+        details?: string,
     ): void {
         result.checks.push({ name, status, message, details })
 
@@ -148,17 +148,15 @@ Useful for troubleshooting authentication or connectivity issues.
                     checkName,
                     "fail",
                     "No credentials found",
-                    "Run 'freeclimb login' to configure credentials"
+                    "Run 'freeclimb login' to configure credentials",
                 )
                 return
             }
 
             const envAccountId =
-                Environment.getString("FREECLIMB_ACCOUNT_ID") ||
-                Environment.getString("ACCOUNT_ID")
+                Environment.getString("FREECLIMB_ACCOUNT_ID") || Environment.getString("ACCOUNT_ID")
             const envApiKey =
-                Environment.getString("FREECLIMB_API_KEY") ||
-                Environment.getString("API_KEY")
+                Environment.getString("FREECLIMB_API_KEY") || Environment.getString("API_KEY")
 
             let source = "keytar (secure storage)"
             if (envAccountId && envApiKey) {
@@ -170,7 +168,7 @@ Useful for troubleshooting authentication or connectivity issues.
                 checkName,
                 "pass",
                 `Credentials configured via ${source}`,
-                `Account ID: ${accountId.substring(0, 10)}...`
+                `Account ID: ${accountId.substring(0, 10)}...`,
             )
         } catch (error: any) {
             this.endCheck(result, checkName, "fail", "Failed to read credentials", error.message)
@@ -182,8 +180,7 @@ Useful for troubleshooting authentication or connectivity issues.
         this.startCheck(checkName)
 
         const baseUrl =
-            Environment.getString("FREECLIMB_CLI_BASE_URL") ||
-            "https://www.freeclimb.com/apiserver"
+            Environment.getString("FREECLIMB_CLI_BASE_URL") || "https://www.freeclimb.com/apiserver"
 
         try {
             const start = Date.now()
@@ -196,7 +193,7 @@ Useful for troubleshooting authentication or connectivity issues.
                     checkName,
                     "warn",
                     `API reachable but slow (${latency}ms)`,
-                    "Check your network connection"
+                    "Check your network connection",
                 )
             } else {
                 this.endCheck(result, checkName, "pass", `API reachable (${latency}ms)`, baseUrl)
@@ -208,10 +205,16 @@ Useful for troubleshooting authentication or connectivity issues.
                     checkName,
                     "fail",
                     "Cannot connect to FreeClimb API",
-                    "Check your internet connection"
+                    "Check your internet connection",
                 )
             } else if (error.code === "ETIMEDOUT") {
-                this.endCheck(result, checkName, "fail", "Connection timed out", "Network may be slow or blocked")
+                this.endCheck(
+                    result,
+                    checkName,
+                    "fail",
+                    "Connection timed out",
+                    "Network may be slow or blocked",
+                )
             } else {
                 this.endCheck(result, checkName, "warn", "API check returned error", error.message)
             }
@@ -235,13 +238,10 @@ Useful for troubleshooting authentication or connectivity issues.
                 Environment.getString("FREECLIMB_CLI_BASE_URL") ||
                 "https://www.freeclimb.com/apiserver"
 
-            const response = await axios.get(
-                `${baseUrl}/Accounts/${accountId}`,
-                {
-                    auth: { username: accountId, password: apiKey },
-                    timeout: 10000,
-                }
-            )
+            const response = await axios.get(`${baseUrl}/Accounts/${accountId}`, {
+                auth: { username: accountId, password: apiKey },
+                timeout: 10000,
+            })
 
             if (response.status === 200) {
                 this.endCheck(result, checkName, "pass", "Authentication successful")
@@ -253,12 +253,24 @@ Useful for troubleshooting authentication or connectivity issues.
                     checkName,
                     "fail",
                     "Invalid credentials",
-                    "Run 'freeclimb login' to re-authenticate"
+                    "Run 'freeclimb login' to re-authenticate",
                 )
             } else if (error.response?.status === 403) {
-                this.endCheck(result, checkName, "fail", "Account access denied", "Check your account status")
+                this.endCheck(
+                    result,
+                    checkName,
+                    "fail",
+                    "Account access denied",
+                    "Check your account status",
+                )
             } else {
-                this.endCheck(result, checkName, "fail", "Authentication check failed", error.message)
+                this.endCheck(
+                    result,
+                    checkName,
+                    "fail",
+                    "Authentication check failed",
+                    error.message,
+                )
             }
         }
     }
@@ -280,13 +292,10 @@ Useful for troubleshooting authentication or connectivity issues.
                 Environment.getString("FREECLIMB_CLI_BASE_URL") ||
                 "https://www.freeclimb.com/apiserver"
 
-            const response = await axios.get(
-                `${baseUrl}/Accounts/${accountId}`,
-                {
-                    auth: { username: accountId, password: apiKey },
-                    timeout: 10000,
-                }
-            )
+            const response = await axios.get(`${baseUrl}/Accounts/${accountId}`, {
+                auth: { username: accountId, password: apiKey },
+                timeout: 10000,
+            })
 
             const account = response.data
             const status = account.status?.toLowerCase()
@@ -296,7 +305,13 @@ Useful for troubleshooting authentication or connectivity issues.
                 const typeLabel = type === "trial" ? " (trial)" : ""
                 this.endCheck(result, checkName, "pass", `Account active${typeLabel}`)
             } else if (status === "suspended") {
-                this.endCheck(result, checkName, "fail", "Account suspended", "Contact support@freeclimb.com")
+                this.endCheck(
+                    result,
+                    checkName,
+                    "fail",
+                    "Account suspended",
+                    "Contact support@freeclimb.com",
+                )
             } else {
                 this.endCheck(result, checkName, "warn", `Account status: ${status}`)
             }
@@ -305,7 +320,13 @@ Useful for troubleshooting authentication or connectivity issues.
             if (error.response?.status === 401 || error.response?.status === 403) {
                 this.endCheck(result, checkName, "fail", "Cannot check - authentication failed")
             } else {
-                this.endCheck(result, checkName, "warn", "Could not fetch account status", error.message)
+                this.endCheck(
+                    result,
+                    checkName,
+                    "warn",
+                    "Could not fetch account status",
+                    error.message,
+                )
             }
         }
     }
@@ -324,7 +345,7 @@ Useful for troubleshooting authentication or connectivity issues.
 
         summaryLines.push("")
         summaryLines.push(
-            `  ${icons.success()} ${passCount} passed  ${icons.error()} ${failCount} failed  ${icons.warning()} ${warnCount} warnings`
+            `  ${icons.success()} ${passCount} passed  ${icons.error()} ${failCount} failed  ${icons.warning()} ${warnCount} warnings`,
         )
         summaryLines.push("")
 
@@ -367,8 +388,8 @@ Useful for troubleshooting authentication or connectivity issues.
                 statusColor === "success"
                     ? chalk.hex("#3fb950")
                     : statusColor === "warning"
-                    ? chalk.hex(BrandColors.orange)
-                    : chalk.red
+                      ? chalk.hex(BrandColors.orange)
+                      : chalk.red
             for (const line of wrappedLines) {
                 summaryLines.push(`  ${colorFn(line)}`)
             }

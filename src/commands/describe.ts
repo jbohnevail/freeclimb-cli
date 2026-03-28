@@ -2,30 +2,30 @@ import { Args, Command, Flags, Interfaces } from "@oclif/core"
 import { getOutputFormat } from "../agent-config.js"
 
 interface CommandSchema {
+    args: Array<{
+        description: string
+        name: string
+        required: boolean
+    }>
     command: string
     description: string
     flags: Record<
         string,
         {
-            type: string
-            required: boolean
-            description: string
-            options?: string[]
             char?: string
             default?: unknown
+            description: string
+            options?: string[]
+            required: boolean
+            type: string
         }
     >
-    args: Array<{
-        name: string
-        required: boolean
-        description: string
-    }>
 }
 
 interface TopicSchema {
-    topic: string
-    description: string
     commands: string[]
+    description: string
+    topic: string
 }
 
 export class Describe extends Command {
@@ -42,8 +42,12 @@ Examples:
 `
 
     static args = {
-		command_or_topic: Args.string({description: "Command (e.g. calls:list) or topic (e.g. calls) to describe", required: false}),
-	}
+        // eslint-disable-next-line camelcase
+        command_or_topic: Args.string({
+            description: "Command (e.g. calls:list) or topic (e.g. calls) to describe",
+            required: false,
+        }),
+    }
 
     static flags = {
         all: Flags.boolean({

@@ -78,7 +78,7 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
     async run() {
         const { flags } = await this.parse(Dev)
         const jsonMode = flags.json || !isTTY()
-        const dataDir = this.config.dataDir
+        const { dataDir } = this.config
 
         // Validate inputs
         if (flags.number) validateResourceId(flags.number, "number")
@@ -96,6 +96,7 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
             async () => {
                 await this.tunnel?.stop().catch(() => {})
                 await this.proxy?.stop().catch(() => {})
+                // eslint-disable-next-line unicorn/no-process-exit
                 process.exit(0)
             },
         )
@@ -113,10 +114,10 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
         try {
             proxyPort = await this.proxy.start()
             proxySpinner?.succeed(`Proxy server listening on port ${proxyPort}`)
-        } catch (err: unknown) {
-            const error = err as Error
-            proxySpinner?.fail(`Failed to start proxy: ${error.message}`)
-            this.error(error.message, { exit: 1 })
+        } catch (error: unknown) {
+            const typedError = error as Error
+            proxySpinner?.fail(`Failed to start proxy: ${typedError.message}`)
+            this.error(typedError.message, { exit: 1 })
         }
 
         // Step 2: Start tunnel pointing to proxy
@@ -128,11 +129,11 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
             this.tunnel = createTunnel(flags.tunnel as TunnelProvider)
             tunnelUrl = await this.tunnel.start(proxyPort)
             tunnelSpinner?.succeed(`Tunnel established: ${chalk.bold(tunnelUrl)}`)
-        } catch (err: unknown) {
-            const error = err as Error
-            tunnelSpinner?.fail(`Failed to establish tunnel: ${error.message}`)
+        } catch (error: unknown) {
+            const typedError = error as Error
+            tunnelSpinner?.fail(`Failed to establish tunnel: ${typedError.message}`)
             await this.proxy?.stop().catch(() => {})
-            this.error(error.message, { exit: 1 })
+            this.error(typedError.message, { exit: 1 })
         }
 
         // Subscribe to tunnel death
@@ -170,18 +171,18 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
                 appSpinner?.succeed(`Updated application: ${chalk.bold(applicationId)}`)
             } else {
                 const app = await createTempApp(tunnelUrl)
-                applicationId = app.applicationId
+                ;({ applicationId } = app)
                 isTemporary = true
                 appSpinner?.succeed(
                     `Created application: ${chalk.bold(applicationId)} (${chalk.dim(app.alias)})`,
                 )
             }
-        } catch (err: unknown) {
-            const error = err as Error
-            appSpinner?.fail(`Failed to set up application: ${error.message}`)
+        } catch (error: unknown) {
+            const typedError = error as Error
+            appSpinner?.fail(`Failed to set up application: ${typedError.message}`)
             await this.tunnel?.stop().catch(() => {})
             await this.proxy?.stop().catch(() => {})
-            this.error(error.message, { exit: 1 })
+            this.error(typedError.message, { exit: 1 })
         }
 
         // Write state immediately after app creation so cleanup can find it
@@ -200,7 +201,9 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
         let assignedPhoneNumber: string | undefined
 
         if (flags.number) {
-            const numSpinner = jsonMode ? null : createSpinner({ text: "Assigning phone number..." })
+            const numSpinner = jsonMode
+                ? null
+                : createSpinner({ text: "Assigning phone number..." })
             numSpinner?.start()
 
             try {
@@ -215,18 +218,20 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
                 // Update state file with number assignment for crash recovery
                 writeDevState(dataDir, this.devState)
 
-                const prevLabel = previousAppId ? chalk.dim(`(was: ${previousAppId})`) : chalk.dim("(was: unassigned)")
+                const prevLabel = previousAppId
+                    ? chalk.dim(`(was: ${previousAppId})`)
+                    : chalk.dim("(was: unassigned)")
                 numSpinner?.succeed(
                     `Assigned ${chalk.bold(assignedPhoneNumber)} → ${applicationId} ${prevLabel}`,
                 )
-            } catch (err: unknown) {
-                const error = err as Error
-                numSpinner?.fail(`Failed to assign number: ${error.message}`)
+            } catch (error: unknown) {
+                const typedError = error as Error
+                numSpinner?.fail(`Failed to assign number: ${typedError.message}`)
                 // Cleanup will handle restoration via state file
                 if (isTemporary) await deleteTempApp(applicationId).catch(() => {})
                 await this.tunnel?.stop().catch(() => {})
                 await this.proxy?.stop().catch(() => {})
-                this.error(error.message, { exit: 1 })
+                this.error(typedError.message, { exit: 1 })
             }
         }
 
@@ -300,7 +305,9 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
             )
         }
 
-        if (!jsonMode) {
+        if (jsonMode) {
+            await performCleanup(staleState, dataDir, this, jsonMode)
+        } else {
             this.log(chalk.yellow(`Found stale dev session from ${staleState.createdAt}`))
             this.log(chalk.yellow(`  Application: ${staleState.applicationId}`))
 
@@ -312,16 +319,14 @@ This is the fastest way to go from zero to handling live calls/SMS locally.
             if (shouldClean) {
                 await performCleanup(staleState, dataDir, this, jsonMode)
             }
-        } else {
-            await performCleanup(staleState, dataDir, this, jsonMode)
         }
 
         // If cleanup partially failed, the state file is retained — abort to prevent overwriting it
         if (readDevState(dataDir) !== null) {
             this.error(
                 "Previous session cleanup incomplete — some resources could not be restored. " +
-                "Fix the issue and run 'freeclimb dev' again to retry, or manually delete " +
-                `${dataDir}/dev-state.json to proceed.`,
+                    "Fix the issue and run 'freeclimb dev' again to retry, or manually delete " +
+                    `${dataDir}/dev-state.json to proceed.`,
                 { exit: 1 },
             )
         }

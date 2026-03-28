@@ -25,14 +25,20 @@ export async function performCleanup(
                 await restoreNumber(assignment.phoneNumberId, assignment.previousApplicationId)
                 if (!jsonMode) {
                     logger.log(
-                        chalk.green(`  ✔ Restored ${assignment.phoneNumberId} → ${assignment.previousApplicationId || "(unassigned)"}`),
+                        chalk.green(
+                            `  ✔ Restored ${assignment.phoneNumberId} → ${assignment.previousApplicationId || "(unassigned)"}`,
+                        ),
                     )
                 }
-            } catch (err: unknown) {
+            } catch (error: unknown) {
                 allSucceeded = false
-                const error = err as Error
+                const typedError = error as Error
                 if (!jsonMode) {
-                    logger.log(chalk.yellow(`  ⚠ Could not restore ${assignment.phoneNumberId}: ${error.message}`))
+                    logger.log(
+                        chalk.yellow(
+                            `  ⚠ Could not restore ${assignment.phoneNumberId}: ${typedError.message}`,
+                        ),
+                    )
                 }
             }
         }
@@ -42,13 +48,19 @@ export async function performCleanup(
             try {
                 await restoreAppUrls(state.applicationId, state.previousAppUrls)
                 if (!jsonMode) {
-                    logger.log(chalk.green(`  ✔ Restored application ${state.applicationId} webhook URLs`))
+                    logger.log(
+                        chalk.green(`  ✔ Restored application ${state.applicationId} webhook URLs`),
+                    )
                 }
-            } catch (err: unknown) {
+            } catch (error: unknown) {
                 allSucceeded = false
-                const error = err as Error
+                const typedError = error as Error
                 if (!jsonMode) {
-                    logger.log(chalk.yellow(`  ⚠ Could not restore application URLs for ${state.applicationId}: ${error.message}`))
+                    logger.log(
+                        chalk.yellow(
+                            `  ⚠ Could not restore application URLs for ${state.applicationId}: ${typedError.message}`,
+                        ),
+                    )
                 }
             }
         }
@@ -60,11 +72,15 @@ export async function performCleanup(
                 if (!jsonMode) {
                     logger.log(chalk.green(`  ✔ Deleted temp application ${state.applicationId}`))
                 }
-            } catch (err: unknown) {
+            } catch (error: unknown) {
                 allSucceeded = false
-                const error = err as Error
+                const typedError = error as Error
                 if (!jsonMode) {
-                    logger.log(chalk.yellow(`  ⚠ Could not delete application ${state.applicationId}: ${error.message}`))
+                    logger.log(
+                        chalk.yellow(
+                            `  ⚠ Could not delete application ${state.applicationId}: ${typedError.message}`,
+                        ),
+                    )
                 }
             }
         }
@@ -73,7 +89,11 @@ export async function performCleanup(
         if (allSucceeded) {
             removeDevState(dataDir)
         } else if (!jsonMode) {
-            logger.log(chalk.yellow(`  ⚠ State file retained for retry — run 'freeclimb dev' to re-attempt cleanup`))
+            logger.log(
+                chalk.yellow(
+                    `  ⚠ State file retained for retry — run 'freeclimb dev' to re-attempt cleanup`,
+                ),
+            )
         }
     } finally {
         cleaning = false

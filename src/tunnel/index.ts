@@ -1,9 +1,9 @@
 import { EventEmitter } from "events"
 
 export interface Tunnel extends EventEmitter {
-    url: string
     start(port: number): Promise<string>
     stop(): Promise<void>
+    url: string
 }
 
 export type TunnelProvider = "ngrok" | "cloudflared"
@@ -20,11 +20,11 @@ export function createTunnel(provider: TunnelProvider): Tunnel {
 }
 
 class NgrokAdapter extends EventEmitter implements Tunnel {
-    private _url = ""
+    private tunnelUrl = ""
     private adapter: any = null
 
     get url(): string {
-        return this._url
+        return this.tunnelUrl
     }
 
     async start(port: number): Promise<string> {
@@ -35,8 +35,8 @@ class NgrokAdapter extends EventEmitter implements Tunnel {
         t.on("error", (err: Error) => this.emit("error", err))
         t.on("close", () => this.emit("close"))
 
-        this._url = await t.start(port)
-        return this._url
+        this.tunnelUrl = await t.start(port)
+        return this.tunnelUrl
     }
 
     async stop(): Promise<void> {
@@ -48,11 +48,11 @@ class NgrokAdapter extends EventEmitter implements Tunnel {
 }
 
 class CloudflaredAdapter extends EventEmitter implements Tunnel {
-    private _url = ""
+    private tunnelUrl = ""
     private adapter: any = null
 
     get url(): string {
-        return this._url
+        return this.tunnelUrl
     }
 
     async start(port: number): Promise<string> {
@@ -63,8 +63,8 @@ class CloudflaredAdapter extends EventEmitter implements Tunnel {
         cf.on("error", (err: Error) => this.emit("error", err))
         cf.on("close", () => this.emit("close"))
 
-        this._url = await cf.start(port)
-        return this._url
+        this.tunnelUrl = await cf.start(port)
+        return this.tunnelUrl
     }
 
     async stop(): Promise<void> {

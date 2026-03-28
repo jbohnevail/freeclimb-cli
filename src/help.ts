@@ -7,7 +7,9 @@ import { getBoxChars } from "./ui/chars.js"
 const { bold } = chalk
 
 const primary = supportsColor() ? chalk.hex(BrandColors.orange) : chalk.cyan
-const dim = chalk.dim
+const { dim } = chalk
+// eslint-disable-next-line no-control-regex
+const ANSI_STRIP = /\u001b\[[0-9;]*m/g
 
 function indent(str: string, count: number): string {
     const pad = " ".repeat(count)
@@ -19,12 +21,12 @@ function indent(str: string, count: number): string {
 
 function renderList(items: [string, string | undefined][], maxWidth: number): string {
     const maxNameLen = Math.min(
-        items.reduce((max, [name]) => Math.max(max, name.replace(/\u001b\[[0-9;]*m/g, "").length), 0),
-        30
+        items.reduce((max, [name]) => Math.max(max, name.replace(ANSI_STRIP, "").length), 0),
+        30,
     )
     return items
         .map(([name, desc]) => {
-            const stripped = name.replace(/\u001b\[[0-9;]*m/g, "")
+            const stripped = name.replace(ANSI_STRIP, "")
             const padding = " ".repeat(Math.max(1, maxNameLen - stripped.length + 2))
             const line = `${name}${padding}${desc || ""}`
             return line
@@ -73,7 +75,7 @@ export default class FreeClimbHelpClass extends Help {
                     primary(c.name),
                     c.description ? this.render(c.description.split("\n")[0]) : undefined,
                 ]),
-                80
+                80,
             )
 
             const categoryHeader = `${chars.teeRight}${chars.horizontal} ${primary(category.toUpperCase())} ${chars.horizontal.repeat(Math.max(0, 30 - category.length))}${chars.teeLeft}`
@@ -100,7 +102,7 @@ export default class FreeClimbHelpClass extends Help {
                 const description = c.description ? c.description.split("\n")[0] : ""
                 return [primary(c.id), description] as [string, string]
             }),
-            80
+            80,
         )
 
         const header = `${chars.topLeft}${chars.horizontal} ${primary("COMMANDS")} ${chars.horizontal.repeat(20)}${chars.topRight}`

@@ -40,17 +40,17 @@ export const boxAscii = {
 
 // Box character type for both unicode and ascii versions
 export type BoxChars = {
-    topLeft: string
-    topRight: string
     bottomLeft: string
     bottomRight: string
-    horizontal: string
-    vertical: string
-    teeRight: string
-    teeLeft: string
-    teeDown: string
-    teeUp: string
     cross: string
+    horizontal: string
+    teeDown: string
+    teeLeft: string
+    teeRight: string
+    teeUp: string
+    topLeft: string
+    topRight: string
+    vertical: string
 }
 
 // Get the appropriate box characters based on environment
@@ -144,19 +144,13 @@ export const icons = {
 // Separators
 export const separators = {
     // Horizontal line
-    line: (width: number): string => {
-        return box.horizontal.repeat(width)
-    },
+    line: (width: number): string => box.horizontal.repeat(width),
 
     // Dotted line
-    dotted: (width: number): string => {
-        return "\u00b7".repeat(width)
-    },
+    dotted: (width: number): string => "\u00b7".repeat(width),
 
     // Light horizontal line
-    light: (width: number): string => {
-        return "\u2500".repeat(width)
-    },
+    light: (width: number): string => "\u2500".repeat(width),
 } as const
 
 // Draw a horizontal rule with optional title

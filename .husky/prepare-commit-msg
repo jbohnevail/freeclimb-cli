@@ -1,0 +1,12 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Strip Claude Code attribution from commit messages (portable across GNU/BSD sed)
+TMPFILE=$(mktemp)
+sed '/^Co-Authored-By:.*[Cc]laude/d
+/Generated with \[Claude Code\]/d
+/🤖 Generated with \[Claude Code\]/d' "$1" > "$TMPFILE"
+
+# Remove trailing blank lines
+sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$TMPFILE" > "$1"
+rm -f "$TMPFILE"

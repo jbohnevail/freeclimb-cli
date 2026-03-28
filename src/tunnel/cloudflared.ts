@@ -3,10 +3,10 @@ import { spawn, ChildProcess } from "child_process"
 
 export class CloudflaredTunnel extends EventEmitter {
     private process: ChildProcess | null = null
-    private _url = ""
+    private tunnelUrl = ""
 
     get url(): string {
-        return this._url
+        return this.tunnelUrl
     }
 
     async start(port: number): Promise<string> {
@@ -17,9 +17,13 @@ export class CloudflaredTunnel extends EventEmitter {
             }, 30_000)
 
             try {
-                this.process = spawn("cloudflared", ["tunnel", "--url", `http://localhost:${port}`], {
-                    stdio: ["ignore", "pipe", "pipe"],
-                })
+                this.process = spawn(
+                    "cloudflared",
+                    ["tunnel", "--url", `http://localhost:${port}`],
+                    {
+                        stdio: ["ignore", "pipe", "pipe"],
+                    },
+                )
             } catch {
                 clearTimeout(timeout)
                 reject(
@@ -42,7 +46,7 @@ export class CloudflaredTunnel extends EventEmitter {
             this.process.on("close", (code) => {
                 clearTimeout(timeout)
                 this.emit("close")
-                if (!this._url) {
+                if (!this.tunnelUrl) {
                     reject(new Error(`cloudflared exited with code ${code} before providing a URL`))
                 }
             })
@@ -56,8 +60,8 @@ export class CloudflaredTunnel extends EventEmitter {
                 const match = urlRegex.exec(stderrBuffer)
                 if (match) {
                     clearTimeout(timeout)
-                    this._url = match[0]
-                    resolve(this._url)
+                    this.tunnelUrl = match[0]
+                    resolve(this.tunnelUrl)
                 }
             })
         })

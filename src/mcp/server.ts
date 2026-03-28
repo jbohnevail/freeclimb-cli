@@ -5,7 +5,7 @@
  * Uses the official @modelcontextprotocol/sdk for protocol compliance.
  */
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js"
+import { Server } from "@modelcontextprotocol/sdk/server"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
     CallToolRequestSchema,
@@ -15,10 +15,10 @@ import {
     ListPromptsRequestSchema,
     GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js"
-import { readFileSync, existsSync, readdirSync } from "node:fs"
+import { readFileSync, existsSync, readdirSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
-import { writeFileSync } from "node:fs"
+
 import { tmpdir } from "node:os"
 import { createApiAxios } from "../http.js"
 import {

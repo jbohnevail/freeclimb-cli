@@ -7,20 +7,20 @@ export interface NumberAssignment {
 }
 
 export interface PreviousAppUrls {
-    voiceUrl: string | null
+    callConnectUrl: string | null
     smsUrl: string | null
     statusCallbackUrl: string | null
-    callConnectUrl: string | null
+    voiceUrl: string | null
 }
 
 export interface DevState {
-    pid: number
-    tunnelUrl: string
     applicationId: string
-    isTemporary: boolean
-    previousAppUrls: PreviousAppUrls | null
-    numberAssignments: NumberAssignment[]
     createdAt: string
+    isTemporary: boolean
+    numberAssignments: NumberAssignment[]
+    pid: number
+    previousAppUrls: PreviousAppUrls | null
+    tunnelUrl: string
 }
 
 function stateFilePath(dataDir: string): string {
