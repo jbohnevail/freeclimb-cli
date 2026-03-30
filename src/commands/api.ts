@@ -23,8 +23,11 @@ Full URLs are restricted to FreeClimb domains for credential safety.
 `
 
     static args = {
-		endpoint: Args.string({description: "API endpoint path (e.g., /Calls, /Messages)", required: false}),
-	}
+        endpoint: Args.string({
+            description: "API endpoint path (e.g., /Calls, /Messages)",
+            required: false,
+        }),
+    }
 
     static flags = {
         method: Flags.string({
@@ -74,56 +77,31 @@ Full URLs are restricted to FreeClimb domains for credential safety.
         '$ freeclimb api /Messages --method POST -d \'{"to":"+15551234567","from":"+15559876543","text":"Hello"}\'',
         "$ freeclimb api /IncomingPhoneNumbers --json",
         "$ freeclimb api /Calls --fields callId,status,from,to",
-        "$ freeclimb api /Messages --method POST --dry-run -d '{\"to\":\"+15551234567\"}'",
-        "$ echo '{\"to\":\"+15551234567\",\"from\":\"+15559876543\",\"text\":\"Hello\"}' | freeclimb api /Messages --method POST --stdin",
+        '$ freeclimb api /Messages --method POST --dry-run -d \'{"to":"+15551234567"}\'',
+        '$ echo \'{"to":"+15551234567","from":"+15559876543","text":"Hello"}\' | freeclimb api /Messages --method POST --stdin',
     ]
 
     async run() {
         const { args, flags: cmdFlags } = await this.parse(Api)
         const outputFormat = getOutputFormat(cmdFlags.json, cmdFlags.raw)
 
-        rejectControlChars(args.endpoint, "endpoint")
+        let endpoint = args.endpoint!
+        rejectControlChars(endpoint, "endpoint")
 
-        const accountId = await cred.accountId
-        const apiKey = await cred.apiKey
-
-        if (!accountId || !apiKey) {
-            this.error(
-                chalk.red("Not logged in. Run 'freeclimb login' to authenticate."),
-                { exit: 1 }
-            )
-        }
-
-        const baseUrl =
-            Environment.getString("FREECLIMB_CLI_BASE_URL") ||
-            "https://www.freeclimb.com/apiserver"
-
-        let url = args.endpoint!
-        if (url.startsWith("/")) {
-            url = `${baseUrl}/Accounts/${accountId}${url}`
-        } else {
-            try {
-                const parsed = new URL(url)
-                const allowedHosts = ["freeclimb.com", "www.freeclimb.com"]
-                const isCustomBase = Environment.getString("FREECLIMB_CLI_BASE_URL") !== ""
-                if (isCustomBase) {
-                    const baseHost = new URL(baseUrl).hostname
-                    allowedHosts.push(baseHost)
-                }
-                if (!allowedHosts.some((h) => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`))) {
-                    this.error(
-                        chalk.red(
-                            `Refusing to send credentials to non-FreeClimb host: ${parsed.hostname}\n` +
-                            "Use a path starting with / for account-scoped endpoints, or set FREECLIMB_CLI_BASE_URL for custom domains."
-                        ),
-                        { exit: 1 }
-                    )
-                }
-            } catch {
-                this.error(chalk.red(`Invalid URL: ${url}`), { exit: 1 })
+        // Normalize endpoint: strip MSYS/Git Bash path conversion artifacts
+        // (e.g., "C:/Program Files/Git/Calls" back to "/Calls") and accept
+        // bare paths like "Calls" as shorthand for "/Calls".
+        if (process.platform === "win32" || process.env.MSYSTEM) {
+            const msysMatch = endpoint.match(/^[A-Z]:\/Program Files\/Git\/(.+)$/i)
+            if (msysMatch) {
+                endpoint = `/${msysMatch[1]}`
             }
         }
+        if (!endpoint.startsWith("/") && !endpoint.startsWith("http")) {
+            endpoint = `/${endpoint}`
+        }
 
+        // Parse params and data before auth check so --dry-run works without credentials
         const params: Record<string, string> = {}
         if (cmdFlags.param) {
             for (const p of cmdFlags.param) {
@@ -146,7 +124,9 @@ Full URLs are restricted to FreeClimb domains for credential safety.
             }
             const raw = Buffer.concat(chunks).toString("utf-8").trim()
             if (!raw) {
-                this.error("No data received from stdin. Pipe data or use --data flag instead.", { exit: 1 })
+                this.error("No data received from stdin. Pipe data or use --data flag instead.", {
+                    exit: 1,
+                })
             }
             try {
                 data = JSON.parse(raw)
@@ -161,11 +141,12 @@ Full URLs are restricted to FreeClimb domains for credential safety.
             }
         }
 
+        // Dry-run: show what would be sent without requiring credentials
         if (cmdFlags["dry-run"]) {
             const dryRunOutput = {
                 dryRun: true,
                 method: cmdFlags.method,
-                url,
+                endpoint,
                 params: Object.keys(params).length > 0 ? params : undefined,
                 data,
             }
@@ -176,6 +157,49 @@ Full URLs are restricted to FreeClimb domains for credential safety.
                 this.log(JSON.stringify(dryRunOutput, null, 2))
             }
             return
+        }
+
+        // Authenticate - required for all non-dry-run requests
+        const accountId = await cred.accountId
+        const apiKey = await cred.apiKey
+
+        if (!accountId || !apiKey) {
+            this.error(chalk.red("Not logged in. Run 'freeclimb login' to authenticate."), {
+                exit: 1,
+            })
+        }
+
+        const baseUrl =
+            Environment.getString("FREECLIMB_CLI_BASE_URL") || "https://www.freeclimb.com/apiserver"
+
+        let url = endpoint
+        if (url.startsWith("/")) {
+            url = `${baseUrl}/Accounts/${accountId}${url}`
+        } else {
+            try {
+                const parsed = new URL(url)
+                const allowedHosts = ["freeclimb.com", "www.freeclimb.com"]
+                const isCustomBase = Environment.getString("FREECLIMB_CLI_BASE_URL") !== ""
+                if (isCustomBase) {
+                    const baseHost = new URL(baseUrl).hostname
+                    allowedHosts.push(baseHost)
+                }
+                if (
+                    !allowedHosts.some(
+                        (h) => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`),
+                    )
+                ) {
+                    this.error(
+                        chalk.red(
+                            `Refusing to send credentials to non-FreeClimb host: ${parsed.hostname}\n` +
+                                "Use a path starting with / for account-scoped endpoints, or set FREECLIMB_CLI_BASE_URL for custom domains.",
+                        ),
+                        { exit: 1 },
+                    )
+                }
+            } catch {
+                this.error(chalk.red(`Invalid URL: ${url}`), { exit: 1 })
+            }
         }
 
         try {
@@ -194,7 +218,7 @@ Full URLs are restricted to FreeClimb domains for credential safety.
             if (cmdFlags.fields) {
                 responseData = filterFieldsDeep(
                     responseData,
-                    cmdFlags.fields.split(",").map((f: string) => f.trim())
+                    cmdFlags.fields.split(",").map((f: string) => f.trim()),
                 )
             }
 
@@ -207,8 +231,8 @@ Full URLs are restricted to FreeClimb domains for credential safety.
                             command: `api ${args.endpoint}`,
                         }),
                         null,
-                        2
-                    )
+                        2,
+                    ),
                 )
             } else {
                 this.log(chalk.green(`${response.status} ${response.statusText}`))
@@ -229,14 +253,14 @@ Full URLs are restricted to FreeClimb domains for credential safety.
                                 data: errData,
                             },
                             null,
-                            2
-                        )
+                            2,
+                        ),
                     )
                     this.exit(1)
                 } else {
                     this.error(
                         chalk.red(`${status} ${statusText}\n${JSON.stringify(errData, null, 2)}`),
-                        { exit: 1 }
+                        { exit: 1 },
                     )
                 }
             } else {
