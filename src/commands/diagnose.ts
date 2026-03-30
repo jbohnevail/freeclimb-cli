@@ -188,8 +188,8 @@ Useful for troubleshooting authentication or connectivity issues.
         const baseUrl =
             Environment.getString("FREECLIMB_CLI_BASE_URL") || "https://www.freeclimb.com/apiserver"
 
+        const start = Date.now()
         try {
-            const start = Date.now()
             await axios.get(baseUrl, { timeout: 10000 })
             const latency = Date.now() - start
 
@@ -205,7 +205,27 @@ Useful for troubleshooting authentication or connectivity issues.
                 this.endCheck(result, checkName, "pass", `API reachable (${latency}ms)`, baseUrl)
             }
         } catch (error: any) {
-            if (error.code === "ECONNREFUSED") {
+            if (error.response) {
+                // Got an HTTP response (e.g. 404) — server IS reachable
+                const latency = Date.now() - start
+                if (latency > 2000) {
+                    this.endCheck(
+                        result,
+                        checkName,
+                        "warn",
+                        `API reachable but slow (${latency}ms)`,
+                        "Check your network connection",
+                    )
+                } else {
+                    this.endCheck(
+                        result,
+                        checkName,
+                        "pass",
+                        `API reachable (${latency}ms)`,
+                        baseUrl,
+                    )
+                }
+            } else if (error.code === "ECONNREFUSED") {
                 this.endCheck(
                     result,
                     checkName,
@@ -213,7 +233,7 @@ Useful for troubleshooting authentication or connectivity issues.
                     "Cannot connect to FreeClimb API",
                     "Check your internet connection",
                 )
-            } else if (error.code === "ETIMEDOUT") {
+            } else if (error.code === "ETIMEDOUT" || error.code === "ECONNABORTED") {
                 this.endCheck(
                     result,
                     checkName,
@@ -222,7 +242,13 @@ Useful for troubleshooting authentication or connectivity issues.
                     "Network may be slow or blocked",
                 )
             } else {
-                this.endCheck(result, checkName, "warn", "API check returned error", error.message)
+                this.endCheck(
+                    result,
+                    checkName,
+                    "fail",
+                    "Cannot reach FreeClimb API",
+                    error.message,
+                )
             }
         }
     }
