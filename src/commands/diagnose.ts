@@ -42,12 +42,15 @@ Useful for troubleshooting authentication or connectivity issues.
 
     private useSpinners = false
 
+    private jsonMode = false
+
     private currentSpinner: Spinner | null = null
 
     async run() {
         const { flags } = await this.parse(Diagnose)
 
         // Use spinners only for TTY and non-JSON output
+        this.jsonMode = flags.json
         this.useSpinners = !flags.json && isTTY()
 
         const result: DiagnoseResult = {
@@ -111,22 +114,25 @@ Useful for troubleshooting authentication or connectivity issues.
 
         if (this.useSpinners && this.currentSpinner) {
             switch (status) {
-                case "pass":
+                case "pass": {
                     this.currentSpinner.succeed(`${name}: ${message}`)
                     break
-                case "fail":
+                }
+                case "fail": {
                     this.currentSpinner.fail(`${name}: ${message}`)
                     break
-                case "warn":
+                }
+                case "warn": {
                     this.currentSpinner.warn(`${name}: ${message}`)
                     break
+                }
             }
             if (details) {
                 this.log(chalk.dim(`  ${details}`))
             }
             this.currentSpinner = null
-        } else if (!this.useSpinners) {
-            // Non-TTY output
+        } else if (!this.useSpinners && !this.jsonMode) {
+            // Non-TTY, non-JSON output
             this.log(statusIndicator(status, `${name}: ${message}`))
             if (details) {
                 this.log(chalk.dim(`  ${details}`))
@@ -168,7 +174,7 @@ Useful for troubleshooting authentication or connectivity issues.
                 checkName,
                 "pass",
                 `Credentials configured via ${source}`,
-                `Account ID: ${accountId.substring(0, 10)}...`,
+                `Account ID: ${accountId.slice(0, 10)}...`,
             )
         } catch (error: any) {
             this.endCheck(result, checkName, "fail", "Failed to read credentials", error.message)
@@ -343,29 +349,32 @@ Useful for troubleshooting authentication or connectivity issues.
         const failCount = result.checks.filter((c) => c.status === "fail").length
         const warnCount = result.checks.filter((c) => c.status === "warn").length
 
-        summaryLines.push("")
         summaryLines.push(
+            "",
             `  ${icons.success()} ${passCount} passed  ${icons.error()} ${failCount} failed  ${icons.warning()} ${warnCount} warnings`,
+            "",
         )
-        summaryLines.push("")
 
         // Overall status message
         let statusMessage: string
         let statusColor: "success" | "warning" | "error"
 
         switch (result.overallStatus) {
-            case "healthy":
+            case "healthy": {
                 statusMessage = "All checks passed! Your FreeClimb CLI is configured correctly."
                 statusColor = "success"
                 break
-            case "degraded":
+            }
+            case "degraded": {
                 statusMessage = "Some checks have warnings. Review the details above."
                 statusColor = "warning"
                 break
-            case "error":
+            }
+            case "error": {
                 statusMessage = "Some checks failed. Please address the issues above."
                 statusColor = "error"
                 break
+            }
         }
 
         // Word-wrap status message to fit within the box
