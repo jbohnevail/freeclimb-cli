@@ -85,7 +85,10 @@ Full URLs are restricted to FreeClimb domains for credential safety.
         const { args, flags: cmdFlags } = await this.parse(Api)
         const outputFormat = getOutputFormat(cmdFlags.json, cmdFlags.raw)
 
-        let endpoint = args.endpoint!
+        if (!args.endpoint) {
+            this.error("Endpoint argument is required. Example: freeclimb api /Calls", { exit: 1 })
+        }
+        let { endpoint } = args
         rejectControlChars(endpoint, "endpoint")
 
         // Normalize endpoint: strip MSYS/Git Bash path conversion artifacts
@@ -228,7 +231,7 @@ Full URLs are restricted to FreeClimb domains for credential safety.
                 this.log(
                     JSON.stringify(
                         wrapJsonOutput(responseData, {
-                            command: `api ${args.endpoint}`,
+                            command: `api ${endpoint}`,
                         }),
                         null,
                         2,

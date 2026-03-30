@@ -46,6 +46,8 @@ Useful for troubleshooting authentication or connectivity issues.
 
     private currentSpinner: Spinner | null = null
 
+    private accountData: any = null
+
     async run() {
         const { flags } = await this.parse(Diagnose)
 
@@ -189,10 +191,8 @@ Useful for troubleshooting authentication or connectivity issues.
             Environment.getString("FREECLIMB_CLI_BASE_URL") || "https://www.freeclimb.com/apiserver"
 
         const start = Date.now()
-        try {
-            await axios.get(baseUrl, { timeout: 10000 })
+        const reportReachable = () => {
             const latency = Date.now() - start
-
             if (latency > 2000) {
                 this.endCheck(
                     result,
@@ -204,27 +204,15 @@ Useful for troubleshooting authentication or connectivity issues.
             } else {
                 this.endCheck(result, checkName, "pass", `API reachable (${latency}ms)`, baseUrl)
             }
+        }
+
+        try {
+            await axios.get(baseUrl, { timeout: 10000 })
+            reportReachable()
         } catch (error: any) {
             if (error.response) {
                 // Got an HTTP response (e.g. 404) — server IS reachable
-                const latency = Date.now() - start
-                if (latency > 2000) {
-                    this.endCheck(
-                        result,
-                        checkName,
-                        "warn",
-                        `API reachable but slow (${latency}ms)`,
-                        "Check your network connection",
-                    )
-                } else {
-                    this.endCheck(
-                        result,
-                        checkName,
-                        "pass",
-                        `API reachable (${latency}ms)`,
-                        baseUrl,
-                    )
-                }
+                reportReachable()
             } else if (error.code === "ECONNREFUSED") {
                 this.endCheck(
                     result,
@@ -276,6 +264,7 @@ Useful for troubleshooting authentication or connectivity issues.
             })
 
             if (response.status === 200) {
+                this.accountData = response.data
                 this.endCheck(result, checkName, "pass", "Authentication successful")
             }
         } catch (error: any) {
@@ -312,24 +301,12 @@ Useful for troubleshooting authentication or connectivity issues.
         this.startCheck(checkName)
 
         try {
-            const accountId = await cred.accountId
-            const apiKey = await cred.apiKey
-
-            if (!accountId || !apiKey) {
-                this.endCheck(result, checkName, "fail", "Cannot check - no credentials")
+            if (!this.accountData) {
+                this.endCheck(result, checkName, "fail", "Cannot check - authentication failed")
                 return
             }
 
-            const baseUrl =
-                Environment.getString("FREECLIMB_CLI_BASE_URL") ||
-                "https://www.freeclimb.com/apiserver"
-
-            const response = await axios.get(`${baseUrl}/Accounts/${accountId}`, {
-                auth: { username: accountId, password: apiKey },
-                timeout: 10000,
-            })
-
-            const account = response.data
+            const account = this.accountData
             const status = account.status?.toLowerCase()
             const type = account.type?.toLowerCase()
 
@@ -348,18 +325,13 @@ Useful for troubleshooting authentication or connectivity issues.
                 this.endCheck(result, checkName, "warn", `Account status: ${status}`)
             }
         } catch (error: any) {
-            // Skip if auth already failed
-            if (error.response?.status === 401 || error.response?.status === 403) {
-                this.endCheck(result, checkName, "fail", "Cannot check - authentication failed")
-            } else {
-                this.endCheck(
-                    result,
-                    checkName,
-                    "warn",
-                    "Could not fetch account status",
-                    error.message,
-                )
-            }
+            this.endCheck(
+                result,
+                checkName,
+                "warn",
+                "Could not parse account status",
+                error.message,
+            )
         }
     }
 

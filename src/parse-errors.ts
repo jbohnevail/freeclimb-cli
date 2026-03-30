@@ -1,3 +1,5 @@
+import { returnFormat } from "./error-messages.js"
+
 export function parse(output: any) {
     let code
     let title
@@ -47,16 +49,6 @@ export function parse(output: any) {
         url = "https://docs.freeclimb.com/reference/error-and-warning-dictionary"
     }
     return returnFormat(code, title, url, suggestion)
-}
-
-function returnFormat(code: number, message: string, url: string, suggestion: string) {
-    return `
-    Code : ${code}
-    Message : ${message}
-    Suggestion : ${suggestion}
-    For further information on this error visit :
-    ${url}
-    `
 }
 
 function formatFlag() {

@@ -40,9 +40,10 @@ export class Environment {
             if (prevContents.length > 0) {
                 // the file is not empty but doesn't have this particular variable
                 newContents = prevContents + "\n" + replacement // we add a newline at the beginning to leave the previous line unchanged
+            } else {
+                // otherwise if the file is empty, no newline is needed at the beginning
+                newContents = prevContents + replacement
             }
-            // otherwise if the file is empty, no newline is needed at the beginning
-            newContents = prevContents + replacement
         } else {
             newContents = prevContents.replace(regex, replacement)
         }
@@ -70,16 +71,10 @@ export class Environment {
 export const env = {
     get accountId() {
         // Support both new FREECLIMB_ prefix and legacy ACCOUNT_ID
-        return (
-            Environment.getString("FREECLIMB_ACCOUNT_ID") ||
-            Environment.getString("ACCOUNT_ID")
-        )
+        return Environment.getString("FREECLIMB_ACCOUNT_ID") || Environment.getString("ACCOUNT_ID")
     },
     get apiKey() {
         // Support both new FREECLIMB_ prefix and legacy API_KEY
-        return (
-            Environment.getString("FREECLIMB_API_KEY") ||
-            Environment.getString("API_KEY")
-        )
+        return Environment.getString("FREECLIMB_API_KEY") || Environment.getString("API_KEY")
     },
 }

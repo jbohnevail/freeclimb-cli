@@ -58,7 +58,7 @@ export class DefaultFatalError extends FreeClimbError {
                 1021,
                 "Program Error",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                `Please contact vail \n${error}`,
+                `Please contact support@freeclimb.com\n${error}`,
             ),
             4,
         )
@@ -113,7 +113,7 @@ export class SetPasswordError extends FreeClimbError {
                 1005,
                 "Keytar Error",
                 "https://docs.freeclimb.com/reference/error-and-warning-dictionary",
-                `Re-run the login command. /nIf the error persists, please contact support@freeclimb.com`,
+                `Re-run the login command.\nIf the error persists, please contact support@freeclimb.com\n\nDetails: ${errorMessage}`,
             ),
             4,
         )

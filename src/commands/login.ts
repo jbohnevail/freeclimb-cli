@@ -57,17 +57,20 @@ export class login extends Command {
         }
 
         if (flags.accountId || flags.apiKey) {
-            this.error("Both --accountId and --apiKey must be provided for non-interactive login.", {
-                exit: 2,
-            })
+            this.error(
+                "Both --accountId and --apiKey must be provided for non-interactive login.",
+                {
+                    exit: 2,
+                },
+            )
         }
 
         // Non-TTY without flags — fail fast with actionable guidance
         if (!isTTY()) {
             this.error(
                 "Login requires --accountId, --apiKey, and --yes flags in non-interactive mode.\n" +
-                "Example: freeclimb login --accountId AC... --apiKey abc123 --yes\n" +
-                "Alternatively, set ACCOUNT_ID and API_KEY environment variables.",
+                    "Example: freeclimb login --accountId AC... --apiKey abc123 --yes\n" +
+                    "Alternatively, set ACCOUNT_ID and API_KEY environment variables.",
                 { exit: 2 },
             )
         }
@@ -75,17 +78,27 @@ export class login extends Command {
         // Interactive login path
         this.log("You can find your Account ID and API Key at https://www.freeclimb.com/dashboard")
         const confirmation: boolean = await prompts.confirm(
-            "If you are already logged in to the FreeClimb CLI on this computer, you will first be logged out of that account. Would you like to continue?"
+            "If you are already logged in to the FreeClimb CLI on this computer, you will first be logged out of that account. Would you like to continue?",
         )
 
         if (confirmation) {
-            const accountId = await prompts.password(
-                "-> The Account ID of your FreeClimb Account"
-            )
+            const accountId = await prompts.password("-> The Account ID of your FreeClimb Account")
 
-            const apiKey = await prompts.password(
-                "-> Your API Key for your FreeClimb Account"
-            )
+            const apiKey = await prompts.password("-> Your API Key for your FreeClimb Account")
+            if (/^AC[0-9a-fA-F]{40}$/gm.exec(accountId) === null) {
+                this.warn(
+                    chalk.yellow(
+                        "Account ID does not appear to match the expected format (AC followed by 40 hex characters)",
+                    ),
+                )
+            }
+            if (/^[0-9a-fA-F]{40}$/gm.exec(apiKey) === null) {
+                this.warn(
+                    chalk.yellow(
+                        "API Key does not appear to match the expected format (40 hex characters)",
+                    ),
+                )
+            }
             await cred.removeCredentials()
             try {
                 await cred.setCredentials(accountId, apiKey)
@@ -94,20 +107,6 @@ export class login extends Command {
                 this.error(err.message, { exit: err.code })
             }
             await fcApi.apiCall("GET", {}, verifyResponse, verifyErrorResponse)
-            if (/^AC[0-9a-fA-F]{40}$/gm.exec(accountId) === null) {
-                this.warn(
-                    chalk.yellow(
-                        "Your Account ID has been saved, but it does not appear to match the correct Account ID format"
-                    )
-                )
-            }
-            if (/^[0-9a-fA-F]{40}$/gm.exec(apiKey) === null) {
-                this.warn(
-                    chalk.yellow(
-                        "Your API Key has been saved, but it does not appear to match the correct API Key format"
-                    )
-                )
-            }
         } else {
             const err = new Errors.LoginCancelled()
             this.error(err.message, { exit: err.code })
