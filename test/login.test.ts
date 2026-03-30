@@ -1,61 +1,86 @@
+import { runCommand } from "@oclif/test"
 import { expect } from "chai"
 import nock from "nock"
-import sinon from "sinon"
-import { prompts } from "../lib/prompts.js"
-import { runCommand } from "@oclif/test"
+import { cred } from "../src/credentials.js"
 
 describe("Test for login command", function () {
-    afterEach(() => {
-        sinon.restore()
+    afterEach(async () => {
         nock.cleanAll()
+        await cred.removeCredentials()
     })
 
-    it("Test exit code 2 is produced when user responds N", async () => {
-        sinon.stub(prompts, "confirm").resolves(false)
-        const { error } = await runCommand(["login"])
+    it("Test exit code 2 when --yes flag is missing for non-interactive login", async () => {
+        const { error } = await runCommand([
+            "login",
+            "--accountId",
+            "AC1234",
+            "--apiKey",
+            "key1234",
+        ])
         expect(error?.oclif?.exit).to.equal(2)
     })
 
-    it("tests warning for an incorrect account id length and checks action on error for verification", async () => {
-        const testAccount = "1111122222333334444455555666667777788888"
+    it("tests error message when API returns 500 for verification", async () => {
+        const testAccountId = "AC1111122222333334444455555666667777788888"
+        const testApiKey = "abc123def456abc123def456abc123def456abc12"
+
         nock("https://www.freeclimb.com")
-            .get(`/apiserver/Accounts/${testAccount}`)
+            .get(`/apiserver/Accounts/${testAccountId}`)
             .reply(500, "error")
 
-        sinon.stub(prompts, "confirm").resolves(true)
-        sinon.stub(prompts, "password").resolves(testAccount)
-        const { stdout } = await runCommand(["login"])
+        const { stdout } = await runCommand([
+            "login",
+            "--accountId",
+            testAccountId,
+            "--apiKey",
+            testApiKey,
+            "--yes",
+        ])
         expect(stdout).to.contain(
-            "<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.-->"
+            "<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.-->",
         )
     })
 
-    it("tests warning for an incorrect auth token length and checks action on error for verification", async () => {
-        const testAccount = "AC1111122222333334444455555666667777788888"
-        nock("https://www.freeclimb.com")
-            .get(`/apiserver/Accounts/${testAccount}`)
-            .reply(500, "error")
+    it("tests error message when API returns 401 for invalid credentials", async () => {
+        const testAccountId = "AC2222233333444445555566666777778888899999"
+        const testApiKey = "def456abc123def456abc123def456abc123def45"
 
-        sinon.stub(prompts, "confirm").resolves(true)
-        sinon.stub(prompts, "password").resolves(testAccount)
-        const { stdout } = await runCommand(["login"])
+        nock("https://www.freeclimb.com")
+            .get(`/apiserver/Accounts/${testAccountId}`)
+            .reply(401, { error: "Unauthorized" })
+
+        const { stdout } = await runCommand([
+            "login",
+            "--accountId",
+            testAccountId,
+            "--apiKey",
+            testApiKey,
+            "--yes",
+        ])
         expect(stdout).to.contain(
-            "<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.-->"
+            "<---Inputted ACCOUNT_ID and API_KEY where not valid. Please try again.-->",
         )
     })
 
-    it("tests for response when account is verified", async () => {
-        const testAccount = "1234567"
+    it("tests success message when account is verified", async () => {
+        const testAccountId = "AC3333344444555556666677777888889999900000"
+        const testApiKey = "abc123def456abc123def456abc123def456abc12"
         const testJson = { message: "Response from server" }
+
         nock("https://www.freeclimb.com")
-            .get(`/apiserver/Accounts/${testAccount}`)
+            .get(`/apiserver/Accounts/${testAccountId}`)
             .reply(200, testJson)
 
-        sinon.stub(prompts, "confirm").resolves(true)
-        sinon.stub(prompts, "password").resolves(testAccount)
-        const { stdout } = await runCommand(["login"])
+        const { stdout } = await runCommand([
+            "login",
+            "--accountId",
+            testAccountId,
+            "--apiKey",
+            testApiKey,
+            "--yes",
+        ])
         expect(stdout).to.contain(
-            "<---Your ACCOUNT_ID and API_KEY have been verified through Freeclimb.--->"
+            "<---Your ACCOUNT_ID and API_KEY have been verified through Freeclimb.--->",
         )
     })
 })

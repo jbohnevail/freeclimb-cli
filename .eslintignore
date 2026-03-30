@@ -2,3 +2,6 @@
 /tmp
 /src/commands/login.ts
 /benchmarks
+/generation
+/deployment-scripts
+/scripts
