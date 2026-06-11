@@ -11,6 +11,7 @@ import { BrandColors } from "../ui/theme.js"
 import { CallStatusCard } from "./components/call-status-card.js"
 import { QueueDepthGauge } from "./components/queue-depth-gauge.js"
 import { LogStream } from "./components/log-stream.js"
+import { BrandCard, BrandHeading, BrandMetric, BrandTable } from "./components/branded.js"
 
 const customComponentDefinitions = {
     CallStatusCard: {
@@ -62,6 +63,10 @@ export const freeclimbCatalog = defineCatalog(schema, {
 // json-render's ComponentMap generic requires ComponentRenderProps wrappers; custom components receive resolved props directly
 export const FreeclimbRenderer = createRenderer(freeclimbCatalog, {
     ...standardComponents,
+    Card: BrandCard,
+    Heading: BrandHeading,
+    Metric: BrandMetric,
+    Table: BrandTable,
     CallStatusCard,
     QueueDepthGauge,
     LogStream,

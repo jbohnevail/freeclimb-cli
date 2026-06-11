@@ -24,14 +24,14 @@
       "type": "Metric",
       "props": {
         "label": "Active Calls",
-        "value": { "$computed": "count", "args": { "path": "/activeCalls/calls" } }
+        "value": { "$state": "/activeCalls/total" }
       }
     },
     "metric-total": {
       "type": "Metric",
       "props": {
         "label": "Recent Calls",
-        "value": { "$computed": "count", "args": { "path": "/recentCalls/calls" } }
+        "value": { "$state": "/recentCalls/total" }
       }
     },
     "calls-section": {
