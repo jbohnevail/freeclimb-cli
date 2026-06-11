@@ -31,6 +31,7 @@ import {
 import { parseDashboardSpec, PRESET_NAMES } from "../dashboard/types.js"
 import type { PresetName } from "../dashboard/types.js"
 import { tools, ToolName } from "./tools.js"
+import { UI_TABLE_URI, UI_TABLE_MIME, UI_TOOLS, TABLE_HTML, buildUiPayload } from "./ui.js"
 
 // Lazy-loaded to avoid pulling React/Ink into MCP server startup
 async function getDashboardPromptLazy(): Promise<string> {
@@ -428,16 +429,23 @@ export async function startMcpServer(): Promise<void> {
             name: tool.name,
             description: tool.description,
             inputSchema: tool.inputSchema,
+            ...(UI_TOOLS.has(tool.name as ToolName)
+                ? { _meta: { ui: { resourceUri: UI_TABLE_URI, visibility: ["model", "app"] } } }
+                : {}),
         })),
     }))
 
     // Call tools
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
         try {
+            const toolName = request.params.name as ToolName
             const toolResult = await handleToolCall(
-                request.params.name as ToolName,
+                toolName,
                 (request.params.arguments as Record<string, unknown>) || {},
             )
+            const uiPayload = UI_TOOLS.has(toolName)
+                ? buildUiPayload(toolName, toolResult)
+                : undefined
             return {
                 content: [
                     {
@@ -445,6 +453,7 @@ export async function startMcpServer(): Promise<void> {
                         text: JSON.stringify(toolResult, null, 2),
                     },
                 ],
+                ...(uiPayload ? { structuredContent: uiPayload } : {}),
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error)
@@ -473,6 +482,26 @@ export async function startMcpServer(): Promise<void> {
 
     // List resources
     server.setRequestHandler(ListResourcesRequestSchema, async () => {
+        const uiResources = [
+            {
+                uri: UI_TABLE_URI,
+                name: "FreeClimb Table",
+                description: "FreeClimb-themed interactive table for list results",
+                mimeType: UI_TABLE_MIME,
+                _meta: {
+                    ui: {
+                        prefersBorder: true,
+                        csp: {
+                            resourceDomains: [
+                                "https://fonts.googleapis.com",
+                                "https://fonts.gstatic.com",
+                            ],
+                        },
+                    },
+                },
+            },
+        ]
+
         const apiResources = [
             {
                 uri: "freeclimb://account",
@@ -501,12 +530,36 @@ export async function startMcpServer(): Promise<void> {
             mimeType: "text/markdown",
         }))
 
-        return { resources: [...apiResources, ...skillResources] }
+        return { resources: [...uiResources, ...apiResources, ...skillResources] }
     })
 
     // Read resources
     server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
         const { uri } = request.params
+
+        // Handle MCP Apps UI resource (no API call needed)
+        if (uri === UI_TABLE_URI) {
+            return {
+                contents: [
+                    {
+                        uri: UI_TABLE_URI,
+                        mimeType: UI_TABLE_MIME,
+                        text: TABLE_HTML,
+                        _meta: {
+                            ui: {
+                                prefersBorder: true,
+                                csp: {
+                                    resourceDomains: [
+                                        "https://fonts.googleapis.com",
+                                        "https://fonts.gstatic.com",
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                ],
+            }
+        }
 
         // Handle skill resources (no API call needed)
         if (uri.startsWith("freeclimb://skills/")) {
